@@ -1,0 +1,6 @@
+Section "Device"
+	Identifier  "Device0"
+	Driver      "nvidia"
+	Option      "NoLogo" "true"
+	Option      "DPI" "96 x 96"
+EndSection
