@@ -28,38 +28,35 @@
 %endif
 
 Name:           nvidia-driver
-Version:        352.79
+Version:        361.42
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
 URL:            http://www.nvidia.com/object/unix.html
-ExclusiveArch:  %{ix86} x86_64 armv7hl
+ExclusiveArch:  %{ix86} x86_64
 
 Source0:        %{name}-%{version}-i386.tar.xz
 Source1:        %{name}-%{version}-x86_64.tar.xz
-Source2:        %{name}-%{version}-armv7hl.tar.xz
 Source10:       99-nvidia-modules.conf
-# X.org "OutputClass" only on server 1.16+
 Source11:       10-nvidia-driver.conf
 Source12:       99-nvidia-ignoreabi.conf
 Source13:       xorg.conf.nvidia
+
 Source20:       blacklist-nouveau.conf
 Source21:       alternate-install-present
 Source22:       60-nvidia-uvm.rules
 Source23:       nvidia-uvm.conf
+
 Source99:       nvidia-generate-tarballs.sh
 
-# For execstack removal
-%if 0%{?fedora} >= 23 || 0%{?rhel} > 7
-BuildRequires:  execstack
+%if 0%{?rhel} == 6
+Requires:       xorg-x11-server-Xorg%{?_isa}
 %else
-BuildRequires:  prelink
-%endif
-
 # UDev rule location (_udevrulesdir)
-%if 0%{?fedora} || 0%{?rhel} >= 7
 BuildRequires:  systemd
+# X.org "OutputClass" only on server 1.16+
+Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.16
 %endif
 
 Requires:       grubby
@@ -68,7 +65,6 @@ Requires:       nvidia-kmod = %{?epoch}:%{version}
 Provides:       nvidia-kmod-common = %{?epoch}:%{version}
 Requires:       nvidia-settings%{?_isa} = %{?epoch}:%{version}
 Requires:       libva-vdpau-driver%{?_isa}
-Requires:       xorg-x11-server-Xorg%{?_isa}
 
 Conflicts:      nvidia-x11-drv-beta
 Conflicts:      nvidia-x11-drv-71xx
@@ -102,6 +98,7 @@ Summary:        Libraries for %{name}
 Requires(post): ldconfig
 Requires:       %{name} = %{?epoch}:%{version}-%{release}
 Requires:       libvdpau%{?_isa} >= 0.5
+Requires:       libglvnd%{?_isa}
 
 Obsoletes:      nvidia-x11-drv-libs < %{?epoch}:%{version}
 Provides:       nvidia-x11-drv-libs = %{?epoch}:%{version}
@@ -176,14 +173,6 @@ such as OpenGL headers.
 %setup -q -T -b 1 -n %{name}-%{version}-x86_64
 %endif
 
-%ifarch armv7hl
-%setup -q -T -b 2 -n %{name}-%{version}-armv7hl
-%endif
-
-# Print and remove execstack from binaries
-execstack -q nvidia-cuda-mps-control nvidia-cuda-mps-server lib*.so.*
-execstack -c nvidia-cuda-mps-control nvidia-cuda-mps-server lib*.so.*
-
 # Create symlinks for shared objects
 ldconfig -vn .
 
@@ -205,17 +194,13 @@ mkdir -p %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
 mkdir -p %{buildroot}%{_udevrulesdir}
 mkdir -p %{buildroot}%{_modprobe_d}/
-%ifarch %{ix86} x86_64
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
-%endif
 
-# Install headers
+# Headers
 install -p -m 0644 *.h %{buildroot}%{_includedir}/nvidia/GL/
 
-%ifarch %{ix86} x86_64
 # OpenCL config
 install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
-%endif
 
 # Library search path
 echo "%{_libdir}/nvidia" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_lib}.conf
@@ -226,25 +211,25 @@ install -p -m 0644 %{SOURCE20} %{buildroot}%{_modprobe_d}/
 # Autoload nvidia-uvm module
 install -p -m 0644 %{SOURCE23} %{buildroot}%{_prefix}/lib/modules-load.d/
 
-# Install binaries
+# Binaries
 install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-report.sh} %{buildroot}%{_bindir}
 
-# Install man pages
+# Man pages
 install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1/
 
 # X configuration
 install -p -m 0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
 sed -i -e 's|@LIBDIR@|%{_libdir}|g' %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
 
-%if 0%{?rhel}
+%if 0%{?rhel} == 6
 install -p -m 0644 %{SOURCE13} %{buildroot}%{_sysconfdir}/X11/xorg.conf.nvidia
-%endif
-
-%if 0%{?fedora} || 0%{?rhel} > 7
+%else
+# Use xorg.conf as sample
+cp %{SOURCE13} xorg.conf.sample
 install -p -m 0644 %{SOURCE11} %{buildroot}%{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
 %endif
 
-%if 0%{?fedora} > 23 || 0%{?rhel} > 7
+%if 0%{?fedora} >= 24
 install -p -m 0644 %{SOURCE12} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-ignoreabi.conf
 %endif
 
@@ -258,31 +243,21 @@ install -p -m 0644 nvidia-application-profiles-%{version}-key-documentation \
 install -p -m 0644 nvidia-application-profiles-%{version}-rc \
     %{buildroot}%{_datadir}/nvidia/
 
-# Install text files for alternate installation
+# Text files for alternate installation
 install -p -m 644 %{SOURCE21} %{buildroot}%{_libdir}/nvidia/alternate-install-present
 
 # UDev rules for nvidia-uvm
 install -p -m 644 %{SOURCE22} %{buildroot}%{_udevrulesdir}
 
-# Install system conflicting libraries
-cp -a \
-    libGL.so* \
-    libGLESv1_CM.so* \
-    libGLESv2.so* \
-    libEGL.so* \
-%ifarch %{ix86} x86_64
-    libOpenCL.so* \
-%endif
-    %{buildroot}%{_libdir}/nvidia/
+# System conflicting libraries
+cp -a libGL.so* libEGL.so* libOpenCL.so* %{buildroot}%{_libdir}/nvidia/
 
-# Install unique libraries
-cp -a libcuda.so* libnv*.so* \
-    %{buildroot}%{_libdir}/
-ln -sf libcuda.so.%{version} %{buildroot}%{_libdir}/libcuda.so
-
-# VDPAU libraries
+# Unique libraries
+cp -a lib*GL*_nvidia.so* libcuda.so* libnvidia-*.so* libnvcuvid.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
 
+ln -sf libcuda.so.%{version} %{buildroot}%{_libdir}/libcuda.so
+ln -sf libGLX_nvidia.so.%{version} %{buildroot}%{_libdir}/libGLX_indirect.so.0
 
 %post
 if [ "$1" -eq "1" ]; then
@@ -300,7 +275,7 @@ fi || :
 
 %post NVML -p /sbin/ldconfig
 
-%if 0%{?rhel}
+%if 0%{?rhel} == 6
 %posttrans
 [ -f %{_sysconfdir}/X11/xorg.conf ] || cp -p %{_sysconfdir}/X11/xorg.conf.nvidia %{_sysconfdir}/X11/xorg.conf || :
 %endif
@@ -339,22 +314,18 @@ fi ||:
 # X.org configuration files
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
 
-%if 0%{?rhel}
+%if 0%{?rhel} == 6
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.nvidia
-%endif
-
-%if 0%{?fedora} || 0%{?rhel} > 7
+%else
 %{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
 %endif
 
-%if 0%{?fedora} > 23 || 0%{?rhel} > 7
+%if 0%{?fedora} >= 24 || 0%{?rhel} >= 8
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/99-nvidia-ignoreabi.conf
 %endif
 
 %files cuda
-%ifarch %{ix86} x86_64
 %{_sysconfdir}/OpenCL/vendors/*
-%endif
 %{_bindir}/nvidia-cuda-mps-control
 %{_bindir}/nvidia-cuda-mps-server
 %{_bindir}/nvidia-debugdump
@@ -367,13 +338,17 @@ fi ||:
 %files libs
 %dir %{_libdir}/nvidia
 %{_libdir}/nvidia/libEGL.so.1
-%{_libdir}/nvidia/libEGL.so.%{version}
 %{_libdir}/nvidia/libGL.so.1
 %{_libdir}/nvidia/libGL.so.%{version}
-%{_libdir}/nvidia/libGLESv1_CM.so.1
-%{_libdir}/nvidia/libGLESv1_CM.so.%{version}
-%{_libdir}/nvidia/libGLESv2.so.2
-%{_libdir}/nvidia/libGLESv2.so.%{version}
+%{_libdir}/libEGL_nvidia.so.0
+%{_libdir}/libEGL_nvidia.so.%{version}
+%{_libdir}/libGLESv1_CM_nvidia.so.1
+%{_libdir}/libGLESv1_CM_nvidia.so.%{version}
+%{_libdir}/libGLESv2_nvidia.so.2
+%{_libdir}/libGLESv2_nvidia.so.%{version}
+%{_libdir}/libGLX_indirect.so.0
+%{_libdir}/libGLX_nvidia.so.0
+%{_libdir}/libGLX_nvidia.so.%{version}
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
 %{_libdir}/libnvidia-eglcore.so.%{version}
@@ -385,20 +360,22 @@ fi ||:
 %{_sysconfdir}/ld.so.conf.d/nvidia-%{_lib}.conf
 
 %files cuda-libs
+%dir %{_libdir}/nvidia
 %{_libdir}/libcuda.so
 %{_libdir}/libcuda.so.1
 %{_libdir}/libcuda.so.%{version}
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
+%{_libdir}/libnvidia-compiler.so.%{version}
 %{_libdir}/libnvidia-encode.so.1
 %{_libdir}/libnvidia-encode.so.%{version}
+%{_libdir}/libnvidia-fatbinaryloader.so.%{version}
 %{_libdir}/libnvidia-opencl.so.1
 %{_libdir}/libnvidia-opencl.so.%{version}
-%ifarch %{ix86} x86_64
+%{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
 %{_libdir}/nvidia/libOpenCL.so.1
 %{_libdir}/nvidia/libOpenCL.so.1.0.0
-%{_libdir}/libnvidia-compiler.so.%{version}
-%endif
+%{_sysconfdir}/ld.so.conf.d/nvidia-%{_lib}.conf
 
 %files NvFBCOpenGL
 %{_libdir}/libnvidia-fbc.so.1
@@ -414,6 +391,14 @@ fi ||:
 %{_includedir}/nvidia/
 
 %changelog
+* Wed Mar 30 2016 Simone Caronni <negativo17@gmail.com> - 2:361.42-1
+- Update to 361.42, add libglvnd requirement.
+- Use non-libglvnd libGL as per default Nvidia installation, some Steam games
+  check for non-abi stuff in libGL.
+- Remove ARM (Carma, Kayla) support.
+- Use new X.org OutputClass loader for RHEL 7 (X.org 1.16+, RHEL 7.2+).
+- Update isa requirements.
+
 * Tue Jan 26 2016 Simone Caronni <negativo17@gmail.com> - 2:352.79-1
 - Update to 352.79.
 
@@ -648,3 +633,4 @@ fi ||:
 - Obsoletes xorg-x11-drv-nvidia.
 - Switched to no-compat32 x86_64 archive.
 - Switch to generated sources.
+

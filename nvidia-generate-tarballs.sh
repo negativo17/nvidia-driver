@@ -1,7 +1,7 @@
 #!/bin/sh -x
 set -e
 
-VERSION=352.79
+VERSION=361.42
 DL_SITE=ftp://download.nvidia.com/XFree86
 #DL_SITE=http://us.download.nvidia.com/XFree86
 
@@ -15,9 +15,11 @@ create_tarball() {
     cd temp
 
     # Compiled from source
-    rm -f nvidia-settings* nvidia-xconfig* nvidia-persistenced* \
-            nvidia-modprobe* libvdpau.so* libvdpau_trace.so* \
-            libnvidia-gtk*
+    rm -f \
+        nvidia-xconfig* nvidia-persistenced* nvidia-modprobe* \
+        libnvidia-gtk* nvidia-settings* \
+        libGLESv1_CM.so.* libGLESv2.so.* libGL.so.1.* libGL.la \
+        libGLdispatch.so.* libOpenGL.so.* libGLX.so.*
 
     # Useless with packages
     rm -f nvidia-installer* .manifest make* mk* tls_test*
@@ -26,10 +28,8 @@ create_tarball() {
     rm -f libnvidia-wfb*
 
     # Use correct tls implementation
-    if [ ${ARCH} == "i386" -o ${ARCH} == "x86_64" ]; then
-        mv -f tls/libnvidia-tls.so* .
-        rm -fr tls
-    fi
+    mv -f tls/libnvidia-tls.so* .
+    rm -fr tls
 
     mv kernel ../${KMOD}/
     mv * ../${DRIVER}/
@@ -53,8 +53,3 @@ wget -c ${DL_SITE}/Linux-${ARCH}/${VERSION}/NVIDIA-Linux-${ARCH}-${VERSION}-no-c
 mv NVIDIA-Linux-${ARCH}-${VERSION}-no-compat32.run nvidia-${VERSION}-${ARCH}.run
 create_tarball
 
-ARCH=armv7hl
-wget -c ${DL_SITE}/Linux-32bit-ARM/${VERSION}/NVIDIA-Linux-armv7l-gnueabihf-${VERSION}.run
-#wget -c ${DL_SITE}/Linux-x86-ARM/${VERSION}/NVIDIA-Linux-armv7l-gnueabihf-${VERSION}.run
-mv NVIDIA-Linux-armv7l-gnueabihf-${VERSION}.run nvidia-${VERSION}-${ARCH}.run
-create_tarball
