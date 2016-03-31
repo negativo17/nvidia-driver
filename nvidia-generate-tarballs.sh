@@ -20,8 +20,7 @@ create_tarball() {
         nvidia-xconfig* nvidia-persistenced* nvidia-modprobe* \
         libnvidia-gtk* nvidia-settings* \
         libGLESv1_CM.so.* libGLESv2.so.* libGL.so.* libGL.la \
-        libGLdispatch.so.* libOpenGL.so.* libGLX.so.* \
-        libglvnd_install_checker
+        libGLdispatch.so.* libOpenGL.so.* libGLX.so.*
 
     # Useless with packages
     rm -f nvidia-installer* .manifest make* mk* tls_test*
