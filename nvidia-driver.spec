@@ -28,8 +28,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        361.28
-Release:        2%{?dist}
+Version:        361.42
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -391,6 +391,9 @@ fi ||:
 %{_includedir}/nvidia/
 
 %changelog
+* Wed Mar 30 2016 Simone Caronni <negativo17@gmail.com> - 2:361.42-1
+- Update to 361.42.
+
 * Tue Feb 16 2016 Simone Caronni <negativo17@gmail.com> - 2:361.28-2
 - Use non-libglvnd libGL as per default Nvidia installation, some Steam games
   check for non-abi stuff in libGL.
