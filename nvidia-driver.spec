@@ -28,7 +28,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        364.12
+Version:        364.15
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
@@ -98,7 +98,7 @@ Summary:        Libraries for %{name}
 Requires(post): ldconfig
 Requires:       %{name} = %{?epoch}:%{version}-%{release}
 Requires:       libvdpau%{?_isa} >= 0.5
-Requires:       libglvnd%{?_isa}
+Requires:       libglvnd%{?_isa} >= 0.1.0
 
 Obsoletes:      nvidia-x11-drv-libs < %{?epoch}:%{version}
 Provides:       nvidia-x11-drv-libs = %{?epoch}:%{version}
@@ -395,6 +395,10 @@ fi ||:
 %{_includedir}/nvidia/
 
 %changelog
+* Fri Apr 08 2016 Simone Caronni <negativo17@gmail.com> - 2:364.15-1
+- Update to 364.15.
+- Requires libglvnd >= 0.1.0.
+
 * Tue Mar 22 2016 Simone Caronni <negativo17@gmail.com> - 2:364.12-1
 - Update to 364.12.
 - Add Vulkan and DRM KMS support.
