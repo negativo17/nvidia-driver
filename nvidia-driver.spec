@@ -28,7 +28,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        364.15
+Version:        364.19
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
@@ -395,6 +395,9 @@ fi ||:
 %{_includedir}/nvidia/
 
 %changelog
+* Mon May 02 2016 Simone Caronni <negativo17@gmail.com> - 2:364.19-1
+- Update to 364.19.
+
 * Fri Apr 08 2016 Simone Caronni <negativo17@gmail.com> - 2:364.15-1
 - Update to 364.15.
 - Requires libglvnd >= 0.1.0.
