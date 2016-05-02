@@ -403,6 +403,8 @@ fi ||:
   https://copr.fedorainfracloud.org/coprs/ajax/vulkan/
 - Update description.
 - Re-enable libglvnd libGL.so library.
+- Do not enable modeset by default. There is no fb driver and the only consumer
+  is a custom build of Wayland with rejected patches.
 
 * Wed Mar 30 2016 Simone Caronni <negativo17@gmail.com> - 2:361.42-1
 - Update to 361.42.
