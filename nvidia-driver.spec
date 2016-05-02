@@ -28,7 +28,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        361.42
+Version:        364.19
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
@@ -43,7 +43,7 @@ Source11:       10-nvidia-driver.conf
 Source12:       99-nvidia-ignoreabi.conf
 Source13:       xorg.conf.nvidia
 
-Source20:       blacklist-nouveau.conf
+Source20:       nvidia.conf
 Source21:       alternate-install-present
 Source22:       60-nvidia-uvm.rules
 Source23:       nvidia-uvm.conf
@@ -65,6 +65,7 @@ Requires:       nvidia-kmod = %{?epoch}:%{version}
 Provides:       nvidia-kmod-common = %{?epoch}:%{version}
 Requires:       nvidia-settings%{?_isa} = %{?epoch}:%{version}
 Requires:       libva-vdpau-driver%{?_isa}
+#Requires:      vulkan-filesystem
 
 Conflicts:      nvidia-x11-drv-beta
 Conflicts:      nvidia-x11-drv-71xx
@@ -87,8 +88,7 @@ Provides:       nvidia-x11-drv = %{?epoch}:%{version}-%{release}
 
 %description
 This package provides the most recent NVIDIA display driver which allows for
-hardware accelerated rendering with NVIDIA chipsets GeForce8 series and newer.
-GeForce5 and below are NOT supported by this release.
+hardware accelerated rendering with recent NVIDIA chipsets.
 
 For the full product support list, please consult the release notes for driver
 version %{version}.
@@ -98,7 +98,7 @@ Summary:        Libraries for %{name}
 Requires(post): ldconfig
 Requires:       %{name} = %{?epoch}:%{version}-%{release}
 Requires:       libvdpau%{?_isa} >= 0.5
-Requires:       libglvnd%{?_isa}
+Requires:       libglvnd%{?_isa} >= 0.1.0
 
 Obsoletes:      nvidia-x11-drv-libs < %{?epoch}:%{version}
 Provides:       nvidia-x11-drv-libs = %{?epoch}:%{version}
@@ -192,6 +192,7 @@ mkdir -p %{buildroot}%{_prefix}/lib/modules-load.d/
 mkdir -p %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
+mkdir -p %{buildroot}%{_sysconfdir}/vulkan/icd.d/
 mkdir -p %{buildroot}%{_udevrulesdir}
 mkdir -p %{buildroot}%{_modprobe_d}/
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
@@ -202,10 +203,13 @@ install -p -m 0644 *.h %{buildroot}%{_includedir}/nvidia/GL/
 # OpenCL config
 install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
+# Vulkan
+install -p -m 0644 nvidia_icd.json %{buildroot}%{_sysconfdir}/vulkan/icd.d/
+
 # Library search path
 echo "%{_libdir}/nvidia" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_lib}.conf
 
-# Blacklist nouveau
+# Blacklist nouveau, enable KMS
 install -p -m 0644 %{SOURCE20} %{buildroot}%{_modprobe_d}/
 
 # Autoload nvidia-uvm module
@@ -250,7 +254,7 @@ install -p -m 644 %{SOURCE21} %{buildroot}%{_libdir}/nvidia/alternate-install-pr
 install -p -m 644 %{SOURCE22} %{buildroot}%{_udevrulesdir}
 
 # System conflicting libraries
-cp -a libGL.so* libEGL.so* libOpenCL.so* %{buildroot}%{_libdir}/nvidia/
+cp -a libEGL.so* libOpenCL.so* %{buildroot}%{_libdir}/nvidia/
 
 # Unique libraries
 cp -a lib*GL*_nvidia.so* libcuda.so* libnvidia-*.so* libnvcuvid.so* %{buildroot}%{_libdir}/
@@ -310,7 +314,8 @@ fi ||:
 %{_libdir}/nvidia/alternate-install-present
 %{_libdir}/nvidia/xorg
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
-%{_modprobe_d}/blacklist-nouveau.conf
+%{_modprobe_d}/nvidia.conf
+%{_sysconfdir}/vulkan/icd.d/*
 # X.org configuration files
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
 
@@ -338,8 +343,6 @@ fi ||:
 %files libs
 %dir %{_libdir}/nvidia
 %{_libdir}/nvidia/libEGL.so.1
-%{_libdir}/nvidia/libGL.so.1
-%{_libdir}/nvidia/libGL.so.%{version}
 %{_libdir}/libEGL_nvidia.so.0
 %{_libdir}/libEGL_nvidia.so.%{version}
 %{_libdir}/libGLESv1_CM_nvidia.so.1
@@ -351,6 +354,7 @@ fi ||:
 %{_libdir}/libGLX_nvidia.so.%{version}
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
+%{_libdir}/libnvidia-egl-wayland.so.%{version}
 %{_libdir}/libnvidia-eglcore.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
 %{_libdir}/libnvidia-glsi.so.%{version}
@@ -391,6 +395,15 @@ fi ||:
 %{_includedir}/nvidia/
 
 %changelog
+* Mon May 02 2016 Simone Caronni <negativo17@gmail.com> - 2:364.19-1
+- Update to 364.19.
+- Requires libglvnd >= 0.1.0.
+- Add Vulkan and DRM KMS support.
+- Do not require vulkan-filesystem (yet):
+  https://copr.fedorainfracloud.org/coprs/ajax/vulkan/
+- Update description.
+- Re-enable libglvnd libGL.so library.
+
 * Wed Mar 30 2016 Simone Caronni <negativo17@gmail.com> - 2:361.42-1
 - Update to 361.42.
 

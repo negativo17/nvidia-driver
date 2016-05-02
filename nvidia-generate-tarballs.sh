@@ -1,7 +1,7 @@
 #!/bin/sh -x
 set -e
 
-VERSION=361.42
+VERSION=364.19
 DL_SITE=ftp://download.nvidia.com/XFree86
 #DL_SITE=http://us.download.nvidia.com/XFree86
 
@@ -15,10 +15,11 @@ create_tarball() {
     cd temp
 
     # Compiled from source
+    # libGL.so.1.${VERSION} is non-GLVND libGL
     rm -f \
         nvidia-xconfig* nvidia-persistenced* nvidia-modprobe* \
         libnvidia-gtk* nvidia-settings* \
-        libGLESv1_CM.so.* libGLESv2.so.* libGL.so.1.* libGL.la \
+        libGLESv1_CM.so.* libGLESv2.so.* libGL.so.* libGL.la \
         libGLdispatch.so.* libOpenGL.so.* libGLX.so.*
 
     # Useless with packages
