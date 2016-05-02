@@ -397,6 +397,8 @@ fi ||:
 %changelog
 * Mon May 02 2016 Simone Caronni <negativo17@gmail.com> - 2:364.19-1
 - Update to 364.19.
+- Disable modeset by default. There is no fb driver and the only consumer is a
+  custom build of Wayland with rejected patches.
 
 * Fri Apr 08 2016 Simone Caronni <negativo17@gmail.com> - 2:364.15-1
 - Update to 364.15.
