@@ -28,7 +28,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        361.42
+Version:        361.45.11
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
@@ -43,7 +43,7 @@ Source11:       10-nvidia-driver.conf
 Source12:       99-nvidia-ignoreabi.conf
 Source13:       xorg.conf.nvidia
 
-Source20:       blacklist-nouveau.conf
+Source20:       nvidia.conf
 Source21:       alternate-install-present
 Source22:       60-nvidia-uvm.rules
 Source23:       nvidia-uvm.conf
@@ -98,7 +98,7 @@ Summary:        Libraries for %{name}
 Requires(post): ldconfig
 Requires:       %{name} = %{?epoch}:%{version}-%{release}
 Requires:       libvdpau%{?_isa} >= 0.5
-Requires:       libglvnd%{?_isa}
+Requires:       libglvnd%{?_isa} >= 0.1.0
 
 Obsoletes:      nvidia-x11-drv-libs < %{?epoch}:%{version}
 Provides:       nvidia-x11-drv-libs = %{?epoch}:%{version}
@@ -208,8 +208,8 @@ echo "%{_libdir}/nvidia" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_lib
 # Blacklist nouveau
 install -p -m 0644 %{SOURCE20} %{buildroot}%{_modprobe_d}/
 
-# Autoload nvidia-uvm module
-install -p -m 0644 %{SOURCE23} %{buildroot}%{_prefix}/lib/modules-load.d/
+# Autoload nvidia-uvm module after nvidia module
+install -p -m 0644 %{SOURCE23} %{buildroot}%{_modprobe_d}/
 
 # Binaries
 install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-report.sh} %{buildroot}%{_bindir}
@@ -250,7 +250,7 @@ install -p -m 644 %{SOURCE21} %{buildroot}%{_libdir}/nvidia/alternate-install-pr
 install -p -m 644 %{SOURCE22} %{buildroot}%{_udevrulesdir}
 
 # System conflicting libraries
-cp -a libGL.so* libEGL.so* libOpenCL.so* %{buildroot}%{_libdir}/nvidia/
+cp -a libEGL.so* libOpenCL.so* %{buildroot}%{_libdir}/nvidia/
 
 # Unique libraries
 cp -a lib*GL*_nvidia.so* libcuda.so* libnvidia-*.so* libnvcuvid.so* %{buildroot}%{_libdir}/
@@ -310,7 +310,7 @@ fi ||:
 %{_libdir}/nvidia/alternate-install-present
 %{_libdir}/nvidia/xorg
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
-%{_modprobe_d}/blacklist-nouveau.conf
+%{_modprobe_d}/nvidia.conf
 # X.org configuration files
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
 
@@ -332,14 +332,12 @@ fi ||:
 %{_bindir}/nvidia-smi
 %{_mandir}/man1/nvidia-cuda-mps-control.1.*
 %{_mandir}/man1/nvidia-smi.*
+%{_modprobe_d}/nvidia-uvm.conf
 %{_udevrulesdir}/60-nvidia-uvm.rules
-%{_prefix}/lib/modules-load.d/nvidia-uvm.conf
 
 %files libs
 %dir %{_libdir}/nvidia
 %{_libdir}/nvidia/libEGL.so.1
-%{_libdir}/nvidia/libGL.so.1
-%{_libdir}/nvidia/libGL.so.%{version}
 %{_libdir}/libEGL_nvidia.so.0
 %{_libdir}/libEGL_nvidia.so.%{version}
 %{_libdir}/libGLESv1_CM_nvidia.so.1
@@ -391,6 +389,14 @@ fi ||:
 %{_includedir}/nvidia/
 
 %changelog
+* Fri May 27 2016 Simone Caronni <negativo17@gmail.com> - 2:361.45.11-1
+- Update to 361.45.11, use libglvnd libraries for everything except EGL.
+- Load nvidia-uvm.ko through a soft dependency on nvidia.ko. This avoids
+  inserting the nvidia-uvm configuration file in the initrd. Since the module
+  is not (and should not be) in the initrd, this prevents the (harmless) module
+  loading error in Plymouth.
+- Requires libglvnd >= 0.1.0.
+
 * Wed Mar 30 2016 Simone Caronni <negativo17@gmail.com> - 2:361.42-1
 - Update to 361.42, add libglvnd requirement.
 - Use non-libglvnd libGL as per default Nvidia installation, some Steam games
