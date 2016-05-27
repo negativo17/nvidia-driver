@@ -28,7 +28,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        364.19
+Version:        367.18
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
@@ -188,7 +188,6 @@ mkdir -p %{buildroot}%{_libdir}/nvidia/xorg/
 mkdir -p %{buildroot}%{_libdir}/vdpau/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
 mkdir -p %{buildroot}%{_mandir}/man1/
-mkdir -p %{buildroot}%{_prefix}/lib/modules-load.d/
 mkdir -p %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
@@ -212,8 +211,8 @@ echo "%{_libdir}/nvidia" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_lib
 # Blacklist nouveau, enable KMS
 install -p -m 0644 %{SOURCE20} %{buildroot}%{_modprobe_d}/
 
-# Autoload nvidia-uvm module
-install -p -m 0644 %{SOURCE23} %{buildroot}%{_prefix}/lib/modules-load.d/
+# Autoload nvidia-uvm module after nvidia module
+install -p -m 0644 %{SOURCE23} %{buildroot}%{_modprobe_d}/
 
 # Binaries
 install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-report.sh} %{buildroot}%{_bindir}
@@ -337,8 +336,8 @@ fi ||:
 %{_bindir}/nvidia-smi
 %{_mandir}/man1/nvidia-cuda-mps-control.1.*
 %{_mandir}/man1/nvidia-smi.*
+%{_modprobe_d}/nvidia-uvm.conf
 %{_udevrulesdir}/60-nvidia-uvm.rules
-%{_prefix}/lib/modules-load.d/nvidia-uvm.conf
 
 %files libs
 %dir %{_libdir}/nvidia
@@ -395,6 +394,13 @@ fi ||:
 %{_includedir}/nvidia/
 
 %changelog
+* Thu May 26 2016 Simone Caronni <negativo17@gmail.com> - 2:367.18-1
+- Update to 367.18.
+- Load nvidia-uvm.ko through a soft dependency on nvidia.ko. This avoids
+  inserting the nvidia-uvm configuration file in the initrd. Since the module
+  is not (and should not be) in the initrd, this prevents the (harmless) module
+  loading error in Plymouth.
+
 * Mon May 02 2016 Simone Caronni <negativo17@gmail.com> - 2:364.19-1
 - Update to 364.19.
 - Disable modeset by default. There is no fb driver and the only consumer is a
