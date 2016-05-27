@@ -15,7 +15,7 @@ create_tarball() {
     cd temp
 
     # Compiled from source
-    # libGL.so.1.${VERSION} is non-GLVND libGL
+    # libGL.so.${VERSION} is non-GLVND libGL
     rm -f \
         nvidia-xconfig* nvidia-persistenced* nvidia-modprobe* \
         libnvidia-gtk* nvidia-settings* \
