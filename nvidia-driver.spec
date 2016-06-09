@@ -29,7 +29,7 @@
 
 Name:           nvidia-driver
 Version:        367.18
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -175,6 +175,9 @@ such as OpenGL headers.
 
 # Create symlinks for shared objects
 ldconfig -vn .
+
+# Required for building gstreamer 1.0 NVENC plugins
+ln -sf libnvidia-encode.so.%{version} libnvidia-encode.so
 
 %build
 
@@ -392,8 +395,13 @@ fi ||:
 
 %files devel
 %{_includedir}/nvidia/
+%{_libdir}/libnvidia-encode.so
 
 %changelog
+* Thu Jun 09 2016 Simone Caronni <negativo17@gmail.com> - 2:367.18-2
+- Add unversioned libnvidia-encode shared object to devel subpackage; required
+  to build the Gstreamer NVENC plugin.
+
 * Thu May 26 2016 Simone Caronni <negativo17@gmail.com> - 2:367.18-1
 - Update to 367.18.
 - Load nvidia-uvm.ko through a soft dependency on nvidia.ko. This avoids
