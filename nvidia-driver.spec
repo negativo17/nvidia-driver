@@ -28,8 +28,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        361.45.11
-Release:        2%{?dist}
+Version:        367.27
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -65,6 +65,7 @@ Requires:       nvidia-kmod = %{?epoch}:%{version}
 Provides:       nvidia-kmod-common = %{?epoch}:%{version}
 Requires:       nvidia-settings%{?_isa} = %{?epoch}:%{version}
 Requires:       libva-vdpau-driver%{?_isa}
+#Requires:      vulkan-filesystem
 
 Conflicts:      nvidia-x11-drv-beta
 Conflicts:      nvidia-x11-drv-71xx
@@ -87,8 +88,7 @@ Provides:       nvidia-x11-drv = %{?epoch}:%{version}-%{release}
 
 %description
 This package provides the most recent NVIDIA display driver which allows for
-hardware accelerated rendering with NVIDIA chipsets GeForce8 series and newer.
-GeForce5 and below are NOT supported by this release.
+hardware accelerated rendering with recent NVIDIA chipsets.
 
 For the full product support list, please consult the release notes for driver
 version %{version}.
@@ -191,10 +191,10 @@ mkdir -p %{buildroot}%{_libdir}/nvidia/xorg/
 mkdir -p %{buildroot}%{_libdir}/vdpau/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
 mkdir -p %{buildroot}%{_mandir}/man1/
-mkdir -p %{buildroot}%{_prefix}/lib/modules-load.d/
 mkdir -p %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
+mkdir -p %{buildroot}%{_sysconfdir}/vulkan/icd.d/
 mkdir -p %{buildroot}%{_udevrulesdir}
 mkdir -p %{buildroot}%{_modprobe_d}/
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
@@ -205,10 +205,13 @@ install -p -m 0644 *.h %{buildroot}%{_includedir}/nvidia/GL/
 # OpenCL config
 install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
+# Vulkan
+install -p -m 0644 nvidia_icd.json %{buildroot}%{_sysconfdir}/vulkan/icd.d/
+
 # Library search path
 echo "%{_libdir}/nvidia" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_lib}.conf
 
-# Blacklist nouveau
+# Blacklist nouveau, enable KMS
 install -p -m 0644 %{SOURCE20} %{buildroot}%{_modprobe_d}/
 
 # Autoload nvidia-uvm module after nvidia module
@@ -314,6 +317,7 @@ fi ||:
 %{_libdir}/nvidia/xorg
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
 %{_modprobe_d}/nvidia.conf
+%{_sysconfdir}/vulkan/icd.d/*
 # X.org configuration files
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
 
@@ -352,6 +356,7 @@ fi ||:
 %{_libdir}/libGLX_nvidia.so.%{version}
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
+%{_libdir}/libnvidia-egl-wayland.so.%{version}
 %{_libdir}/libnvidia-eglcore.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
 %{_libdir}/libnvidia-glsi.so.%{version}
@@ -393,6 +398,16 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Mon Jun 13 2016 Simone Caronni <negativo17@gmail.com> - 2:367.27-1
+- Update to 367.27.
+- Disable modeset by default. There is no fb driver and the only consumer is a
+  custom build of Wayland with rejected patches.
+- Add Vulkan and DRM KMS support.
+- Do not require vulkan-filesystem (yet):
+  https://copr.fedorainfracloud.org/coprs/ajax/vulkan/
+- Update description.
+- Add new symlink libGLX_indirect.so.0.
+
 * Thu Jun 09 2016 Simone Caronni <negativo17@gmail.com> - 2:361.45.11-2
 - Add unversioned libnvidia-encode shared object to devel subpackage; required
   to build the Gstreamer NVENC plugin.

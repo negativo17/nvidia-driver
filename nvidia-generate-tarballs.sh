@@ -1,7 +1,7 @@
 #!/bin/sh -x
 set -e
 
-VERSION=361.45.11
+VERSION=367.27
 DL_SITE=ftp://download.nvidia.com/XFree86
 #DL_SITE=http://us.download.nvidia.com/XFree86
 
