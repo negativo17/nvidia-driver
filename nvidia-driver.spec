@@ -28,8 +28,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        364.19
-Release:        3%{?dist}
+Version:        367.27
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -398,6 +398,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Mon Jun 13 2016 Simone Caronni <negativo17@gmail.com> - 2:367.27-1
+- Update to 367.27.
+
 * Thu Jun 09 2016 Simone Caronni <negativo17@gmail.com> - 2:364.19-3
 - Add unversioned libnvidia-encode shared object to devel subpackage; required
   to build the Gstreamer NVENC plugin.
