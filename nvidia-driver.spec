@@ -356,7 +356,11 @@ fi ||:
 %{_libdir}/libGLX_nvidia.so.%{version}
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
+%if 0%{?fedora} || 0%{?rhel} >= 8
 %{_libdir}/libnvidia-egl-wayland.so.%{version}
+%else
+%exclude %{_libdir}/libnvidia-egl-wayland.so.%{version}
+%endif
 %{_libdir}/libnvidia-eglcore.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
 %{_libdir}/libnvidia-glsi.so.%{version}
@@ -400,6 +404,7 @@ fi ||:
 %changelog
 * Mon Jun 13 2016 Simone Caronni <negativo17@gmail.com> - 2:367.27-1
 - Update to 367.27.
+- Add libnvidia-egl-wayland.so to the library subpackage only on Fedora systems.
 
 * Thu Jun 09 2016 Simone Caronni <negativo17@gmail.com> - 2:364.19-3
 - Add unversioned libnvidia-encode shared object to devel subpackage; required
