@@ -356,7 +356,11 @@ fi ||:
 %{_libdir}/libGLX_nvidia.so.%{version}
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
+%if 0%{?fedora} || 0%{?rhel} >= 8
 %{_libdir}/libnvidia-egl-wayland.so.%{version}
+%else
+%exclude %{_libdir}/libnvidia-egl-wayland.so.%{version}
+%endif
 %{_libdir}/libnvidia-eglcore.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
 %{_libdir}/libnvidia-glsi.so.%{version}
@@ -407,6 +411,7 @@ fi ||:
   https://copr.fedorainfracloud.org/coprs/ajax/vulkan/
 - Update description.
 - Add new symlink libGLX_indirect.so.0.
+- Add libnvidia-egl-wayland.so to the library subpackage only on Fedora systems.
 
 * Thu Jun 09 2016 Simone Caronni <negativo17@gmail.com> - 2:361.45.11-2
 - Add unversioned libnvidia-encode shared object to devel subpackage; required
