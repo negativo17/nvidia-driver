@@ -114,7 +114,7 @@ This package provides the shared libraries for %{name}.
 
 %package cuda
 Summary:        CUDA integration for %{name}
-Requires:       %{name}-cuda-libs = %{?epoch}:%{version}
+Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch}:%{version}
 Requires:       nvidia-persistenced = %{?epoch}:%{version}
 %if 0%{?fedora} || 0%{?rhel} >= 8
 Requires:       opencl-filesystem
