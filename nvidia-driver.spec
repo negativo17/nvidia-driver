@@ -29,7 +29,7 @@
 
 Name:           nvidia-driver
 Version:        367.27
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -114,6 +114,7 @@ This package provides the shared libraries for %{name}.
 
 %package cuda
 Summary:        CUDA integration for %{name}
+Requires:       %{name}-cuda-libs = %{?epoch}:%{version}
 Requires:       nvidia-persistenced = %{?epoch}:%{version}
 %if 0%{?fedora} || 0%{?rhel} >= 8
 Requires:       opencl-filesystem
@@ -402,6 +403,10 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Tue Jun 21 2016 Simone Caronni <negativo17@gmail.com> - 2:367.27-2
+- Add missing dependency on CUDA libs for CUDA driver components. The automatic
+  one went missing with libraries reorganization.
+
 * Mon Jun 13 2016 Simone Caronni <negativo17@gmail.com> - 2:367.27-1
 - Update to 367.27.
 - Add libnvidia-egl-wayland.so to the library subpackage only on Fedora systems.
