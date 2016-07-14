@@ -29,7 +29,7 @@
 
 Name:           nvidia-driver
 Version:        367.27
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -179,6 +179,8 @@ ldconfig -vn .
 
 # Required for building gstreamer 1.0 NVENC plugins
 ln -sf libnvidia-encode.so.%{version} libnvidia-encode.so
+# Required for building ffmpeg 3.1 Nvidia CUVID
+ln -sf libnvcuvid.so.%{version} libnvcuvid.so
 
 %build
 
@@ -400,9 +402,14 @@ fi ||:
 
 %files devel
 %{_includedir}/nvidia/
+%{_libdir}/libnvcuvid.so
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Thu Jul 14 2016 Simone Caronni <negativo17@gmail.com> - 2:367.27-3
+- Add unversioned CUVID library to devel subpackage for building FFMPeg 3.1
+  CUVID support.
+
 * Tue Jun 21 2016 Simone Caronni <negativo17@gmail.com> - 2:367.27-2
 - Add missing dependency on CUDA libs for CUDA driver components. The automatic
   one went missing with libraries reorganization.
