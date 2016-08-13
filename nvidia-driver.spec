@@ -29,7 +29,7 @@
 
 Name:           nvidia-driver
 Version:        367.35
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -238,7 +238,7 @@ cp %{SOURCE13} xorg.conf.sample
 install -p -m 0644 %{SOURCE11} %{buildroot}%{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
 %endif
 
-%if 0%{?fedora} >= 24
+%if 0%{?fedora} >= 26
 install -p -m 0644 %{SOURCE12} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-ignoreabi.conf
 %endif
 
@@ -295,7 +295,7 @@ if [ "$1" -eq "0" ]; then
 %if 0%{?fedora} || 0%{?rhel} >= 7
   sed -i -e 's/%{_dracutopts} //g' /etc/default/grub
 %endif
-%if 0%{?rhel}
+%if 0%{?rhel} == 6
   # Backup and disable previously used xorg.conf
   [ -f %{_sysconfdir}/X11/xorg.conf ] && mv %{_sysconfdir}/X11/xorg.conf %{_sysconfdir}/X11/xorg.conf.nvidia_uninstalled &>/dev/null
 %endif
@@ -330,7 +330,7 @@ fi ||:
 %{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
 %endif
 
-%if 0%{?fedora} >= 24 || 0%{?rhel} >= 8
+%if 0%{?fedora} >= 26 || 0%{?rhel} >= 8
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/99-nvidia-ignoreabi.conf
 %endif
 
@@ -406,6 +406,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Sat Aug 13 2016 Simone Caronni <negativo17@gmail.com> - 2:367.35-2
+- Move IgnoreABI directive to Fedora 26+.
+
 * Fri Jul 22 2016 Simone Caronni <negativo17@gmail.com> - 2:367.35-1
 - Update to 367.35.
 
