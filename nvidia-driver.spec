@@ -28,8 +28,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        367.35
-Release:        2%{?dist}
+Version:        367.44
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -406,6 +406,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Thu Aug 25 2016 Simone Caronni <negativo17@gmail.com> - 2:367.44-1
+- Update to 367.44.
+
 * Sat Aug 13 2016 Simone Caronni <negativo17@gmail.com> - 2:367.35-2
 - Move IgnoreABI directive to Fedora 26+.
 
