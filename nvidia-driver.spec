@@ -29,7 +29,7 @@
 
 Name:           nvidia-driver
 Version:        370.23
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -47,6 +47,8 @@ Source20:       nvidia.conf
 Source21:       alternate-install-present
 Source22:       60-nvidia-uvm.rules
 Source23:       nvidia-uvm.conf
+
+Source40:       com.nvidia.driver.metainfo.xml
 
 Source99:       nvidia-generate-tarballs.sh
 
@@ -187,6 +189,7 @@ ln -sf libnvcuvid.so.%{version} libnvcuvid.so
 %install
 # Create empty tree
 mkdir -p %{buildroot}%{_bindir}
+mkdir -p %{buildroot}%{_datadir}/appdata/
 mkdir -p %{buildroot}%{_datadir}/nvidia/
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
 mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
@@ -225,6 +228,9 @@ install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-re
 
 # Man pages
 install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1/
+
+# install AppData and add modalias provides
+install -p -m 0644 %{SOURCE40} %{buildroot}%{_datadir}/appdata/
 
 # X configuration
 install -p -m 0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
@@ -315,6 +321,7 @@ fi ||:
 %doc NVIDIA_Changelog README.txt html
 %dir %{_sysconfdir}/nvidia
 %{_bindir}/nvidia-bug-report.sh
+%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
 %{_datadir}/nvidia
 %{_libdir}/nvidia/alternate-install-present
 %{_libdir}/nvidia/xorg
@@ -406,6 +413,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Mon Sep 05 2016 Richard Hughes <richard@hughsie.com> - 2:370.23-2
+- Install an MetaInfo so the driver appears in the software center
+
 * Wed Aug 17 2016 Simone Caronni <negativo17@gmail.com> - 2:370.23-1
 - Update to 370.23.
 
