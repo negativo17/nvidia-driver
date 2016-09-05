@@ -29,7 +29,7 @@
 
 Name:           nvidia-driver
 Version:        370.23
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -49,6 +49,7 @@ Source22:       60-nvidia-uvm.rules
 Source23:       nvidia-uvm.conf
 
 Source40:       com.nvidia.driver.metainfo.xml
+Source41:       parse-readme.py
 
 Source99:       nvidia-generate-tarballs.sh
 
@@ -231,6 +232,12 @@ install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1
 
 # install AppData and add modalias provides
 install -p -m 0644 %{SOURCE40} %{buildroot}%{_datadir}/appdata/
+fn=%{buildroot}%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
+%{SOURCE41} README.txt "NVIDIA GEFORCE GPUS" | xargs appstream-util add-provide ${fn} modalias
+%{SOURCE41} README.txt "NVIDIA QUADRO GPUS" | xargs appstream-util add-provide ${fn} modalias
+%{SOURCE41} README.txt "NVIDIA NVS GPUS" | xargs appstream-util add-provide ${fn} modalias
+%{SOURCE41} README.txt "NVIDIA TESLA GPUS" | xargs appstream-util add-provide ${fn} modalias
+%{SOURCE41} README.txt "NVIDIA GRID GPUS" | xargs appstream-util add-provide ${fn} modalias
 
 # X configuration
 install -p -m 0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
@@ -413,6 +420,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Mon Sep 05 2016 Richard Hughes <richard@hughsie.com> - 2:370.23-3
+- Add modaliases to the MetaInfo file to only match supported NVIDIA hardware
+
 * Mon Sep 05 2016 Richard Hughes <richard@hughsie.com> - 2:370.23-2
 - Install an MetaInfo so the driver appears in the software center
 
