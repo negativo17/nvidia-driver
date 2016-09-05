@@ -29,7 +29,7 @@
 
 Name:           nvidia-driver
 Version:        370.23
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -66,7 +66,6 @@ Requires:       grubby
 Requires:       nvidia-driver-libs%{?_isa} = %{?epoch}:%{version}
 Requires:       nvidia-kmod = %{?epoch}:%{version}
 Provides:       nvidia-kmod-common = %{?epoch}:%{version}
-Requires:       nvidia-settings%{?_isa} = %{?epoch}:%{version}
 Requires:       libva-vdpau-driver%{?_isa}
 #Requires:      vulkan-filesystem
 
@@ -420,6 +419,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Mon Sep 05 2016 Simone Caronni <negativo17@gmail.com> - 2:370.23-4
+- Do not require nvidia-settings, make it possible to install without the GUI.
+
 * Mon Sep 05 2016 Richard Hughes <richard@hughsie.com> - 2:370.23-3
 - Add modaliases to the MetaInfo file to only match supported NVIDIA hardware
 
