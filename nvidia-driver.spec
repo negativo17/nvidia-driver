@@ -29,7 +29,7 @@
 
 Name:           nvidia-driver
 Version:        370.23
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -60,6 +60,11 @@ Requires:       xorg-x11-server-Xorg%{?_isa}
 BuildRequires:  systemd
 # X.org "OutputClass" only on server 1.16+
 Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.16
+%endif
+
+%if 0%{?fedora} >= 25
+# AppStream metadata generation
+BuildRequires:  libappstream-glib%{?_isa}
 %endif
 
 Requires:       grubby
@@ -229,6 +234,7 @@ install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-re
 # Man pages
 install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1/
 
+%if 0%{?fedora} >= 25
 # install AppData and add modalias provides
 install -p -m 0644 %{SOURCE40} %{buildroot}%{_datadir}/appdata/
 fn=%{buildroot}%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
@@ -237,6 +243,7 @@ fn=%{buildroot}%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
 %{SOURCE41} README.txt "NVIDIA NVS GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA TESLA GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA GRID GPUS" | xargs appstream-util add-provide ${fn} modalias
+%endif
 
 # X configuration
 install -p -m 0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
@@ -327,7 +334,9 @@ fi ||:
 %doc NVIDIA_Changelog README.txt html
 %dir %{_sysconfdir}/nvidia
 %{_bindir}/nvidia-bug-report.sh
+%if 0%{?fedora} >= 25
 %{_datadir}/appdata/com.nvidia.driver.metainfo.xml
+%endif
 %{_datadir}/nvidia
 %{_libdir}/nvidia/alternate-install-present
 %{_libdir}/nvidia/xorg
@@ -419,6 +428,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Mon Sep 05 2016 Simone Caronni <negativo17@gmail.com> - 2:370.23-5
+- Make the whole AppStream generation available only on Fedora 25+.
+
 * Mon Sep 05 2016 Simone Caronni <negativo17@gmail.com> - 2:370.23-4
 - Do not require nvidia-settings, make it possible to install without the GUI.
 
