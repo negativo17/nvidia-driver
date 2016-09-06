@@ -64,7 +64,7 @@ Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.16
 
 %if 0%{?fedora} >= 25
 # AppStream metadata generation
-BuildRequires:  libappstream-glib%{?_isa}
+BuildRequires:  libappstream-glib%{?_isa} >= 0.6.3
 %endif
 
 Requires:       grubby
