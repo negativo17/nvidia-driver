@@ -32,6 +32,6 @@
   </keywords>
   <update_contact>richard_at_hughsie.com</update_contact>
   <suggests>
-    <id>com.nvidia.driver.settings.desktop</id>
+    <id>nvidia-settings.desktop</id>
   </suggests>
 </component>
