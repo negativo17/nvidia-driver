@@ -17,6 +17,7 @@
       graphics driver supports all modern NVIDIA GPUs.
     </p>
   </description>
+  <translation/>
   <url type="homepage">http://www.nvidia.com/</url>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>LicenseRef-proprietary:NVIDIA</project_license>
