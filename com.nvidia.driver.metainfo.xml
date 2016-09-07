@@ -26,6 +26,9 @@
     <keyword>driver</keyword>
     <keyword>GeForce</keyword>
     <keyword>CUDA</keyword>
+    <keyword>Quadro</keyword>
+    <keyword>Vulkan</keyword>
+    <keyword>OpenGL</keyword>
   </keywords>
   <update_contact>richard_at_hughsie.com</update_contact>
   <suggests>
