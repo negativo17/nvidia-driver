@@ -80,7 +80,7 @@
           <li>Removed the Base Mosaic configuration option from nvidia-settings on systems where the feature is not actually supported.</li>
           <li>Fixed a bug that caused nvidia-smi to report an inaccurate version number.</li>
           <li>Fixed a bug that could lead to a system crash if there was a peer-to-peer mapping still active during CUDA context teardown.</li>
-          <li>Fixed a bug that prevented nvidia-bug-report.sh from finding relevant messages in kernel log files.
+          <li>Fixed a bug that prevented nvidia-bug-report.sh from finding relevant messages in kernel log files.</li>
         </ul>
       </description>
     </release>
