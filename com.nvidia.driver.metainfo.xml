@@ -2,7 +2,7 @@
 <!-- Copyright 2016 Richard Hughes <richard@hughsie.com> -->
 <component type="driver">
   <id>com.nvidia.driver</id>
-  <name>NVIDIA</name>
+  <name>NVIDIA Linux Graphics Driver</name>
   <summary>Accelerated Linux Graphics Driver</summary>
   <description>
     <p>
