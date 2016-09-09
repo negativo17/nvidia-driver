@@ -28,8 +28,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        370.23
-Release:        5%{?dist}
+Version:        370.28
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -428,6 +428,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Fri Sep 09 2016 Simone Caronni <negativo17@gmail.com> - 2:370.28-1
+- Update to 370.28.
+
 * Mon Sep 05 2016 Simone Caronni <negativo17@gmail.com> - 2:370.23-5
 - Make the whole AppStream generation available only on Fedora 25+.
 
