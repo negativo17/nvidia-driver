@@ -38,6 +38,9 @@
   <releases>
     <release date="2016-09-08" version="370.28">
       <description>
+        <p>
+          New short lived branch release.
+        </p>
         <ul>
           <li>Improved compatibility with recent Linux kernels.</li>
           <li>Fixed undefined symbol references in libnvidia-glcore.so.</li>
