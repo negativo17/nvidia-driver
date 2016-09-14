@@ -29,7 +29,7 @@
 
 Name:           nvidia-driver
 Version:        370.28
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -237,12 +237,12 @@ install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1
 %if 0%{?fedora} >= 25
 # install AppData and add modalias provides
 install -p -m 0644 %{SOURCE40} %{buildroot}%{_datadir}/appdata/
-#fn=%{buildroot}%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
-#%{SOURCE41} README.txt "NVIDIA GEFORCE GPUS" | xargs appstream-util add-provide ${fn} modalias
-#%{SOURCE41} README.txt "NVIDIA QUADRO GPUS" | xargs appstream-util add-provide ${fn} modalias
-#%{SOURCE41} README.txt "NVIDIA NVS GPUS" | xargs appstream-util add-provide ${fn} modalias
-#%{SOURCE41} README.txt "NVIDIA TESLA GPUS" | xargs appstream-util add-provide ${fn} modalias
-#%{SOURCE41} README.txt "NVIDIA GRID GPUS" | xargs appstream-util add-provide ${fn} modalias
+fn=%{buildroot}%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
+%{SOURCE41} README.txt "NVIDIA GEFORCE GPUS" | xargs appstream-util add-provide ${fn} modalias
+%{SOURCE41} README.txt "NVIDIA QUADRO GPUS" | xargs appstream-util add-provide ${fn} modalias
+%{SOURCE41} README.txt "NVIDIA NVS GPUS" | xargs appstream-util add-provide ${fn} modalias
+%{SOURCE41} README.txt "NVIDIA TESLA GPUS" | xargs appstream-util add-provide ${fn} modalias
+%{SOURCE41} README.txt "NVIDIA GRID GPUS" | xargs appstream-util add-provide ${fn} modalias
 %endif
 
 # X configuration
@@ -428,6 +428,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Wed Sep 14 2016 Simone Caronni <negativo17@gmail.com> - 2:370.28-3
+- Enable filtering by pci id in the AppStream metadata.
+
 * Sun Sep 11 2016 Simone Caronni <negativo17@gmail.com> - 2:370.28-2
 - Update AppStream metadata.
 
