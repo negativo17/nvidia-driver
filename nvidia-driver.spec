@@ -29,7 +29,7 @@
 
 Name:           nvidia-driver
 Version:        367.44
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -65,7 +65,9 @@ Requires:       nvidia-kmod = %{?epoch}:%{version}
 Provides:       nvidia-kmod-common = %{?epoch}:%{version}
 Requires:       nvidia-settings%{?_isa} = %{?epoch}:%{version}
 Requires:       libva-vdpau-driver%{?_isa}
-#Requires:      vulkan-filesystem
+%if 0%{?fedora}
+Requires:       vulkan-filesystem
+%endif
 
 Conflicts:      nvidia-x11-drv-beta
 Conflicts:      nvidia-x11-drv-71xx
@@ -406,6 +408,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Sun Oct 09 2016 Simone Caronni <negativo17@gmail.com> - 2:367.44-2
+- Require vulkan-filesystem on Fedora.
+
 * Thu Aug 25 2016 Simone Caronni <negativo17@gmail.com> - 2:367.44-1
 - Update to 367.44.
 
