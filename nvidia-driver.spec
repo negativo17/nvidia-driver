@@ -29,7 +29,7 @@
 
 Name:           nvidia-driver
 Version:        370.28
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -72,7 +72,9 @@ Requires:       nvidia-driver-libs%{?_isa} = %{?epoch}:%{version}
 Requires:       nvidia-kmod = %{?epoch}:%{version}
 Provides:       nvidia-kmod-common = %{?epoch}:%{version}
 Requires:       libva-vdpau-driver%{?_isa}
-#Requires:      vulkan-filesystem
+%if 0%{?fedora}
+Requires:       vulkan-filesystem
+%endif
 
 Conflicts:      nvidia-x11-drv-beta
 Conflicts:      nvidia-x11-drv-71xx
@@ -428,6 +430,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Sun Oct 09 2016 Simone Caronni <negativo17@gmail.com> - 2:370.28-4
+- Require vulkan-filesystem on Fedora.
+
 * Wed Sep 14 2016 Simone Caronni <negativo17@gmail.com> - 2:370.28-3
 - Enable filtering by pci id in the AppStream metadata.
 
