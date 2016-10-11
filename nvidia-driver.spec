@@ -28,8 +28,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        367.44
-Release:        2%{?dist}
+Version:        367.57
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -376,6 +376,7 @@ fi ||:
 
 %files cuda-libs
 %dir %{_libdir}/nvidia
+# The unversioned lib is used by most programs:
 %{_libdir}/libcuda.so
 %{_libdir}/libcuda.so.1
 %{_libdir}/libcuda.so.%{version}
@@ -408,6 +409,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Mon Oct 10 2016 Simone Caronni <negativo17@gmail.com> - 2:367.57-1
+- Update to 367.57.
+
 * Sun Oct 09 2016 Simone Caronni <negativo17@gmail.com> - 2:367.44-2
 - Require vulkan-filesystem on Fedora.
 
