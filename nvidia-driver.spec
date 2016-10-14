@@ -29,7 +29,7 @@
 
 Name:           nvidia-driver
 Version:        370.28
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -94,6 +94,10 @@ Obsoletes:      xorg-x11-drv-nvidia < %{?epoch}:%{version}-%{release}
 Provides:       xorg-x11-drv-nvidia = %{?epoch}:%{version}-%{release}
 Obsoletes:      nvidia-x11-drv < %{?epoch}:%{version}-%{release}
 Provides:       nvidia-x11-drv = %{?epoch}:%{version}-%{release}
+
+# Introduced in CUDA 8.0
+Obsoletes:      cuda-drivers < %{?epoch}:%{version}-%{release}
+Provides:       cuda-drivers = %{?epoch}:%{version}-%{release}
 
 %description
 This package provides the most recent NVIDIA display driver which allows for
@@ -430,6 +434,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Fri Oct 14 2016 Simone Caronni <negativo17@gmail.com> - 2:370.28-5
+- Obsoletes/Provides cuda-drivers, as introduced in CUDA 8.0 packages.
+
 * Sun Oct 09 2016 Simone Caronni <negativo17@gmail.com> - 2:370.28-4
 - Require vulkan-filesystem on Fedora.
 
