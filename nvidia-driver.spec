@@ -151,7 +151,7 @@ remote graphics scenarios.
 %package NVML
 Summary:        NVIDIA Management Library (NVML)
 Requires(post): ldconfig
-Provides:       cuda-nvml = %{?epoch}:%{version}-%{release}
+Provides:       cuda-nvml%{?_isa} = %{?epoch}:%{version}-%{release}
 
 %description NVML
 A C-based API for monitoring and managing various states of the NVIDIA GPU
