@@ -111,6 +111,9 @@ Summary:        Libraries for %{name}
 Requires(post): ldconfig
 Requires:       %{name} = %{?epoch}:%{version}-%{release}
 Requires:       libvdpau%{?_isa} >= 0.5
+# Even though it relies on GLVND components, libEGL.so.1 provided by Nvidia is
+# not yet compatible with libglvnd.
+# https://devtalk.nvidia.com/default/topic/915640/unix-graphics-announcements-and-news/multiple-glx-client-libraries-in-the-nvidia-linux-driver-installer-package/
 Conflicts:      libglvnd-egl%{?_isa} >= 0.1.1
 Requires:       libglvnd-gles%{?_isa} >= 0.1.1
 Requires:       libglvnd-glx%{?_isa} >= 0.1.1
