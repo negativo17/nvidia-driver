@@ -36,6 +36,43 @@
     <id>nvidia-settings.desktop</id>
   </suggests>
   <releases>
+    <release date="2016-10-21" version="375.10">
+      <description>
+        <p>
+          New beta release.
+        </p>
+        <p>
+          Added support for the following GPU:
+        </p>
+        <ul>
+          <li>Quadro P6000</li>
+          <li>Quadro P5000</li>
+          <li>Tesla P40</li>
+          <li>GeForce GTX 1050</li>
+          <li>GeForce GTX 1050 Ti</li>
+        </ul>
+        <p>
+          Added new X configuration options which override the MetaMode tokens with the same names:
+        </p>
+        <ul>
+          <li>ForceCompositionPipeline</li>
+          <li>ForceFullCompositionPipeline</li>
+        </ul>
+        <ul>
+          <li>Fixed a bug that caused issues with panning and cursor constraining when mixing PRIME-driven displays with natively driven displays.</li>
+          <li>Fixed a bug that caused long delays when leaving the VT or disabling a display device while an OpenGL application is running.</li>
+          <li>Improved console restore behavior on systems that use the UEFI Graphics Output Protocol, and most vesafb modes.</li>
+          <li>Added support for the RandR TILE property added in RandR 1.5.</li>
+          <li>Improved compatibility with recent Linux kernels.</li>
+          <li>Fixed a bug that could prevent systems with GPUs configured in SLI from resuming correctly from ACPI S3/S4 sleep/hibernate states.</li>
+          <li>Added support for NVIDIA 3D Vision 2 Stereo on Linux. This IR emitter can be used with stereo mode "10" set in the X configuration file.</li>
+          <li>Fixed a bug that could cause quad-buffered stereo applications to crash when disabling displays.</li>
+          <li>Updated the behavior of the nvidia-settings control panel upon closing the control panel window to be consistent with clicking the control panel's "Quit" button.</li>
+          <li>Added support for the screen_info.ext_lfb_base field, on kernels that have it, in order to properly handle UEFI framebuffer consoles with physical addresses above 4GB.</li>
+          <li>Fixed a bug that allowed nvidia-installer to attempt loading kernel modules that were built against non-running kernels.</li>
+        </ul>
+      </description>
+    </release>
     <release date="2016-09-08" version="370.28">
       <description>
         <p>
