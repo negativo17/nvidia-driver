@@ -28,8 +28,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        370.28
-Release:        6%{?dist}
+Version:        375.10
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -441,6 +441,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Sat Oct 22 2016 Simone Caronni <negativo17@gmail.com> - 2:375.10-1
+- Update to 375.10.
+
 * Fri Oct 21 2016 Simone Caronni <negativo17@gmail.com> - 2:370.28-6
 - Update requirements on improved libglvnd package.
 
