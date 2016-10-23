@@ -21,7 +21,7 @@
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
 
-# Prevent nvidia-driver-libs being pulled in place of mesa. This is for all
+# Prevent nvidia-libs being pulled in place of mesa. This is for all
 # libraries in the "nvidia" subdirectory.
 %global __provides_exclude_from %{_libdir}/nvidia
 %global __requires_exclude_from %{_libdir}/nvidia
