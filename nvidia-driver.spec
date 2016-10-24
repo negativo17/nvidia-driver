@@ -29,7 +29,7 @@
 
 Name:           nvidia-driver
 Version:        367.57
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -104,6 +104,7 @@ Summary:        Libraries for %{name}
 Requires(post): ldconfig
 Requires:       %{name} = %{?epoch}:%{version}-%{release}
 Requires:       libvdpau%{?_isa} >= 0.5
+Requires:       libglvnd%{?_isa} >= 0.1.1
 # Even though it relies on GLVND components, libEGL.so.1 provided by Nvidia is
 # not yet compatible with libglvnd.
 # https://devtalk.nvidia.com/default/topic/915640/unix-graphics-announcements-and-news/multiple-glx-client-libraries-in-the-nvidia-linux-driver-installer-package/
@@ -420,6 +421,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Mon Oct 24 2016 Simone Caronni <negativo17@gmail.com> - 2:367.57-4
+- Add missing libglvnd library dependency.
+
 * Fri Oct 21 2016 Simone Caronni <negativo17@gmail.com> - 2:367.57-3
 - Update requirements on improved libglvnd package.
 
