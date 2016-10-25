@@ -29,7 +29,7 @@
 
 Name:           nvidia-driver
 Version:        375.10
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -111,14 +111,11 @@ Summary:        Libraries for %{name}
 Requires(post): ldconfig
 Requires:       %{name} = %{?epoch}:%{version}-%{release}
 Requires:       libvdpau%{?_isa} >= 0.5
-Requires:       libglvnd%{?_isa} >= 0.1.1
-# Even though it relies on GLVND components, libEGL.so.1 provided by Nvidia is
-# not yet compatible with libglvnd.
-# https://devtalk.nvidia.com/default/topic/915640/unix-graphics-announcements-and-news/multiple-glx-client-libraries-in-the-nvidia-linux-driver-installer-package/
-Conflicts:      libglvnd-egl%{?_isa} >= 0.1.1
-Requires:       libglvnd-gles%{?_isa} >= 0.1.1
-Requires:       libglvnd-glx%{?_isa} >= 0.1.1
-Requires:       libglvnd-opengl%{?_isa} >= 0.1.1
+Requires:       libglvnd%{?_isa} >= 0.2
+Requires:       libglvnd-egl%{?_isa} >= 0.2
+Requires:       libglvnd-gles%{?_isa} >= 0.2
+Requires:       libglvnd-glx%{?_isa} >= 0.2
+Requires:       libglvnd-opengl%{?_isa} >= 0.2
 
 Obsoletes:      nvidia-x11-drv-libs < %{?epoch}:%{version}
 Provides:       nvidia-x11-drv-libs = %{?epoch}:%{version}
@@ -209,6 +206,7 @@ ln -sf libnvcuvid.so.%{version} libnvcuvid.so
 # Create empty tree
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/appdata/
+mkdir -p %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 mkdir -p %{buildroot}%{_datadir}/nvidia/
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
 mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
@@ -230,8 +228,9 @@ install -p -m 0644 *.h %{buildroot}%{_includedir}/nvidia/GL/
 # OpenCL config
 install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
-# Vulkan
+# Vulkan and EGL loaders
 install -p -m 0644 nvidia_icd.json %{buildroot}%{_sysconfdir}/vulkan/icd.d/
+install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 
 # Library search path
 echo "%{_libdir}/nvidia" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_lib}.conf
@@ -291,7 +290,7 @@ install -p -m 644 %{SOURCE21} %{buildroot}%{_libdir}/nvidia/alternate-install-pr
 install -p -m 644 %{SOURCE22} %{buildroot}%{_udevrulesdir}
 
 # System conflicting libraries
-cp -a libEGL.so* libOpenCL.so* %{buildroot}%{_libdir}/nvidia/
+cp -a libOpenCL.so* %{buildroot}%{_libdir}/nvidia/
 
 # Unique libraries
 cp -a lib*GL*_nvidia.so* libcuda.so* libnvidia-*.so* libnvcuvid.so* %{buildroot}%{_libdir}/
@@ -381,8 +380,7 @@ fi ||:
 %{_udevrulesdir}/60-nvidia-uvm.rules
 
 %files libs
-%dir %{_libdir}/nvidia
-%{_libdir}/nvidia/libEGL.so.1
+%{_datadir}/glvnd/egl_vendor.d/*
 %{_libdir}/libEGL_nvidia.so.0
 %{_libdir}/libEGL_nvidia.so.%{version}
 %{_libdir}/libGLESv1_CM_nvidia.so.1
@@ -441,6 +439,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Tue Oct 25 2016 Simone Caronni <negativo17@gmail.com> - 2:375.10-3
+- Enable libglvnd 0.2.x based EGL.
+
 * Mon Oct 24 2016 Simone Caronni <negativo17@gmail.com> - 2:375.10-2
 - Add missing libglvnd library dependency.
 
