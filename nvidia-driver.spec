@@ -21,15 +21,15 @@
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
 
-# Prevent nvidia-driver-libs being pulled in place of mesa. This is for all
+# Prevent nvidia-libs being pulled in place of mesa. This is for all
 # libraries in the "nvidia" subdirectory.
 %global __provides_exclude_from %{_libdir}/nvidia
 %global __requires_exclude_from %{_libdir}/nvidia
 %endif
 
 Name:           nvidia-driver
-Version:        367.57
-Release:        4%{?dist}
+Version:        375.20
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -48,6 +48,9 @@ Source21:       alternate-install-present
 Source22:       60-nvidia-uvm.rules
 Source23:       nvidia-uvm.conf
 
+Source40:       com.nvidia.driver.metainfo.xml
+Source41:       parse-readme.py
+
 Source99:       nvidia-generate-tarballs.sh
 
 %if 0%{?rhel} == 6
@@ -59,11 +62,15 @@ BuildRequires:  systemd
 Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.16
 %endif
 
+%if 0%{?fedora} >= 25
+# AppStream metadata generation
+BuildRequires:  libappstream-glib%{?_isa} >= 0.6.3
+%endif
+
 Requires:       grubby
 Requires:       nvidia-driver-libs%{?_isa} = %{?epoch}:%{version}
 Requires:       nvidia-kmod = %{?epoch}:%{version}
 Provides:       nvidia-kmod-common = %{?epoch}:%{version}
-Requires:       nvidia-settings%{?_isa} = %{?epoch}:%{version}
 Requires:       libva-vdpau-driver%{?_isa}
 %if 0%{?fedora}
 Requires:       vulkan-filesystem
@@ -104,14 +111,11 @@ Summary:        Libraries for %{name}
 Requires(post): ldconfig
 Requires:       %{name} = %{?epoch}:%{version}-%{release}
 Requires:       libvdpau%{?_isa} >= 0.5
-Requires:       libglvnd%{?_isa} >= 0.1.1
-# Even though it relies on GLVND components, libEGL.so.1 provided by Nvidia is
-# not yet compatible with libglvnd.
-# https://devtalk.nvidia.com/default/topic/915640/unix-graphics-announcements-and-news/multiple-glx-client-libraries-in-the-nvidia-linux-driver-installer-package/
-Conflicts:      libglvnd-egl%{?_isa} >= 0.1.1
-Requires:       libglvnd-gles%{?_isa} >= 0.1.1
-Requires:       libglvnd-glx%{?_isa} >= 0.1.1
-Requires:       libglvnd-opengl%{?_isa} >= 0.1.1
+Requires:       libglvnd%{?_isa} >= 0.2
+Requires:       libglvnd-egl%{?_isa} >= 0.2
+Requires:       libglvnd-gles%{?_isa} >= 0.2
+Requires:       libglvnd-glx%{?_isa} >= 0.2
+Requires:       libglvnd-opengl%{?_isa} >= 0.2
 
 Obsoletes:      nvidia-x11-drv-libs < %{?epoch}:%{version}
 Provides:       nvidia-x11-drv-libs = %{?epoch}:%{version}
@@ -201,6 +205,8 @@ ln -sf libnvcuvid.so.%{version} libnvcuvid.so
 %install
 # Create empty tree
 mkdir -p %{buildroot}%{_bindir}
+mkdir -p %{buildroot}%{_datadir}/appdata/
+mkdir -p %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 mkdir -p %{buildroot}%{_datadir}/nvidia/
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
 mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
@@ -222,8 +228,9 @@ install -p -m 0644 *.h %{buildroot}%{_includedir}/nvidia/GL/
 # OpenCL config
 install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
-# Vulkan
+# Vulkan and EGL loaders
 install -p -m 0644 nvidia_icd.json %{buildroot}%{_sysconfdir}/vulkan/icd.d/
+install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 
 # Library search path
 echo "%{_libdir}/nvidia" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_lib}.conf
@@ -239,6 +246,16 @@ install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-re
 
 # Man pages
 install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1/
+
+%if 0%{?fedora} >= 25
+# install AppData and add modalias provides
+install -p -m 0644 %{SOURCE40} %{buildroot}%{_datadir}/appdata/
+fn=%{buildroot}%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
+%{SOURCE41} README.txt "NVIDIA GEFORCE GPUS" | xargs appstream-util add-provide ${fn} modalias
+%{SOURCE41} README.txt "NVIDIA QUADRO GPUS" | xargs appstream-util add-provide ${fn} modalias
+%{SOURCE41} README.txt "NVIDIA NVS GPUS" | xargs appstream-util add-provide ${fn} modalias
+%{SOURCE41} README.txt "NVIDIA TESLA GPUS" | xargs appstream-util add-provide ${fn} modalias
+%endif
 
 # X configuration
 install -p -m 0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
@@ -273,7 +290,7 @@ install -p -m 644 %{SOURCE21} %{buildroot}%{_libdir}/nvidia/alternate-install-pr
 install -p -m 644 %{SOURCE22} %{buildroot}%{_udevrulesdir}
 
 # System conflicting libraries
-cp -a libEGL.so* libOpenCL.so* %{buildroot}%{_libdir}/nvidia/
+cp -a libOpenCL.so* %{buildroot}%{_libdir}/nvidia/
 
 # Unique libraries
 cp -a lib*GL*_nvidia.so* libcuda.so* libnvidia-*.so* libnvcuvid.so* %{buildroot}%{_libdir}/
@@ -329,6 +346,9 @@ fi ||:
 %doc NVIDIA_Changelog README.txt html
 %dir %{_sysconfdir}/nvidia
 %{_bindir}/nvidia-bug-report.sh
+%if 0%{?fedora} >= 25
+%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
+%endif
 %{_datadir}/nvidia
 %{_libdir}/nvidia/alternate-install-present
 %{_libdir}/nvidia/xorg
@@ -360,8 +380,7 @@ fi ||:
 %{_udevrulesdir}/60-nvidia-uvm.rules
 
 %files libs
-%dir %{_libdir}/nvidia
-%{_libdir}/nvidia/libEGL.so.1
+%{_datadir}/glvnd/egl_vendor.d/*
 %{_libdir}/libEGL_nvidia.so.0
 %{_libdir}/libEGL_nvidia.so.%{version}
 %{_libdir}/libGLESv1_CM_nvidia.so.1
@@ -388,7 +407,6 @@ fi ||:
 
 %files cuda-libs
 %dir %{_libdir}/nvidia
-# The unversioned lib is used by most programs:
 %{_libdir}/libcuda.so
 %{_libdir}/libcuda.so.1
 %{_libdir}/libcuda.so.%{version}
@@ -421,6 +439,21 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Sat Nov 19 2016 Simone Caronni <negativo17@gmail.com> - 2:375.20-1
+- Update to 375.20.
+- Add IgnoreABI only on Fedora 26+.
+- Remove releases from AppStream metadata file (can't track between various
+  beta, short lived, long lived releases).
+- Enable libglvnd 0.2.x based EGL.
+- Update requirements on improved libglvnd package.
+- Obsoletes/Provides cuda-drivers, as introduced in CUDA 8.0 packages.
+- Require vulkan-filesystem on Fedora.
+- Enable filtering by pci id in the AppStream metadata.
+- Make the whole AppStream generation available only on Fedora 25+.
+- Do not require nvidia-settings, make it possible to install without the GUI.
+- Add modaliases to the MetaInfo file to only match supported NVIDIA hardware.
+- Install an MetaInfo so the driver appears in the software center.
+
 * Mon Oct 24 2016 Simone Caronni <negativo17@gmail.com> - 2:367.57-4
 - Add missing libglvnd library dependency.
 
