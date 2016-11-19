@@ -1,9 +1,9 @@
 #!/bin/sh -x
 set -e
 
-VERSION=370.28
-DL_SITE=ftp://download.nvidia.com/XFree86
-#DL_SITE=http://us.download.nvidia.com/XFree86
+VERSION=375.20
+#DL_SITE=ftp://download.nvidia.com/XFree86
+DL_SITE=http://us.download.nvidia.com/XFree86
 
 create_tarball() {
     KMOD=nvidia-kmod-${VERSION}-${ARCH}
@@ -15,12 +15,15 @@ create_tarball() {
     cd temp
 
     # Compiled from source
-    # libGL.so.${VERSION} is non-GLVND libGL
     rm -f \
         nvidia-xconfig* nvidia-persistenced* nvidia-modprobe* \
         libnvidia-gtk* nvidia-settings* \
-        libGLESv1_CM.so.* libGLESv2.so.* libGL.so.* libGL.la \
-        libGLdispatch.so.* libOpenGL.so.* libGLX.so.*
+        libGLESv1_CM.so.* libGLESv2.so.* libGL.la \
+        libGLdispatch.so.* libOpenGL.so.* libGLX.so.* \
+        libGL.so.1* libEGL.so.1*
+
+    # Non GLVND libraries
+    rm -f libGL.so.${VERSION} libEGL.so.${VERSION}
 
     # Useless with packages
     rm -f nvidia-installer* .manifest make* mk* tls_test*
