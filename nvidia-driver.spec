@@ -28,8 +28,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        375.10
-Release:        4%{?dist}
+Version:        375.20
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -269,7 +269,7 @@ cp %{SOURCE13} xorg.conf.sample
 install -p -m 0644 %{SOURCE11} %{buildroot}%{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
 %endif
 
-%if 0%{?fedora} >= 25
+%if 0%{?fedora} >= 26
 install -p -m 0644 %{SOURCE12} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-ignoreabi.conf
 %endif
 
@@ -364,7 +364,7 @@ fi ||:
 %{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
 %endif
 
-%if 0%{?fedora} >= 25 || 0%{?rhel} >= 8
+%if 0%{?fedora} >= 26 || 0%{?rhel} >= 8
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/99-nvidia-ignoreabi.conf
 %endif
 
@@ -439,6 +439,12 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Sat Nov 19 2016 Simone Caronni <negativo17@gmail.com> - 2:375.20-1
+- Update to 375.20.
+- Add IgnoreABI only on Fedora 26+.
+- Remove releases from AppStream metadata file (can't track between various
+  beta, short lived, long lived releases).
+
 * Thu Nov 03 2016 Simone Caronni <negativo17@gmail.com> - 2:375.10-4
 - Nvidia driver version 375.10 is not yet compatible with X server version 1.19.
 
