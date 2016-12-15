@@ -28,8 +28,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        375.20
-Release:        2%{?dist}
+Version:        375.26
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -438,6 +438,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Thu Dec 15 2016 Simone Caronni <negativo17@gmail.com> - 2:375.26-1
+- Update to 375.26.
+
 * Fri Dec 02 2016 Simone Caronni <negativo17@gmail.com> - 2:375.20-2
 - Remove library location override from the libs subpackage.
 
