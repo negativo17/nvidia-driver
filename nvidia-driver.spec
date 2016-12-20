@@ -488,6 +488,7 @@ fi ||:
 - Trim changelog.
 - Remove support for Fedora 23.
 - Remove no longer needed kernel command line options.
+- Enable SLI by default for the nvidia-drm module.
 
 * Thu Dec 15 2016 Simone Caronni <negativo17@gmail.com> - 2:375.26-1
 - Update to 375.26.
