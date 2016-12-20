@@ -4,7 +4,7 @@
 %if 0%{?rhel} == 6
 # RHEL 6 does not have _udevrulesdir defined
 %global _udevrulesdir   %{_prefix}/lib/udev/rules.d/
-%global _dracutopts     nouveau.modeset=0 rdblacklist=nouveau nomodeset vga=normal
+%global _dracutopts     nouveau.modeset=0 rdblacklist=nouveau
 %global _modprobe_d     %{_sysconfdir}/modprobe.d/
 %global _grubby         /sbin/grubby --grub --update-kernel=ALL
 
@@ -17,7 +17,7 @@
 %endif
 
 %if 0%{?fedora} || 0%{?rhel} >= 7
-%global _dracutopts     nouveau.modeset=0 rd.driver.blacklist=nouveau nomodeset gfxpayload=vga=normal
+%global _dracutopts     nouveau.modeset=0 rd.driver.blacklist=nouveau
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
 
@@ -29,7 +29,7 @@
 
 Name:           nvidia-driver
 Version:        375.26
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -38,10 +38,16 @@ ExclusiveArch:  %{ix86} x86_64
 
 Source0:        %{name}-%{version}-i386.tar.xz
 Source1:        %{name}-%{version}-x86_64.tar.xz
+# For servers up to 1.19.0-3
 Source10:       99-nvidia-modules.conf
+# For servers from 1.16 to 1.19.0-3
 Source11:       10-nvidia-driver.conf
+# For unreleased Fedora versions
 Source12:       99-nvidia-ignoreabi.conf
-Source13:       xorg.conf.nvidia
+# For servers 1.19.0-3+
+Source13:       10-nvidia.conf
+# For servers up to 1.15, also used as sample
+Source14:       xorg.conf.nvidia
 
 Source20:       nvidia.conf
 Source21:       alternate-install-present
@@ -53,13 +59,9 @@ Source41:       parse-readme.py
 
 Source99:       nvidia-generate-tarballs.sh
 
-%if 0%{?rhel} == 6
-Requires:       xorg-x11-server-Xorg%{?_isa}
-%else
+%if 0%{?fedora} || 0%{?rhel} >= 7
 # UDev rule location (_udevrulesdir)
 BuildRequires:  systemd
-# X.org "OutputClass" only on server 1.16+
-Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.16
 %endif
 
 %if 0%{?fedora} >= 25
@@ -72,8 +74,23 @@ Requires:       nvidia-driver-libs%{?_isa} = %{?epoch}:%{version}
 Requires:       nvidia-kmod = %{?epoch}:%{version}
 Provides:       nvidia-kmod-common = %{?epoch}:%{version}
 Requires:       libva-vdpau-driver%{?_isa}
+
 %if 0%{?fedora}
 Requires:       vulkan-filesystem
+%endif
+
+%if 0%{?rhel} == 6
+Requires:       xorg-x11-server-Xorg%{?_isa}
+%endif
+
+%if 0%{?fedora} == 24 || 0%{?rhel} == 7
+# X.org "OutputClass"
+Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.16
+%endif
+
+%if 0%{?fedora} >= 25
+# Extended "OutputClass" with device options
+Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.19.0-3
 %endif
 
 Conflicts:      nvidia-x11-drv-beta
@@ -208,7 +225,6 @@ mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/appdata/
 mkdir -p %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 mkdir -p %{buildroot}%{_datadir}/nvidia/
-mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
 mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
 mkdir -p %{buildroot}%{_libdir}/nvidia/xorg/
 mkdir -p %{buildroot}%{_libdir}/vdpau/
@@ -221,6 +237,10 @@ mkdir -p %{buildroot}%{_sysconfdir}/vulkan/icd.d/
 mkdir -p %{buildroot}%{_udevrulesdir}
 mkdir -p %{buildroot}%{_modprobe_d}/
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
+
+%if 0%{?fedora} == 24 || 0%{?rhel}
+mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
+%endif
 
 # Headers
 install -p -m 0644 *.h %{buildroot}%{_includedir}/nvidia/GL/
@@ -258,15 +278,25 @@ fn=%{buildroot}%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
 %endif
 
 # X configuration
+%if 0%{?rhel} == 6
+install -p -m 0644 %{SOURCE14} %{buildroot}%{_sysconfdir}/X11/xorg.conf.nvidia
+%endif
+
+%if 0%{?fedora} == 24 || 0%{?rhel}
 install -p -m 0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
 sed -i -e 's|@LIBDIR@|%{_libdir}|g' %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
+%endif
 
-%if 0%{?rhel} == 6
-install -p -m 0644 %{SOURCE13} %{buildroot}%{_sysconfdir}/X11/xorg.conf.nvidia
-%else
+%if 0%{?fedora} == 24 || 0%{?rhel} >= 7
 # Use xorg.conf as sample
-cp %{SOURCE13} xorg.conf.sample
+cp %{SOURCE14} xorg.conf.sample
 install -p -m 0644 %{SOURCE11} %{buildroot}%{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
+%endif
+
+%if 0%{?fedora} >= 25
+# Use xorg.conf as sample
+cp %{SOURCE14} xorg.conf.sample
+install -p -m 0644 %{SOURCE13} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %endif
 
 %if 0%{?fedora} >= 26
@@ -305,6 +335,11 @@ if [ "$1" -eq "1" ]; then
 %if 0%{?fedora} || 0%{?rhel} >= 7
   sed -i -e 's/GRUB_CMDLINE_LINUX="/GRUB_CMDLINE_LINUX="%{_dracutopts} /g' /etc/default/grub
 %endif
+fi || :
+if [ "$1" -eq "2" ]; then
+  # Remove no longer needed options
+  %{_grubby} --remove-args='nomodeset gfxpayload=vga=normal' &>/dev/null
+  sed -i -e 's/ nomodeset gfxpayload=vga=normal//g' /etc/default/grub
 fi || :
 
 %post libs -p /sbin/ldconfig
@@ -355,13 +390,22 @@ fi ||:
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
 %{_modprobe_d}/nvidia.conf
 %{_sysconfdir}/vulkan/icd.d/*
+
 # X.org configuration files
+%if 0%{?fedora} == 24 || 0%{?rhel}
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
+%endif
 
 %if 0%{?rhel} == 6
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.nvidia
-%else
-%{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
+%endif
+
+%if 0%{?fedora} == 24 || 0%{?rhel} >= 7
+%config(noreplace) %{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
+%endif
+
+%if 0%{?fedora} >= 25
+%config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %endif
 
 %if 0%{?fedora} >= 26 || 0%{?rhel} >= 8
@@ -438,6 +482,13 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Tue Dec 20 2016 Simone Caronni <negativo17@gmail.com> - 2:375.26-2
+- Add configuration options for new OutputClass Device integration on Fedora 25
+  with X server 1.19.0-3 (new 10-nvidia.conf configuration file).
+- Trim changelog.
+- Remove support for Fedora 23.
+- Remove no longer needed kernel command line options.
+
 * Thu Dec 15 2016 Simone Caronni <negativo17@gmail.com> - 2:375.26-1
 - Update to 375.26.
 
@@ -638,160 +689,3 @@ fi ||:
 
 * Mon Jan 12 2015 Simone Caronni <negativo17@gmail.com> - 2:346.22-2
 - RHEL/CentOS 7 does not have OpenCL packages (thanks stj).
-
-* Tue Dec 09 2014 Simone Caronni <negativo17@gmail.com> - 2:346.22-1
-- Update to 346.22.
-
-* Fri Nov 14 2014 Simone Caronni <negativo17@gmail.com> - 2:346.16-1
-- Update to 346.16.
-
-* Mon Sep 22 2014 Simone Caronni <negativo17@gmail.com> - 2:343.22-1
-- Update to 343.22.
-
-* Thu Aug 07 2014 Simone Caronni <negativo17@gmail.com> - 2:343.13-1
-- Update to 343.13.
-
-* Tue Aug 05 2014 Simone Caronni <negativo17@gmail.com> - 2:340.24-5
-- Split xorg.conf.d configuration in multiple files.
-
-* Mon Jul 14 2014 Simone Caronni <negativo17@gmail.com> - 2:340.24-4
-- Split out NVML library.
-
-* Mon Jul 14 2014 Simone Caronni <negativo17@gmail.com> - 2:340.24-3
-- Rely on built in generator for some requirements.
-- Rpmlint fixes.
-- Provides nvidia-driver-NVML for GPU Deployment kit.
-
-* Fri Jul 11 2014 Simone Caronni <negativo17@gmail.com> - 2:340.24-2
-- Move nvidia-ml/nvidia-debugdump to cuda packages.
-- Use new OutputClass to load the driver on X.org server 1.16 (Fedora 21):
-  https://plus.google.com/118125769023950376556/posts/YqyEgcpZmJU
-- Add udev rule in nvidia-driver-cuda for nvidia-uvm module (Jan P. Springer).
-- Move X.org NVIDIA Files section to be loaded latest (overwrite all Files
-  section - Jan P. Springer).
-- Remove nvidia-modprobe requirement.
-
-* Tue Jul 08 2014 Simone Caronni <negativo17@gmail.com> - 2:340.24-1
-- Update to 340.24.
-
-* Fri Jun 13 2014 Simone Caronni <negativo17@gmail.com> - 2:340.17-3
-- Add IgnoreABI server flag for Fedora 21.
-
-* Wed Jun 11 2014 Simone Caronni <negativo17@gmail.com> - 2:340.17-2
-- Move application profiles configuration in proper place where the driver
-  expects defaults.
-
-* Mon Jun 09 2014 Simone Caronni <negativo17@gmail.com> - 2:340.17-1
-- Update to 340.17.
-
-* Mon Jun 02 2014 Simone Caronni <negativo17@gmail.com> - 2:337.25-1
-- Update to 337.25.
-
-* Thu May 15 2014 Simone Caronni <negativo17@gmail.com> - 2:337.19-2
-- Update RPM filters for autogenerated Provides/Requires.
-
-* Tue May 06 2014 Simone Caronni <negativo17@gmail.com> - 2:337.19-1
-- Update to 337.19.
-
-* Tue Apr 08 2014 Simone Caronni <negativo17@gmail.com> - 2:337.12-1
-- Update to 337.12.
-
-* Tue Mar 04 2014 Simone Caronni <negativo17@gmail.com> - 2:334.21-1
-- Update to 334.21.
-- Added application profiles to the main package.
-
-* Sat Feb 08 2014 Simone Caronni <negativo17@gmail.com> - 2:334.16-1
-- Update to 334.16.
-- Add EGL/GLES libraries to x86_64 package.
-- Add NvFBCOpenGL libraries to armv7hl.
-- Added new nvidia-modprobe dependency.
-
-* Tue Jan 14 2014 Simone Caronni <negativo17@gmail.com> - 2:331.38-1
-- Update to 331.38.
-
-* Wed Jan 08 2014 Simone Caronni <negativo17@gmail.com> - 2:331.20-4
-- CUDA subpackage requires opencl-filesystem on Fedora & RHEL 7.
-- Update filters on libraries so all libGL, libEGL and libGLES libraries are
-  excluded.
-
-* Tue Dec 17 2013 Simone Caronni <negativo17@gmail.com> - 2:331.20-3
-- Update libGL filters with recent packaging guidelines for Fedora and RHEL 7.
-
-* Wed Nov 13 2013 Simone Caronni <negativo17@gmail.com> - 2:331.20-2
-- Disable glamoregl X.org module.
-
-* Thu Nov 07 2013 Simone Caronni <negativo17@gmail.com> - 2:331.20-1
-- Update to 331.20.
-- Create NvFBCOpenGL subpackage.
-
-* Mon Nov 04 2013 Simone Caronni <negativo17@gmail.com> - 2:331.17-1
-- Update to 331.17.
-- Added new libraries:
-    libnvidia-fbc (i686, armv7hl, x86_64)
-    libvdpau_nvidia, libEGL (armv7hl)
-    libGLESv* libraries (i686, armv7hl)
-- Removed libraries (they will probably be re-added):
-    libnvidia-vgxcfg libraries (i686, x86_64)
-
-* Fri Oct 04 2013 Simone Caronni <negativo17@gmail.com> - 2:331.13-1
-- Update to 331.13.
-- Add new libEGL library to i686.
-
-* Mon Sep 09 2013 Simone Caronni <negativo17@gmail.com> - 2:325.15-1
-- Update to 325.15.
-- Add new libnvidia-vgxcfg (i686, x86_64).
-
-* Thu Aug 22 2013 Simone Caronni <negativo17@gmail.com> - 2:319.49-2
-- Move nvidia-debugdump in main package.
-- Remove libvdpau from driver tarball.
-
-* Wed Aug 21 2013 Simone Caronni <negativo17@gmail.com> - 2:319.49-1
-- Updated to 319.49.
-- Add new libnvidia-ifr where appropriate.
-
-* Tue Aug 06 2013 Simone Caronni <negativo17@gmail.com> - 2:319.32-6
-- Fix duplicated binaries in non CUDA packages.
-- Removed libnvidia-wfb.
-- Deleted unused libnvidia-tls libraries.
-
-* Mon Aug 05 2013 Simone Caronni <negativo17@gmail.com> - 2:319.32-5
-- Fedora 17 has gone EOL.
-
-* Thu Jul 25 2013 Simone Caronni <negativo17@gmail.com> - 2:319.32-4
-- Remove dependency on nvidia-xconfig.
-
-* Tue Jul 02 2013 Simone Caronni <negativo17@gmail.com> - 2:319.32-2
-- Add armv7hl support.
-
-* Fri Jun 28 2013 Simone Caronni <negativo17@gmail.com> - 1:319.32-1
-- Update to 319.32.
-- Bump Epoch.
-
-* Fri May 24 2013 Simone Caronni <negativo17@gmail.com> - 1:319.23-1
-- Update to 319.23.
-
-* Wed May 22 2013 Simone Caronni <negativo17@gmail.com> - 1:319.17-5
-- Obsolete also xorg-x11-drv-nvidia-libs.
-- Add dracut options depending on distribution.
-- Add grubby to requirements.
-
-* Tue May 21 2013 Simone Caronni <negativo17@gmail.com> - 1:319.17-3
-- Split CUDA into subpackages.
-
-* Thu May 02 2013 Simone Caronni <negativo17@gmail.com> - 1:319.17-2
-- Update to 319.17.
-- Switch nvidia-cuda-proxy* to nvidia-cuda-mps*.
-- Add dependency on nvidia-persistenced and versioned nvidia tools.
-
-* Tue Apr 30 2013 Simone Caronni <negativo17@gmail.com> - 1:319.12-3
-- Remove all filters except libGL.so*.
-
-* Mon Apr 22 2013 Simone Caronni <negativo17@gmail.com> - 1:319.12-2
-- Started off from rpmfusion-nonfree packages.
-- Updated to 319.12.
-- Simplify packaging.
-- Add conflict to drivers 304xx.
-- Add dependency on libva-vdpau-driver.
-- Obsoletes xorg-x11-drv-nvidia.
-- Switched to no-compat32 x86_64 archive.
-- Switch to generated sources.
