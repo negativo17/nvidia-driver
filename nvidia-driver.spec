@@ -5,6 +5,7 @@
 # RHEL 6 does not have _udevrulesdir defined
 %global _udevrulesdir   %{_prefix}/lib/udev/rules.d/
 %global _dracutopts     nouveau.modeset=0 rdblacklist=nouveau
+%global _dracutopts_rm  nomodeset vga=normal
 %global _modprobe_d     %{_sysconfdir}/modprobe.d/
 %global _grubby         /sbin/grubby --grub --update-kernel=ALL
 
@@ -18,6 +19,7 @@
 
 %if 0%{?fedora} || 0%{?rhel} >= 7
 %global _dracutopts     nouveau.modeset=0 rd.driver.blacklist=nouveau
+%global _dracutopts_rm  nomodeset gfxpayload=vga=normal
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
 
@@ -29,7 +31,7 @@
 
 Name:           nvidia-driver
 Version:        375.26
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -338,8 +340,8 @@ if [ "$1" -eq "1" ]; then
 fi || :
 if [ "$1" -eq "2" ]; then
   # Remove no longer needed options
-  %{_grubby} --remove-args='nomodeset gfxpayload=vga=normal' &>/dev/null
-  sed -i -e 's/ nomodeset gfxpayload=vga=normal//g' /etc/default/grub
+  %{_grubby} --remove-args='%{_dracutopts_rm}' &>/dev/null
+  sed -i -e 's/ %{_dracutopts_rm}//g' /etc/default/grub
 fi || :
 
 %post libs -p /sbin/ldconfig
@@ -482,13 +484,18 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Wed Dec 21 2016 Simone Caronni <negativo17@gmail.com> - 2:375.26-3
+- Do not enable nvidia-drm modeset by default yet.
+- Adjust removal of obsolete kernel command line options for RHEL 6.
+- Update OutputClass configuration for Intel/Optimus systems.
+
 * Tue Dec 20 2016 Simone Caronni <negativo17@gmail.com> - 2:375.26-2
 - Add configuration options for new OutputClass Device integration on Fedora 25
   with X server 1.19.0-3 (new 10-nvidia.conf configuration file).
 - Trim changelog.
 - Remove support for Fedora 23.
 - Remove no longer needed kernel command line options.
-- Enable SLI by default for the nvidia-drm module.
+- Enable modeset by default for the nvidia-drm module.
 
 * Thu Dec 15 2016 Simone Caronni <negativo17@gmail.com> - 2:375.26-1
 - Update to 375.26.
