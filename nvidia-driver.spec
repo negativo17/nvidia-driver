@@ -299,6 +299,7 @@ install -p -m 0644 %{SOURCE11} %{buildroot}%{_datadir}/X11/xorg.conf.d/10-nvidia
 # Use xorg.conf as sample
 cp %{SOURCE14} xorg.conf.sample
 install -p -m 0644 %{SOURCE13} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
+sed -i -e 's|@LIBDIR@|%{_libdir}|g' %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %endif
 
 %if 0%{?fedora} >= 26
