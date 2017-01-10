@@ -31,7 +31,7 @@
 
 Name:           nvidia-driver
 Version:        375.26
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -486,6 +486,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Tue Jan 10 2017 Simone Caronni <negativo17@gmail.com> - 2:375.26-4
+- Enable SLI and BaseMosaic (SLI multimonitor) by default.
+
 * Wed Dec 21 2016 Simone Caronni <negativo17@gmail.com> - 2:375.26-3
 - Do not enable nvidia-drm modeset by default yet.
 - Adjust removal of obsolete kernel command line options for RHEL 6.
