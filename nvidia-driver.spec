@@ -95,16 +95,6 @@ Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.16
 Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.19.0-3
 %endif
 
-Conflicts:      nvidia-x11-drv-beta
-Conflicts:      nvidia-x11-drv-71xx
-Conflicts:      nvidia-x11-drv-96xx
-Conflicts:      nvidia-x11-drv-173xx
-Conflicts:      nvidia-x11-drv-304xx
-Conflicts:      xorg-x11-drv-nvidia-beta
-Conflicts:      xorg-x11-drv-nvidia-71xx
-Conflicts:      xorg-x11-drv-nvidia-96xx
-Conflicts:      xorg-x11-drv-nvidia-173xx
-Conflicts:      xorg-x11-drv-nvidia-304xx
 Conflicts:      fglrx-x11-drv
 Conflicts:      catalyst-x11-drv
 Conflicts:      catalyst-x11-drv-legacy
@@ -150,7 +140,8 @@ This package provides the shared libraries for %{name}.
 
 %package cuda
 Summary:        CUDA integration for %{name}
-Conflicts:      xorg-x11-drv-nvidia-cuda
+Obsoletes:      xorg-x11-drv-nvidia-cuda < %{?epoch}:%{version}-%{release}
+Provides:       xorg-x11-drv-nvidia-cuda = %{?epoch}:%{version}-%{release}
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch}:%{version}
 Requires:       nvidia-persistenced = %{?epoch}:%{version}
 %if 0%{?fedora} || 0%{?rhel} >= 8
@@ -194,6 +185,8 @@ to be a platform for building 3rd party applications.
 
 %package devel
 Summary:        Development files for %{name}
+Obsoletes:      xorg-x11-drv-nvidia-devel < %{?epoch}:%{version}-%{release}
+Provides:       xorg-x11-drv-nvidia-devel = %{?epoch}:%{version}-%{release}
 Requires:       %{name}-libs%{?_isa} = %{?epoch}:%{version}-%{release}
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch}:%{version}-%{release}
 Requires:       %{name}-NVML%{?_isa} = %{?epoch}:%{version}-%{release}
