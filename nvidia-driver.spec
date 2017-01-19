@@ -126,6 +126,10 @@ Requires:       libglvnd-gles%{?_isa} >= 0.2
 Requires:       libglvnd-glx%{?_isa} >= 0.2
 Requires:       libglvnd-opengl%{?_isa} >= 0.2
 
+%if 0%{?fedora} || 0%{?rhel} >= 8
+Requires:       libnvidia-egl-wayland
+%endif
+
 Obsoletes:      nvidia-x11-drv-libs < %{?epoch}:%{version}
 Provides:       nvidia-x11-drv-libs = %{?epoch}:%{version}
 Obsoletes:      xorg-x11-drv-nvidia-libs < %{?epoch}:%{version}
@@ -220,6 +224,7 @@ ln -sf libnvcuvid.so.%{version} libnvcuvid.so
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/appdata/
 mkdir -p %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
+mkdir -p %{buildroot}%{_datadir}/egl/egl_external_platform.d/
 mkdir -p %{buildroot}%{_datadir}/nvidia/
 mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
 mkdir -p %{buildroot}%{_libdir}/nvidia/xorg/
@@ -227,6 +232,7 @@ mkdir -p %{buildroot}%{_libdir}/vdpau/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
 mkdir -p %{buildroot}%{_mandir}/man1/
 mkdir -p %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/
+mkdir -p %{buildroot}%{_sysconfdir}/egl/egl_external_platform.d/
 mkdir -p %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
 mkdir -p %{buildroot}%{_sysconfdir}/vulkan/icd.d/
@@ -247,6 +253,8 @@ install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 # Vulkan and EGL loaders
 install -p -m 0644 nvidia_icd.json %{buildroot}%{_sysconfdir}/vulkan/icd.d/
 install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
+# EGL external plaform interface
+install -p -m 0644 10_nvidia_wayland.json %{buildroot}%{_datadir}/egl/egl_external_platform.d/
 
 # Library search path
 echo "%{_libdir}/nvidia" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_lib}.conf
@@ -421,6 +429,7 @@ fi ||:
 %{_udevrulesdir}/60-nvidia-uvm.rules
 
 %files libs
+%{_datadir}/egl/egl_external_platform.d/*
 %{_datadir}/glvnd/egl_vendor.d/*
 %{_libdir}/libEGL_nvidia.so.0
 %{_libdir}/libEGL_nvidia.so.%{version}
@@ -433,11 +442,6 @@ fi ||:
 %{_libdir}/libGLX_nvidia.so.%{version}
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
-%if 0%{?fedora} || 0%{?rhel} >= 8
-%{_libdir}/libnvidia-egl-wayland.so.%{version}
-%else
-%exclude %{_libdir}/libnvidia-egl-wayland.so.%{version}
-%endif
 %{_libdir}/libnvidia-eglcore.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
 %{_libdir}/libnvidia-glsi.so.%{version}
@@ -481,6 +485,9 @@ fi ||:
 %changelog
 * Thu Jan 19 2017 Simone Caronni <negativo17@gmail.com> - 2:378.09-1
 - Update to 378.09.
+- Remove libnvidia-egl-wayland as it is now built from source.
+- Temporarily add EGL External Platform Interface configuration directories to
+  the libs subpackage.
 
 * Tue Jan 10 2017 Simone Caronni <negativo17@gmail.com> - 2:375.26-4
 - Enable SLI and BaseMosaic (SLI multimonitor) by default.

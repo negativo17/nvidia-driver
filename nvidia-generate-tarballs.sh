@@ -20,7 +20,7 @@ create_tarball() {
         libnvidia-gtk* nvidia-settings* \
         libGLESv1_CM.so.* libGLESv2.so.* libGL.la \
         libGLdispatch.so.* libOpenGL.so.* libGLX.so.* \
-        libGL.so.1* libEGL.so.1*
+        libGL.so.1* libEGL.so.1* libnvidia-egl-wayland.so.*
 
     # Non GLVND libraries
     rm -f libGL.so.${VERSION} libEGL.so.${VERSION}
