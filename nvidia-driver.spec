@@ -61,6 +61,8 @@ Source41:       parse-readme.py
 
 Source99:       nvidia-generate-tarballs.sh
 
+BuildRequires:  python
+
 %if 0%{?fedora} || 0%{?rhel} >= 7
 # UDev rule location (_udevrulesdir)
 BuildRequires:  systemd
