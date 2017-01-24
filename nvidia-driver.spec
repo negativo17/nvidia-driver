@@ -129,7 +129,7 @@ Requires:       libglvnd-glx%{?_isa} >= 0.2
 Requires:       libglvnd-opengl%{?_isa} >= 0.2
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
-Requires:       libnvidia-egl-wayland
+Requires:       egl-wayland
 %endif
 
 Obsoletes:      nvidia-x11-drv-libs < %{?epoch}:%{version}
