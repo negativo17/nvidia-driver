@@ -255,9 +255,10 @@ install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 # Vulkan and EGL loaders
 install -p -m 0644 nvidia_icd.json %{buildroot}%{_sysconfdir}/vulkan/icd.d/
 install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
+%if 0%{?fedora} == 24 || 0%{?rhel} >= 8
 # EGL external plaform interface
 install -p -m 0644 10_nvidia_wayland.json %{buildroot}%{_datadir}/egl/egl_external_platform.d/
-
+%endif
 # Library search path
 echo "%{_libdir}/nvidia" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_lib}.conf
 
@@ -431,7 +432,9 @@ fi ||:
 %{_udevrulesdir}/60-nvidia-uvm.rules
 
 %files libs
+%if 0%{?fedora} == 24 || 0%{?rhel} >= 8
 %{_datadir}/egl/egl_external_platform.d/*
+%endif
 %{_datadir}/glvnd/egl_vendor.d/*
 %{_libdir}/libEGL_nvidia.so.0
 %{_libdir}/libEGL_nvidia.so.%{version}
