@@ -450,6 +450,9 @@ fi ||:
 %{_libdir}/libnvidia-tls.so.%{version}
 %{_libdir}/vdpau/libvdpau_nvidia.so.1
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
+# Temporary
+%{_datadir}/egl/egl_external_platform.d/
+%{_sysconfdir}/egl/egl_external_platform.d/
 
 %files cuda-libs
 %dir %{_libdir}/nvidia
