@@ -31,7 +31,7 @@
 
 Name:           nvidia-driver
 Version:        378.09
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -226,7 +226,6 @@ ln -sf libnvcuvid.so.%{version} libnvcuvid.so
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/appdata/
 mkdir -p %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
-mkdir -p %{buildroot}%{_datadir}/egl/egl_external_platform.d/
 mkdir -p %{buildroot}%{_datadir}/nvidia/
 mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
 mkdir -p %{buildroot}%{_libdir}/nvidia/xorg/
@@ -234,7 +233,6 @@ mkdir -p %{buildroot}%{_libdir}/vdpau/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
 mkdir -p %{buildroot}%{_mandir}/man1/
 mkdir -p %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/
-mkdir -p %{buildroot}%{_sysconfdir}/egl/egl_external_platform.d/
 mkdir -p %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
 mkdir -p %{buildroot}%{_sysconfdir}/vulkan/icd.d/
@@ -255,10 +253,6 @@ install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 # Vulkan and EGL loaders
 install -p -m 0644 nvidia_icd.json %{buildroot}%{_sysconfdir}/vulkan/icd.d/
 install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
-%if 0%{?fedora} == 24 || 0%{?rhel} >= 8
-# EGL external plaform interface
-install -p -m 0644 10_nvidia_wayland.json %{buildroot}%{_datadir}/egl/egl_external_platform.d/
-%endif
 # Library search path
 echo "%{_libdir}/nvidia" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_lib}.conf
 
@@ -432,9 +426,6 @@ fi ||:
 %{_udevrulesdir}/60-nvidia-uvm.rules
 
 %files libs
-%if 0%{?fedora} == 24 || 0%{?rhel} >= 8
-%{_datadir}/egl/egl_external_platform.d/*
-%endif
 %{_datadir}/glvnd/egl_vendor.d/*
 %{_libdir}/libEGL_nvidia.so.0
 %{_libdir}/libEGL_nvidia.so.%{version}
@@ -453,9 +444,6 @@ fi ||:
 %{_libdir}/libnvidia-tls.so.%{version}
 %{_libdir}/vdpau/libvdpau_nvidia.so.1
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
-# Temporary
-%{_datadir}/egl/egl_external_platform.d/
-%{_sysconfdir}/egl/egl_external_platform.d/
 
 %files cuda-libs
 %dir %{_libdir}/nvidia
@@ -491,6 +479,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Mon Feb 06 2017 Simone Caronni <negativo17@gmail.com> - 2:378.09-2
+- EGL external plaform configuration folders are now in libglvnd-egl.
+
 * Thu Jan 19 2017 Simone Caronni <negativo17@gmail.com> - 2:378.09-1
 - Update to 378.09.
 - Remove libnvidia-egl-wayland as it is now built from source.
