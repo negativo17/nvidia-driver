@@ -128,7 +128,7 @@ Requires:       libglvnd-gles%{?_isa} >= 0.2
 Requires:       libglvnd-glx%{?_isa} >= 0.2
 Requires:       libglvnd-opengl%{?_isa} >= 0.2
 
-%if 0%{?fedora} || 0%{?rhel} >= 8
+%if 0%{?fedora} >= 25 || 0%{?rhel} >= 8
 Requires:       egl-wayland
 %endif
 
