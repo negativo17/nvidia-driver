@@ -8,13 +8,6 @@
 %global _dracutopts_rm  nomodeset vga=normal
 %global _modprobe_d     %{_sysconfdir}/modprobe.d/
 %global _grubby         /sbin/grubby --grub --update-kernel=ALL
-
-# Prevent nvidia-driver-libs being pulled in place of mesa
-%{?filter_setup:
-%filter_provides_in %{_libdir}/nvidia
-%filter_requires_in %{_libdir}/nvidia
-%filter_setup
-}
 %endif
 
 %if 0%{?fedora} || 0%{?rhel} >= 7
@@ -22,16 +15,11 @@
 %global _dracutopts_rm  nomodeset gfxpayload=vga=normal
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
-
-# Prevent nvidia-libs being pulled in place of mesa. This is for all
-# libraries in the "nvidia" subdirectory.
-%global __provides_exclude_from %{_libdir}/nvidia
-%global __requires_exclude_from %{_libdir}/nvidia
 %endif
 
 Name:           nvidia-driver
 Version:        375.39
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -52,7 +40,6 @@ Source13:       10-nvidia.conf
 Source14:       xorg.conf.nvidia
 
 Source20:       nvidia.conf
-Source21:       alternate-install-present
 Source22:       60-nvidia-uvm.rules
 Source23:       nvidia-uvm.conf
 
@@ -144,8 +131,9 @@ Obsoletes:      xorg-x11-drv-nvidia-cuda < %{?epoch}:%{version}-%{release}
 Provides:       xorg-x11-drv-nvidia-cuda = %{?epoch}:%{version}-%{release}
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch}:%{version}
 Requires:       nvidia-persistenced = %{?epoch}:%{version}
-%if 0%{?fedora} || 0%{?rhel} >= 8
+%if 0%{?fedora} || 0%{?rhel} >= 7
 Requires:       opencl-filesystem
+Requires:       ocl-icd
 %endif
 
 %description cuda
@@ -227,7 +215,6 @@ mkdir -p %{buildroot}%{_libdir}/vdpau/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
 mkdir -p %{buildroot}%{_mandir}/man1/
 mkdir -p %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/
-mkdir -p %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
 mkdir -p %{buildroot}%{_sysconfdir}/vulkan/icd.d/
 mkdir -p %{buildroot}%{_udevrulesdir}
@@ -247,9 +234,6 @@ install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 # Vulkan and EGL loaders
 install -p -m 0644 nvidia_icd.json %{buildroot}%{_sysconfdir}/vulkan/icd.d/
 install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
-
-# Library search path
-echo "%{_libdir}/nvidia" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_lib}.conf
 
 # Blacklist nouveau, enable KMS
 install -p -m 0644 %{SOURCE20} %{buildroot}%{_modprobe_d}/
@@ -310,14 +294,13 @@ install -p -m 0644 nvidia-application-profiles-%{version}-key-documentation \
 install -p -m 0644 nvidia-application-profiles-%{version}-rc \
     %{buildroot}%{_datadir}/nvidia/
 
-# Text files for alternate installation
-install -p -m 644 %{SOURCE21} %{buildroot}%{_libdir}/nvidia/alternate-install-present
-
 # UDev rules for nvidia-uvm
 install -p -m 644 %{SOURCE22} %{buildroot}%{_udevrulesdir}
 
+%if 0%{?rhel} == 6
 # System conflicting libraries
-cp -a libOpenCL.so* %{buildroot}%{_libdir}/nvidia/
+cp -a libOpenCL.so* %{buildroot}%{_libdir}/
+%endif
 
 # Unique libraries
 cp -a lib*GL*_nvidia.so* libcuda.so* libnvidia-*.so* libnvcuvid.so* %{buildroot}%{_libdir}/
@@ -382,8 +365,7 @@ fi ||:
 %{_datadir}/appdata/com.nvidia.driver.metainfo.xml
 %endif
 %{_datadir}/nvidia
-%{_libdir}/nvidia/alternate-install-present
-%{_libdir}/nvidia/xorg
+%{_libdir}/nvidia
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
 %{_modprobe_d}/nvidia.conf
 %{_sysconfdir}/vulkan/icd.d/*
@@ -446,7 +428,6 @@ fi ||:
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
 
 %files cuda-libs
-%dir %{_libdir}/nvidia
 %{_libdir}/libcuda.so
 %{_libdir}/libcuda.so.1
 %{_libdir}/libcuda.so.%{version}
@@ -459,9 +440,10 @@ fi ||:
 %{_libdir}/libnvidia-opencl.so.1
 %{_libdir}/libnvidia-opencl.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
-%{_libdir}/nvidia/libOpenCL.so.1
-%{_libdir}/nvidia/libOpenCL.so.1.0.0
-%{_sysconfdir}/ld.so.conf.d/nvidia-%{_lib}.conf
+%if 0%{?rhel} == 6
+%{_libdir}/libOpenCL.so.1
+%{_libdir}/libOpenCL.so.1.0.0
+%endif
 
 %files NvFBCOpenGL
 %{_libdir}/libnvidia-fbc.so.1
@@ -479,6 +461,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Tue Feb 21 2017 Simone Caronni <negativo17@gmail.com> - 2:375.39-2
+- Install the OpenCL loader only on RHEL < 7 and in the system path.
+
 * Wed Feb 15 2017 Simone Caronni <negativo17@gmail.com> - 2:375.39-1
 - Update to 375.39.
 
