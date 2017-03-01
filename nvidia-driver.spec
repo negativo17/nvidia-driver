@@ -19,7 +19,7 @@
 
 Name:           nvidia-driver
 Version:        378.13
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -462,6 +462,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Wed Mar 01 2017 Simone Caronni <negativo17@gmail.com> - 2:378.13-3
+- Add nvidia-uvm-tools device creation to CUDA subpackage.
+
 * Tue Feb 21 2017 Simone Caronni <negativo17@gmail.com> - 2:378.13-2
 - Install the OpenCL loader only on RHEL < 7 and in the system path.
 
