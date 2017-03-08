@@ -4,4 +4,5 @@ Section "Device"
     Option      "NoLogo" "true"
     Option      "DPI" "96 x 96"
     Option      "SLI" "Auto"
+    Option      "BaseMosaic" "on"
 EndSection
