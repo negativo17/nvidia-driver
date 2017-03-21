@@ -19,7 +19,7 @@
 
 Name:           nvidia-driver
 Version:        378.13
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -206,6 +206,10 @@ ldconfig -vn .
 ln -sf libnvidia-encode.so.%{version} libnvidia-encode.so
 # Required for building ffmpeg 3.1 Nvidia CUVID
 ln -sf libnvcuvid.so.%{version} libnvcuvid.so
+# Required for building against CUDA
+ln -sf libcuda.so.%{version} libcuda.so
+# libglvnd indirect entry point
+ln -sf libGLX_nvidia.so.%{version} libGLX_indirect.so.0
 
 %build
 
@@ -312,8 +316,12 @@ cp -a libOpenCL.so* %{buildroot}%{_libdir}/
 cp -a lib*GL*_nvidia.so* libcuda.so* libnvidia-*.so* libnvcuvid.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
 
-ln -sf libcuda.so.%{version} %{buildroot}%{_libdir}/libcuda.so
-ln -sf libGLX_nvidia.so.%{version} %{buildroot}%{_libdir}/libGLX_indirect.so.0
+%if 0%{?rhel} == 6 || 0%{?rhel} == 7 || 0%{?fedora} == 24
+# libglvnd indirect entry point
+cp -a libGLX_indirect.so* %{buildroot}%{_libdir}/
+%endif
+
+
 
 %post
 if [ "$1" -eq "1" ]; then
@@ -416,7 +424,9 @@ fi ||:
 %{_libdir}/libGLESv1_CM_nvidia.so.%{version}
 %{_libdir}/libGLESv2_nvidia.so.2
 %{_libdir}/libGLESv2_nvidia.so.%{version}
+%if 0%{?rhel} == 6 || 0%{?rhel} == 7 || 0%{?fedora} == 24
 %{_libdir}/libGLX_indirect.so.0
+%endif
 %{_libdir}/libGLX_nvidia.so.0
 %{_libdir}/libGLX_nvidia.so.%{version}
 %{_libdir}/libnvidia-cfg.so.1
@@ -462,6 +472,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Tue Mar 21 2017 Simone Caronni <negativo17@gmail.com> - 2:378.13-4
+- Install libGLX_indirect.so.0 only on Fedora 24 and RHEL 6/7.
+
 * Wed Mar 01 2017 Simone Caronni <negativo17@gmail.com> - 2:378.13-3
 - Add nvidia-uvm-tools device creation to CUDA subpackage.
 
