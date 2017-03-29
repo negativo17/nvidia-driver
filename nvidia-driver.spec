@@ -113,6 +113,10 @@ Requires:       libglvnd-gles%{?_isa} >= 0.2
 Requires:       libglvnd-glx%{?_isa} >= 0.2
 Requires:       libglvnd-opengl%{?_isa} >= 0.2
 
+%if 0%{?fedora} >= 25 || 0%{?rhel} >= 8
+Requires:       egl-wayland
+%endif
+
 Obsoletes:      nvidia-x11-drv-libs < %{?epoch}:%{version}
 Provides:       nvidia-x11-drv-libs = %{?epoch}:%{version}
 Obsoletes:      xorg-x11-drv-nvidia-libs < %{?epoch}:%{version}
@@ -418,11 +422,6 @@ fi ||:
 %{_libdir}/libGLX_nvidia.so.%{version}
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
-%if 0%{?fedora} || 0%{?rhel} >= 8
-%{_libdir}/libnvidia-egl-wayland.so.%{version}
-%else
-%exclude %{_libdir}/libnvidia-egl-wayland.so.%{version}
-%endif
 %{_libdir}/libnvidia-eglcore.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
 %{_libdir}/libnvidia-glsi.so.%{version}
@@ -462,6 +461,7 @@ fi ||:
 %changelog
 * Wed Mar 29 2017 Simone Caronni <negativo17@gmail.com> - 2:375.39-5
 - Use EPEL OpenCL loader also on RHEL/CentOS 7.
+- Clean up the EGL Wayland provider installation.
 
 * Tue Mar 21 2017 Simone Caronni <negativo17@gmail.com> - 2:375.39-4
 - Install libGLX_indirect.so.0 only on Fedora 24 and RHEL 6/7.
