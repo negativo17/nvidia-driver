@@ -19,7 +19,7 @@
 
 Name:           nvidia-driver
 Version:        375.39
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -131,10 +131,8 @@ Obsoletes:      xorg-x11-drv-nvidia-cuda < %{?epoch}:%{version}-%{release}
 Provides:       xorg-x11-drv-nvidia-cuda = %{?epoch}:%{version}-%{release}
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch}:%{version}
 Requires:       nvidia-persistenced = %{?epoch}:%{version}
-%if 0%{?fedora} || 0%{?rhel} >= 7
 Requires:       opencl-filesystem
 Requires:       ocl-icd
-%endif
 
 %description cuda
 This package provides the CUDA integration components for %{name}.
@@ -301,11 +299,6 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 # UDev rules for nvidia-uvm
 install -p -m 644 %{SOURCE22} %{buildroot}%{_udevrulesdir}
 
-%if 0%{?rhel} == 6
-# System conflicting libraries
-cp -a libOpenCL.so* %{buildroot}%{_libdir}/
-%endif
-
 # Unique libraries
 cp -a lib*GL*_nvidia.so* libcuda.so* libnvidia-*.so* libnvcuvid.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
@@ -450,10 +443,6 @@ fi ||:
 %{_libdir}/libnvidia-opencl.so.1
 %{_libdir}/libnvidia-opencl.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
-%if 0%{?rhel} == 6
-%{_libdir}/libOpenCL.so.1
-%{_libdir}/libOpenCL.so.1.0.0
-%endif
 
 %files NvFBCOpenGL
 %{_libdir}/libnvidia-fbc.so.1
@@ -471,6 +460,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Wed Mar 29 2017 Simone Caronni <negativo17@gmail.com> - 2:375.39-5
+- Use EPEL OpenCL loader also on RHEL/CentOS 7.
+
 * Tue Mar 21 2017 Simone Caronni <negativo17@gmail.com> - 2:375.39-4
 - Install libGLX_indirect.so.0 only on Fedora 24 and RHEL 6/7.
 
