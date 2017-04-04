@@ -17,9 +17,13 @@
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
 %endif
 
+%if 0%{?rhel} || 0%{?fedora} == 24
+%global _glvnd_libdir   %{_libdir}/libglvnd
+%endif
+
 Name:           nvidia-driver
 Version:        375.39
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -307,11 +311,12 @@ install -p -m 644 %{SOURCE22} %{buildroot}%{_udevrulesdir}
 cp -a lib*GL*_nvidia.so* libcuda.so* libnvidia-*.so* libnvcuvid.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
 
+# libglvnd indirect entry point and private libglvnd libraries
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7 || 0%{?fedora} == 24
-# libglvnd indirect entry point
 cp -a libGLX_indirect.so* %{buildroot}%{_libdir}/
+install -m 0755 -d       $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/
+echo -e "%{_glvnd_libdir} \n" > $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/nvidia-%{_lib}.conf
 %endif
-
 
 
 %post
@@ -408,6 +413,10 @@ fi ||:
 %{_udevrulesdir}/60-nvidia-uvm.rules
 
 %files libs
+%if 0%{?rhel} == 6 || 0%{?rhel} == 7 || 0%{?fedora} == 24
+%{_sysconfdir}/ld.so.conf.d/nvidia-%{_lib}.conf
+%{_libdir}/libGLX_indirect.so.0
+%endif
 %{_datadir}/glvnd/egl_vendor.d/*
 %{_libdir}/libEGL_nvidia.so.0
 %{_libdir}/libEGL_nvidia.so.%{version}
@@ -415,9 +424,6 @@ fi ||:
 %{_libdir}/libGLESv1_CM_nvidia.so.%{version}
 %{_libdir}/libGLESv2_nvidia.so.2
 %{_libdir}/libGLESv2_nvidia.so.%{version}
-%if 0%{?rhel} == 6 || 0%{?rhel} == 7 || 0%{?fedora} == 24
-%{_libdir}/libGLX_indirect.so.0
-%endif
 %{_libdir}/libGLX_nvidia.so.0
 %{_libdir}/libGLX_nvidia.so.%{version}
 %{_libdir}/libnvidia-cfg.so.1
@@ -459,6 +465,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Tue Apr 04 2017 Simone Caronni <negativo17@gmail.com> - 2:375.39-6
+- Use private libglvnd libraries for RHEL 6/7 and Fedora 24.
+
 * Wed Mar 29 2017 Simone Caronni <negativo17@gmail.com> - 2:375.39-5
 - Use EPEL OpenCL loader also on RHEL/CentOS 7.
 - Clean up the EGL Wayland provider installation.
