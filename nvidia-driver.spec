@@ -22,8 +22,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        378.13
-Release:        6%{?dist}
+Version:        381.09
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -267,6 +267,7 @@ fn=%{buildroot}%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
 %{SOURCE41} README.txt "NVIDIA QUADRO GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA NVS GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA TESLA GPUS" | xargs appstream-util add-provide ${fn} modalias
+%{SOURCE41} README.txt "NVIDIA GRID GPUS" | xargs appstream-util add-provide ${fn} modalias
 %endif
 
 # X configuration
@@ -467,6 +468,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Fri Apr 07 2017 Simone Caronni <negativo17@gmail.com> - 2:381.09-1
+- Update to 381.09.
+
 * Tue Apr 04 2017 Simone Caronni <negativo17@gmail.com> - 2:378.13-6
 - Use private libglvnd libraries for RHEL 6/7 and Fedora 24.
 
