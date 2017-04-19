@@ -23,7 +23,7 @@
 
 Name:           nvidia-driver
 Version:        378.13
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -40,8 +40,6 @@ Source11:       10-nvidia-driver.conf
 Source12:       99-nvidia-ignoreabi.conf
 # For servers 1.19.0-3+
 Source13:       10-nvidia.conf
-# For servers up to 1.15, also used as sample
-Source14:       xorg.conf.nvidia
 
 Source20:       nvidia.conf
 Source22:       60-nvidia-uvm.rules
@@ -269,25 +267,13 @@ fn=%{buildroot}%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
 %{SOURCE41} README.txt "NVIDIA TESLA GPUS" | xargs appstream-util add-provide ${fn} modalias
 %endif
 
-# X configuration
-%if 0%{?rhel} == 6
-install -p -m 0644 %{SOURCE14} %{buildroot}%{_sysconfdir}/X11/xorg.conf.nvidia
-%endif
-
 %if 0%{?fedora} == 24 || 0%{?rhel}
 install -p -m 0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
 sed -i -e 's|@LIBDIR@|%{_libdir}|g' %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
-%endif
-
-%if 0%{?fedora} == 24 || 0%{?rhel} >= 7
-# Use xorg.conf as sample
-cp %{SOURCE14} xorg.conf.sample
 install -p -m 0644 %{SOURCE11} %{buildroot}%{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
 %endif
 
 %if 0%{?fedora} >= 25
-# Use xorg.conf as sample
-cp %{SOURCE14} xorg.conf.sample
 install -p -m 0644 %{SOURCE13} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 sed -i -e 's|@LIBDIR@|%{_libdir}|g' %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %endif
@@ -342,20 +328,11 @@ fi || :
 
 %post NVML -p /sbin/ldconfig
 
-%if 0%{?rhel} == 6
-%posttrans
-[ -f %{_sysconfdir}/X11/xorg.conf ] || cp -p %{_sysconfdir}/X11/xorg.conf.nvidia %{_sysconfdir}/X11/xorg.conf || :
-%endif
-
 %preun
 if [ "$1" -eq "0" ]; then
   %{_grubby} --remove-args='%{_dracutopts}' &>/dev/null
 %if 0%{?fedora} || 0%{?rhel} >= 7
   sed -i -e 's/%{_dracutopts} //g' /etc/default/grub
-%endif
-%if 0%{?rhel} == 6
-  # Backup and disable previously used xorg.conf
-  [ -f %{_sysconfdir}/X11/xorg.conf ] && mv %{_sysconfdir}/X11/xorg.conf %{_sysconfdir}/X11/xorg.conf.nvidia_uninstalled &>/dev/null
 %endif
 fi ||:
 
@@ -385,13 +362,6 @@ fi ||:
 # X.org configuration files
 %if 0%{?fedora} == 24 || 0%{?rhel}
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
-%endif
-
-%if 0%{?rhel} == 6
-%config(noreplace) %{_sysconfdir}/X11/xorg.conf.nvidia
-%endif
-
-%if 0%{?fedora} == 24 || 0%{?rhel} >= 7
 %config(noreplace) %{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
 %endif
 
@@ -467,6 +437,10 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Wed Apr 19 2017 Simone Caronni <negativo17@gmail.com> - 2:378.13-7
+- Update RHEL/CentOS 6 packages to use OutputClass as in RHEL/CentOS 7 (since
+  RHEL 6.8 it's using X.org server 1.17+).
+
 * Tue Apr 04 2017 Simone Caronni <negativo17@gmail.com> - 2:378.13-6
 - Use private libglvnd libraries for RHEL 6/7 and Fedora 24.
 
