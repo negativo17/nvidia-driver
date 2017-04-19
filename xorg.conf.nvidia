@@ -1,7 +1,0 @@
-Section "Device"
-    Identifier  "Device0"
-    Driver      "nvidia"
-    Option      "DPI" "96 x 96"
-    Option      "SLI" "Auto"
-    Option      "BaseMosaic" "on"
-EndSection
