@@ -22,8 +22,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        375.39
-Release:        7%{?dist}
+Version:        375.66
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -435,6 +435,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Wed May 10 2017 Simone Caronni <negativo17@gmail.com> - 2:375.66-1
+- Update to 375.66.
+
 * Wed Apr 19 2017 Simone Caronni <negativo17@gmail.com> - 2:375.39-7
 - Update RHEL/CentOS 6 packages to use OutputClass as in RHEL/CentOS 7 (since
   RHEL 6.8 it's using X.org server 1.17+).
