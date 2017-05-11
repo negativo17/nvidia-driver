@@ -22,8 +22,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        378.13
-Release:        7%{?dist}
+Version:        381.22
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -265,6 +265,7 @@ fn=%{buildroot}%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
 %{SOURCE41} README.txt "NVIDIA QUADRO GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA NVS GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA TESLA GPUS" | xargs appstream-util add-provide ${fn} modalias
+%{SOURCE41} README.txt "NVIDIA GRID GPUS" | xargs appstream-util add-provide ${fn} modalias
 %endif
 
 %if 0%{?fedora} == 24 || 0%{?rhel}
@@ -437,6 +438,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Thu May 10 2017 Simone Caronni <negativo17@gmail.com> - 2:381.22-1
+- Update to 381.22.
+
 * Wed Apr 19 2017 Simone Caronni <negativo17@gmail.com> - 2:378.13-7
 - Update RHEL/CentOS 6 packages to use OutputClass as in RHEL/CentOS 7 (since
   RHEL 6.8 it's using X.org server 1.17+).
