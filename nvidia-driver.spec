@@ -10,9 +10,20 @@
 %global _grubby         /sbin/grubby --grub --update-kernel=ALL
 %endif
 
-%if 0%{?fedora} || 0%{?rhel} >= 7
+%if 0%{?fedora} == 24 || 0%{?rhel} == 7
 %global _dracutopts     nouveau.modeset=0 rd.driver.blacklist=nouveau
 %global _dracutopts_rm  nomodeset gfxpayload=vga=normal
+%global _modprobe_d     %{_prefix}/lib/modprobe.d/
+%global _grubby         %{_sbindir}/grubby --update-kernel=ALL
+%endif
+
+%if 0%{?fedora} >= 25
+# Fedora 25+ has a fallback service where it tries to load nouveau if nvidia is
+# not loaded, so don't disable it. Just matching the driver with OutputClass in
+# the X.org configuration is enough to load the whole Nvidia stack or the Mesa
+# one.
+%global _dracutopts     rd.driver.blacklist=nouveau
+%global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
 %endif
@@ -23,7 +34,7 @@
 
 Name:           nvidia-driver
 Version:        381.22
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -318,7 +329,7 @@ fi || :
 if [ "$1" -eq "2" ]; then
   # Remove no longer needed options
   %{_grubby} --remove-args='%{_dracutopts_rm}' &>/dev/null
-  sed -i -e 's/ %{_dracutopts_rm}//g' /etc/default/grub
+  for param in %{_dracutopts_rm}; do sed -i -e "s/$param //g" /etc/default/grub; done
 fi || :
 
 %post libs -p /sbin/ldconfig
@@ -438,6 +449,11 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Thu May 11 2017 Simone Caronni <negativo17@gmail.com> - 2:381.22-2
+- Remove nouveau.modeset=0 from kernel cmdline arguments for Fedora 25+, as this
+  breaks fallback to nouveau when nvidia.ko fails to load for some reason
+- Thanks to Hans de Goede <jwrdegoede@fedoraproject.org> for patches.
+
 * Wed May 10 2017 Simone Caronni <negativo17@gmail.com> - 2:381.22-1
 - Update to 381.22.
 
