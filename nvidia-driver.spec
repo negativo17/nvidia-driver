@@ -59,12 +59,16 @@ Source23:       nvidia-uvm.conf
 Source40:       com.nvidia.driver.metainfo.xml
 Source41:       parse-readme.py
 
+# Auto-fallback to nouveau, requires server 1.19.0-3+, glvnd enabled mesa
+Source50:       nvidia-fallback.service
+Source51:       95-nvidia-fallback.preset
+
 Source99:       nvidia-generate-tarballs.sh
 
 BuildRequires:  python
 
 %if 0%{?fedora} || 0%{?rhel} >= 7
-# UDev rule location (_udevrulesdir)
+# UDev rule location (_udevrulesdir) and systemd macros
 BuildRequires:  systemd
 %endif
 
@@ -95,6 +99,8 @@ Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.16
 %if 0%{?fedora} >= 25
 # Extended "OutputClass" with device options
 Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.19.0-3
+# For auto-fallback to nouveau systemd service
+%{?systemd_requires}
 %endif
 
 Conflicts:      fglrx-x11-drv
@@ -246,6 +252,11 @@ mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
 %endif
 
+%if 0%{?fedora} >= 25
+mkdir -p %{buildroot}%{_unitdir}
+mkdir -p %{buildroot}%{_presetdir}
+%endif
+
 # Headers
 install -p -m 0644 *.h %{buildroot}%{_includedir}/nvidia/GL/
 
@@ -277,6 +288,9 @@ fn=%{buildroot}%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
 %{SOURCE41} README.txt "NVIDIA NVS GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA TESLA GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA GRID GPUS" | xargs appstream-util add-provide ${fn} modalias
+# install auto-fallback to nouveau service
+install -p -m 0644 %{SOURCE50} %{buildroot}%{_unitdir}
+install -p -m 0644 %{SOURCE51} %{buildroot}%{_presetdir}
 %endif
 
 %if 0%{?fedora} == 24 || 0%{?rhel}
@@ -319,6 +333,14 @@ echo -e "%{_glvnd_libdir} \n" > $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/nvidi
 %endif
 
 
+# Apply the systemd preset for nvidia-fallback.service when upgrading from
+# a version without nvidia-fallback.service, as %%systemd_post only does this
+# on fresh installs
+%if 0%{?fedora} >= 25
+%triggerun -- %{name} < 2:381.22-2
+systemctl --no-reload preset nvidia-fallback.service >/dev/null 2>&1 || :
+%endif
+
 %post
 if [ "$1" -eq "1" ]; then
   %{_grubby} --args='%{_dracutopts}' &>/dev/null
@@ -331,6 +353,9 @@ if [ "$1" -eq "2" ]; then
   %{_grubby} --remove-args='%{_dracutopts_rm}' &>/dev/null
   for param in %{_dracutopts_rm}; do sed -i -e "s/$param //g" /etc/default/grub; done
 fi || :
+%if 0%{?fedora} >= 25
+%systemd_post nvidia-fallback.service
+%endif
 
 %post libs -p /sbin/ldconfig
 
@@ -347,6 +372,14 @@ if [ "$1" -eq "0" ]; then
   sed -i -e 's/%{_dracutopts} //g' /etc/default/grub
 %endif
 fi ||:
+%if 0%{?fedora} >= 25
+%systemd_preun nvidia-fallback.service
+%endif
+
+%if 0%{?fedora} >= 25
+%postun
+%systemd_postun nvidia-fallback.service
+%endif
 
 %postun libs -p /sbin/ldconfig
 
@@ -364,6 +397,8 @@ fi ||:
 %{_bindir}/nvidia-bug-report.sh
 %if 0%{?fedora} >= 25
 %{_datadir}/appdata/com.nvidia.driver.metainfo.xml
+%{_unitdir}/nvidia-fallback.service
+%{_presetdir}/95-nvidia-fallback.preset
 %endif
 %{_datadir}/nvidia
 %{_libdir}/nvidia
@@ -452,6 +487,8 @@ fi ||:
 * Thu May 11 2017 Simone Caronni <negativo17@gmail.com> - 2:381.22-2
 - Remove nouveau.modeset=0 from kernel cmdline arguments for Fedora 25+, as this
   breaks fallback to nouveau when nvidia.ko fails to load for some reason
+- Add nvidia-fallback.service which automatically fallsback to nouveau if the
+  nvidia driver fails to load for some reason (F25+ only)
 - Thanks to Hans de Goede <jwrdegoede@fedoraproject.org> for patches.
 
 * Wed May 10 2017 Simone Caronni <negativo17@gmail.com> - 2:381.22-1
