@@ -34,7 +34,7 @@
 
 Name:           nvidia-driver
 Version:        381.22
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -484,11 +484,15 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Fri May 12 2017 Simone Caronni <negativo17@gmail.com> - 2:381.22-4
+- Make the fallback service check for the module status instead of the device,
+  which appears only after starting X.
+
 * Fri May 12 2017 Simone Caronni <negativo17@gmail.com> - 2:381.22-3
 - Restore blacklist for nouveau in modprobe configuration as it creates havoc on
   Optimus laptops.
 
-* Thu May 10 2017 Simone Caronni <negativo17@gmail.com> - 2:381.22-2
+* Thu May 11 2017 Simone Caronni <negativo17@gmail.com> - 2:381.22-2
 - Remove nouveau.modeset=0 from kernel cmdline arguments for Fedora 25+, as this
   breaks fallback to nouveau when nvidia.ko fails to load for some reason
 - Add nvidia-fallback.service which automatically fallsback to nouveau if the
