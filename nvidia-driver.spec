@@ -6,6 +6,7 @@
 %global _udevrulesdir   %{_prefix}/lib/udev/rules.d/
 %global _dracutopts     nouveau.modeset=0 rdblacklist=nouveau
 %global _dracutopts_rm  nomodeset vga=normal
+%global _dracut_conf_d	%{_sysconfdir}/dracut.conf.d
 %global _modprobe_d     %{_sysconfdir}/modprobe.d/
 %global _grubby         /sbin/grubby --grub --update-kernel=ALL
 %endif
@@ -13,6 +14,7 @@
 %if 0%{?fedora} || 0%{?rhel} >= 7
 %global _dracutopts     nouveau.modeset=0 rd.driver.blacklist=nouveau
 %global _dracutopts_rm  nomodeset gfxpayload=vga=normal
+%global _dracut_conf_d	%{_prefix}/lib/dracut.conf.d
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
 %endif
@@ -23,7 +25,7 @@
 
 Name:           nvidia-driver
 Version:        375.66
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -44,6 +46,7 @@ Source13:       10-nvidia.conf
 Source20:       nvidia.conf
 Source22:       60-nvidia-uvm.rules
 Source23:       nvidia-uvm.conf
+Source24:       99-nvidia-dracut.conf
 
 Source40:       com.nvidia.driver.metainfo.xml
 Source41:       parse-readme.py
@@ -227,6 +230,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
 mkdir -p %{buildroot}%{_sysconfdir}/vulkan/icd.d/
 mkdir -p %{buildroot}%{_udevrulesdir}
 mkdir -p %{buildroot}%{_modprobe_d}/
+mkdir -p %{buildroot}%{_dracut_conf_d}/
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
 %if 0%{?fedora} == 24 || 0%{?rhel}
@@ -248,6 +252,9 @@ install -p -m 0644 %{SOURCE20} %{buildroot}%{_modprobe_d}/
 
 # Autoload nvidia-uvm module after nvidia module
 install -p -m 0644 %{SOURCE23} %{buildroot}%{_modprobe_d}/
+
+# dracut.conf.d file, nvidia modules must never be in the initrd
+install -p -m 0644 %{SOURCE24} %{buildroot}%{_dracut_conf_d}/
 
 # Binaries
 install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-report.sh} %{buildroot}%{_bindir}
@@ -355,6 +362,7 @@ fi ||:
 %{_libdir}/nvidia
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
 %{_modprobe_d}/nvidia.conf
+%{_dracut_conf_d}/99-nvidia-dracut.conf
 %{_sysconfdir}/vulkan/icd.d/*
 
 # X.org configuration files
@@ -435,6 +443,10 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Fri May 12 2017 Hans de Goede <jwrdegoede@fedoraproject.org> - 2:375.66-2
+- Add dracut.conf.d/99-nvidia.conf file enforcing that the nvidia modules never
+  get added to the initramfs (doing so would break things on a driver update)
+
 * Wed May 10 2017 Simone Caronni <negativo17@gmail.com> - 2:375.66-1
 - Update to 375.66.
 
