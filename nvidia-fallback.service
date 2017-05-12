@@ -2,7 +2,7 @@
 Description=Fallback to nouveau if nvidia did not load
 After=akmods.service dkms.service
 Before=display-manager.service
-ConditionPathExists=!/dev/nvidia
+ConditionPathExists=!/sys/module/nvidia
 
 [Service]
 Type=oneshot
