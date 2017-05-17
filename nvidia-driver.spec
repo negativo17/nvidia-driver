@@ -147,6 +147,7 @@ Conflicts:      nvidia-x11-drv-libs-96xx
 Conflicts:      nvidia-x11-drv-libs-173xx
 Conflicts:      nvidia-x11-drv-libs-304xx
 Conflicts:      nvidia-x11-drv-libs-340xx
+Conflicts:      xorg-x11-drv-nvidia-gl
 Conflicts:      xorg-x11-drv-nvidia-libs
 Conflicts:      xorg-x11-drv-nvidia-libs-173xx
 Conflicts:      xorg-x11-drv-nvidia-libs-304xx
