@@ -37,7 +37,7 @@
 
 Name:           nvidia-driver
 Version:        381.22
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -107,18 +107,18 @@ Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.19.0-3
 %{?systemd_requires}
 %endif
 
-Conflicts:      fglrx-x11-drv
 Conflicts:      catalyst-x11-drv
 Conflicts:      catalyst-x11-drv-legacy
-
-Obsoletes:      xorg-x11-drv-nvidia < %{?epoch}:%{version}-%{release}
-Provides:       xorg-x11-drv-nvidia = %{?epoch}:%{version}-%{release}
-Obsoletes:      nvidia-x11-drv < %{?epoch}:%{version}-%{release}
-Provides:       nvidia-x11-drv = %{?epoch}:%{version}-%{release}
-
-# Introduced in CUDA 8.0
-Obsoletes:      cuda-drivers < %{?epoch}:%{version}-%{release}
-Provides:       cuda-drivers = %{?epoch}:%{version}-%{release}
+Conflicts:      cuda-drivers
+Conflicts:      fglrx-x11-drv
+Conflicts:      nvidia-x11-drv
+Conflicts:      nvidia-x11-drv-173xx
+Conflicts:      nvidia-x11-drv-304xx
+Conflicts:      nvidia-x11-drv-340xx
+Conflicts:      xorg-x11-drv-nvidia
+Conflicts:      xorg-x11-drv-nvidia-173xx
+Conflicts:      xorg-x11-drv-nvidia-304xx
+Conflicts:      xorg-x11-drv-nvidia-340xx
 
 %description
 This package provides the most recent NVIDIA display driver which allows for
@@ -142,13 +142,21 @@ Requires:       libglvnd-opengl%{?_isa} >= 0.2
 Requires:       egl-wayland
 %endif
 
-Obsoletes:      nvidia-x11-drv-libs < %{?epoch}:%{version}
-Provides:       nvidia-x11-drv-libs = %{?epoch}:%{version}
-Obsoletes:      xorg-x11-drv-nvidia-libs < %{?epoch}:%{version}
-Provides:       xorg-x11-drv-nvidia-libs = %{?epoch}:%{version}
+Conflicts:      nvidia-x11-drv-libs
+Conflicts:      nvidia-x11-drv-libs-96xx
+Conflicts:      nvidia-x11-drv-libs-173xx
+Conflicts:      nvidia-x11-drv-libs-304xx
+Conflicts:      nvidia-x11-drv-libs-340xx
+Conflicts:      xorg-x11-drv-nvidia-libs
+Conflicts:      xorg-x11-drv-nvidia-libs-173xx
+Conflicts:      xorg-x11-drv-nvidia-libs-304xx
+Conflicts:      xorg-x11-drv-nvidia-libs-340xx
 %ifarch %{ix86}
-Obsoletes:      nvidia-x11-drv-32bit < %{?epoch}:%{version}
-Provides:       nvidia-x11-drv-32bit = %{?epoch}:%{version}
+Conflicts:      nvidia-x11-drv-32bit
+Conflicts:      nvidia-x11-drv-32bit-96xx
+Conflicts:      nvidia-x11-drv-32bit-173xx
+Conflicts:      nvidia-x11-drv-32bit-304xx
+Conflicts:      nvidia-x11-drv-32bit-340xx
 %endif
 
 %description libs
@@ -156,8 +164,7 @@ This package provides the shared libraries for %{name}.
 
 %package cuda
 Summary:        CUDA integration for %{name}
-Obsoletes:      xorg-x11-drv-nvidia-cuda < %{?epoch}:%{version}-%{release}
-Provides:       xorg-x11-drv-nvidia-cuda = %{?epoch}:%{version}-%{release}
+Conflicts:      xorg-x11-drv-nvidia-cuda
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch}:%{version}
 Requires:       nvidia-persistenced = %{?epoch}:%{version}
 Requires:       opencl-filesystem
@@ -200,8 +207,10 @@ to be a platform for building 3rd party applications.
 
 %package devel
 Summary:        Development files for %{name}
-Obsoletes:      xorg-x11-drv-nvidia-devel < %{?epoch}:%{version}-%{release}
-Provides:       xorg-x11-drv-nvidia-devel = %{?epoch}:%{version}-%{release}
+Conflicts:      xorg-x11-drv-nvidia-devel
+Conflicts:      xorg-x11-drv-nvidia-devel-173xx
+Conflicts:      xorg-x11-drv-nvidia-devel-304xx
+Conflicts:      xorg-x11-drv-nvidia-devel-340xx
 Requires:       %{name}-libs%{?_isa} = %{?epoch}:%{version}-%{release}
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch}:%{version}-%{release}
 Requires:       %{name}-NVML%{?_isa} = %{?epoch}:%{version}-%{release}
@@ -493,6 +502,10 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Wed May 17 2017 Simone Caronni <negativo17@gmail.com> - 2:381.22-6
+- Do not obsolete/provide packages from other repositories, instead conflict
+  with them.
+
 * Fri May 12 2017 Hans de Goede <jwrdegoede@fedoraproject.org> - 2:381.22-5
 - Add dracut.conf.d/99-nvidia.conf file enforcing that the nvidia modules never
   get added to the initramfs (doing so would break things on a driver update)
