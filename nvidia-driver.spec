@@ -82,9 +82,9 @@ BuildRequires:  libappstream-glib%{?_isa} >= 0.6.3
 %endif
 
 Requires:       grubby
-Requires:       nvidia-driver-libs%{?_isa} = %{?epoch}:%{version}
-Requires:       nvidia-kmod = %{?epoch}:%{version}
-Provides:       nvidia-kmod-common = %{?epoch}:%{version}
+Requires:       nvidia-driver-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       nvidia-kmod = %{?epoch:%{epoch}:}%{version}
+Provides:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
 Requires:       libva-vdpau-driver%{?_isa}
 
 %if 0%{?fedora}
@@ -130,7 +130,7 @@ version %{version}.
 %package libs
 Summary:        Libraries for %{name}
 Requires(post): ldconfig
-Requires:       %{name} = %{?epoch}:%{version}-%{release}
+Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       libvdpau%{?_isa} >= 0.5
 Requires:       libglvnd%{?_isa} >= 0.2
 Requires:       libglvnd-egl%{?_isa} >= 0.2
@@ -166,8 +166,8 @@ This package provides the shared libraries for %{name}.
 %package cuda
 Summary:        CUDA integration for %{name}
 Conflicts:      xorg-x11-drv-nvidia-cuda
-Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch}:%{version}
-Requires:       nvidia-persistenced = %{?epoch}:%{version}
+Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       nvidia-persistenced = %{?epoch:%{epoch}:}%{version}
 Requires:       opencl-filesystem
 Requires:       ocl-icd
 
@@ -185,7 +185,7 @@ This package provides the CUDA libraries for %{name}-cuda.
 Summary:        NVIDIA OpenGL-based Framebuffer Capture libraries
 Requires(post): ldconfig
 # Loads libnvidia-encode.so at runtime
-Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch}:%{version}-%{release}
+Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description NvFBCOpenGL
 This library provides a high performance, low latency interface to capture and
@@ -196,7 +196,7 @@ remote graphics scenarios.
 %package NVML
 Summary:        NVIDIA Management Library (NVML)
 Requires(post): ldconfig
-Provides:       cuda-nvml%{?_isa} = %{?epoch}:%{version}-%{release}
+Provides:       cuda-nvml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description NVML
 A C-based API for monitoring and managing various states of the NVIDIA GPU
@@ -212,10 +212,10 @@ Conflicts:      xorg-x11-drv-nvidia-devel
 Conflicts:      xorg-x11-drv-nvidia-devel-173xx
 Conflicts:      xorg-x11-drv-nvidia-devel-304xx
 Conflicts:      xorg-x11-drv-nvidia-devel-340xx
-Requires:       %{name}-libs%{?_isa} = %{?epoch}:%{version}-%{release}
-Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch}:%{version}-%{release}
-Requires:       %{name}-NVML%{?_isa} = %{?epoch}:%{version}-%{release}
-Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch}:%{version}-%{release}
+Requires:       %{name}-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       %{name}-NVML%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description devel
 This package provides the development files of the %{name} package,
