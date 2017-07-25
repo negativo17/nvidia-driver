@@ -36,8 +36,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        381.22
-Release:        6%{?dist}
+Version:        384.59
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -242,6 +242,9 @@ ln -sf libcuda.so.%{version} libcuda.so
 # libglvnd indirect entry point
 ln -sf libGLX_nvidia.so.%{version} libGLX_indirect.so.0
 
+# Use libglvnd for Vulkan
+cat nvidia_icd.json.template | sed -e 's/__NV_VK_ICD__/libGLX_nvidia.so.0/' > nvidia_icd.%{_target_cpu}.json
+
 %build
 
 %install
@@ -250,6 +253,7 @@ mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/appdata/
 mkdir -p %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 mkdir -p %{buildroot}%{_datadir}/nvidia/
+mkdir -p %{buildroot}%{_datadir}/vulkan/icd.d/
 mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
 mkdir -p %{buildroot}%{_libdir}/nvidia/xorg/
 mkdir -p %{buildroot}%{_libdir}/vdpau/
@@ -257,7 +261,6 @@ mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
 mkdir -p %{buildroot}%{_mandir}/man1/
 mkdir -p %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
-mkdir -p %{buildroot}%{_sysconfdir}/vulkan/icd.d/
 mkdir -p %{buildroot}%{_udevrulesdir}
 mkdir -p %{buildroot}%{_modprobe_d}/
 mkdir -p %{buildroot}%{_dracut_conf_d}/
@@ -279,7 +282,7 @@ install -p -m 0644 *.h %{buildroot}%{_includedir}/nvidia/GL/
 install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
 # Vulkan and EGL loaders
-install -p -m 0644 nvidia_icd.json %{buildroot}%{_sysconfdir}/vulkan/icd.d/
+install -p -m 0644 nvidia_icd.%{_target_cpu}.json %{buildroot}%{_datadir}/vulkan/icd.d/
 install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 
 # Blacklist nouveau, enable KMS
@@ -347,7 +350,7 @@ cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7 || 0%{?fedora} == 24
 cp -a libGLX_indirect.so* %{buildroot}%{_libdir}/
 install -m 0755 -d       $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/
-echo -e "%{_glvnd_libdir} \n" > $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/nvidia-%{_lib}.conf
+echo -e "%{_glvnd_libdir} \n" > $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
 
 
@@ -419,11 +422,11 @@ fi ||:
 %{_presetdir}/95-nvidia-fallback.preset
 %endif
 %{_datadir}/nvidia
+%{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
 %{_libdir}/nvidia
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
 %{_modprobe_d}/nvidia.conf
 %{_dracut_conf_d}/99-nvidia-dracut.conf
-%{_sysconfdir}/vulkan/icd.d/*
 
 # X.org configuration files
 %if 0%{?fedora} == 24 || 0%{?rhel}
@@ -452,7 +455,7 @@ fi ||:
 
 %files libs
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7 || 0%{?fedora} == 24
-%{_sysconfdir}/ld.so.conf.d/nvidia-%{_lib}.conf
+%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %{_libdir}/libGLX_indirect.so.0
 %endif
 %{_datadir}/glvnd/egl_vendor.d/*
@@ -485,6 +488,7 @@ fi ||:
 %{_libdir}/libnvidia-fatbinaryloader.so.%{version}
 %{_libdir}/libnvidia-opencl.so.1
 %{_libdir}/libnvidia-opencl.so.%{version}
+%{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
 
 %files NvFBCOpenGL
@@ -503,6 +507,11 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Tue Jul 25 2017 Simone Caronni <negativo17@gmail.com> - 2:384.59-1
+- Update to 384.59.
+- Use system wide default directory for Vulkan ICD loaders.
+- Use _target_cpu in place of _lib where appropriate.
+
 * Wed May 17 2017 Simone Caronni <negativo17@gmail.com> - 2:381.22-6
 - Do not obsolete/provide packages from other repositories, instead conflict
   with them.
