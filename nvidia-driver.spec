@@ -11,9 +11,21 @@
 %global _grubby         /sbin/grubby --grub --update-kernel=ALL
 %endif
 
-%if 0%{?fedora} || 0%{?rhel} >= 7
+%if 0%{?fedora} == 24 || 0%{?rhel} == 7
 %global _dracutopts     nouveau.modeset=0 rd.driver.blacklist=nouveau
 %global _dracutopts_rm  nomodeset gfxpayload=vga=normal
+%global _dracut_conf_d	%{_prefix}/lib/dracut.conf.d
+%global _modprobe_d     %{_prefix}/lib/modprobe.d/
+%global _grubby         %{_sbindir}/grubby --update-kernel=ALL
+%endif
+
+%if 0%{?fedora} >= 25
+# Fedora 25+ has a fallback service where it tries to load nouveau if nvidia is
+# not loaded, so don't disable it. Just matching the driver with OutputClass in
+# the X.org configuration is enough to load the whole Nvidia stack or the Mesa
+# one.
+%global _dracutopts     rd.driver.blacklist=nouveau
+%global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0
 %global _dracut_conf_d	%{_prefix}/lib/dracut.conf.d
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
@@ -24,8 +36,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        375.66
-Release:        3%{?dist}
+Version:        384.59
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -51,10 +63,16 @@ Source24:       99-nvidia-dracut.conf
 Source40:       com.nvidia.driver.metainfo.xml
 Source41:       parse-readme.py
 
+# Auto-fallback to nouveau, requires server 1.19.0-3+, glvnd enabled mesa
+Source50:       nvidia-fallback.service
+Source51:       95-nvidia-fallback.preset
+
 Source99:       nvidia-generate-tarballs.sh
 
+BuildRequires:  python
+
 %if 0%{?fedora} || 0%{?rhel} >= 7
-# UDev rule location (_udevrulesdir)
+# UDev rule location (_udevrulesdir) and systemd macros
 BuildRequires:  systemd
 %endif
 
@@ -85,6 +103,8 @@ Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.16
 %if 0%{?fedora} >= 25
 # Extended "OutputClass" with device options
 Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.19.0-3
+# For auto-fallback to nouveau systemd service
+%{?systemd_requires}
 %endif
 
 Conflicts:      catalyst-x11-drv
@@ -222,6 +242,9 @@ ln -sf libcuda.so.%{version} libcuda.so
 # libglvnd indirect entry point
 ln -sf libGLX_nvidia.so.%{version} libGLX_indirect.so.0
 
+# Use libglvnd for Vulkan
+cat nvidia_icd.json.template | sed -e 's/__NV_VK_ICD__/libGLX_nvidia.so.0/' > nvidia_icd.%{_target_cpu}.json
+
 %build
 
 %install
@@ -230,6 +253,7 @@ mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/appdata/
 mkdir -p %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 mkdir -p %{buildroot}%{_datadir}/nvidia/
+mkdir -p %{buildroot}%{_datadir}/vulkan/icd.d/
 mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
 mkdir -p %{buildroot}%{_libdir}/nvidia/xorg/
 mkdir -p %{buildroot}%{_libdir}/vdpau/
@@ -237,7 +261,6 @@ mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
 mkdir -p %{buildroot}%{_mandir}/man1/
 mkdir -p %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
-mkdir -p %{buildroot}%{_sysconfdir}/vulkan/icd.d/
 mkdir -p %{buildroot}%{_udevrulesdir}
 mkdir -p %{buildroot}%{_modprobe_d}/
 mkdir -p %{buildroot}%{_dracut_conf_d}/
@@ -247,6 +270,11 @@ mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
 %endif
 
+%if 0%{?fedora} >= 25
+mkdir -p %{buildroot}%{_unitdir}
+mkdir -p %{buildroot}%{_presetdir}
+%endif
+
 # Headers
 install -p -m 0644 *.h %{buildroot}%{_includedir}/nvidia/GL/
 
@@ -254,7 +282,7 @@ install -p -m 0644 *.h %{buildroot}%{_includedir}/nvidia/GL/
 install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
 # Vulkan and EGL loaders
-install -p -m 0644 nvidia_icd.json %{buildroot}%{_sysconfdir}/vulkan/icd.d/
+install -p -m 0644 nvidia_icd.%{_target_cpu}.json %{buildroot}%{_datadir}/vulkan/icd.d/
 install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 
 # Blacklist nouveau, enable KMS
@@ -280,6 +308,10 @@ fn=%{buildroot}%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
 %{SOURCE41} README.txt "NVIDIA QUADRO GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA NVS GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA TESLA GPUS" | xargs appstream-util add-provide ${fn} modalias
+%{SOURCE41} README.txt "NVIDIA GRID GPUS" | xargs appstream-util add-provide ${fn} modalias
+# install auto-fallback to nouveau service
+install -p -m 0644 %{SOURCE50} %{buildroot}%{_unitdir}
+install -p -m 0644 %{SOURCE51} %{buildroot}%{_presetdir}
 %endif
 
 %if 0%{?fedora} == 24 || 0%{?rhel}
@@ -318,9 +350,17 @@ cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7 || 0%{?fedora} == 24
 cp -a libGLX_indirect.so* %{buildroot}%{_libdir}/
 install -m 0755 -d       $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/
-echo -e "%{_glvnd_libdir} \n" > $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/nvidia-%{_lib}.conf
+echo -e "%{_glvnd_libdir} \n" > $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
 
+
+# Apply the systemd preset for nvidia-fallback.service when upgrading from
+# a version without nvidia-fallback.service, as %%systemd_post only does this
+# on fresh installs
+%if 0%{?fedora} >= 25
+%triggerun -- %{name} < 2:381.22-2
+systemctl --no-reload preset nvidia-fallback.service >/dev/null 2>&1 || :
+%endif
 
 %post
 if [ "$1" -eq "1" ]; then
@@ -332,8 +372,11 @@ fi || :
 if [ "$1" -eq "2" ]; then
   # Remove no longer needed options
   %{_grubby} --remove-args='%{_dracutopts_rm}' &>/dev/null
-  sed -i -e 's/ %{_dracutopts_rm}//g' /etc/default/grub
+  for param in %{_dracutopts_rm}; do sed -i -e "s/$param //g" /etc/default/grub; done
 fi || :
+%if 0%{?fedora} >= 25
+%systemd_post nvidia-fallback.service
+%endif
 
 %post libs -p /sbin/ldconfig
 
@@ -350,6 +393,14 @@ if [ "$1" -eq "0" ]; then
   sed -i -e 's/%{_dracutopts} //g' /etc/default/grub
 %endif
 fi ||:
+%if 0%{?fedora} >= 25
+%systemd_preun nvidia-fallback.service
+%endif
+
+%if 0%{?fedora} >= 25
+%postun
+%systemd_postun nvidia-fallback.service
+%endif
 
 %postun libs -p /sbin/ldconfig
 
@@ -367,13 +418,15 @@ fi ||:
 %{_bindir}/nvidia-bug-report.sh
 %if 0%{?fedora} >= 25
 %{_datadir}/appdata/com.nvidia.driver.metainfo.xml
+%{_unitdir}/nvidia-fallback.service
+%{_presetdir}/95-nvidia-fallback.preset
 %endif
 %{_datadir}/nvidia
+%{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
 %{_libdir}/nvidia
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
 %{_modprobe_d}/nvidia.conf
 %{_dracut_conf_d}/99-nvidia-dracut.conf
-%{_sysconfdir}/vulkan/icd.d/*
 
 # X.org configuration files
 %if 0%{?fedora} == 24 || 0%{?rhel}
@@ -402,7 +455,7 @@ fi ||:
 
 %files libs
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7 || 0%{?fedora} == 24
-%{_sysconfdir}/ld.so.conf.d/nvidia-%{_lib}.conf
+%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %{_libdir}/libGLX_indirect.so.0
 %endif
 %{_datadir}/glvnd/egl_vendor.d/*
@@ -435,6 +488,7 @@ fi ||:
 %{_libdir}/libnvidia-fatbinaryloader.so.%{version}
 %{_libdir}/libnvidia-opencl.so.1
 %{_libdir}/libnvidia-opencl.so.%{version}
+%{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
 
 %files NvFBCOpenGL
@@ -453,6 +507,16 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Tue Jul 25 2017 Simone Caronni <negativo17@gmail.com> - 2:384.59-1
+- Update to 384.59.
+- Use system wide default directory for Vulkan ICD loaders.
+- Use _target_cpu in place of _lib where appropriate.
+- Add nvidia-fallback.service which automatically fallsback to nouveau if the
+  nvidia driver fails to load for some reason (F25+ only).
+- Remove nouveau.modeset=0 from kernel cmdline arguments for Fedora 25+, as this
+  breaks fallback to nouveau when nvidia.ko fails to load for some reason.
+- Thanks to Hans de Goede <jwrdegoede@fedoraproject.org> for patches.
+
 * Wed May 17 2017 Simone Caronni <negativo17@gmail.com> - 2:375.66-3
 - Do not obsolete/provide packages from other repositories, instead conflict
   with them.

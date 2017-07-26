@@ -1,0 +1,13 @@
+[Unit]
+Description=Fallback to nouveau if nvidia did not load
+After=akmods.service dkms.service
+Before=display-manager.service
+ConditionPathExists=!/sys/module/nvidia
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=-/sbin/modprobe nouveau
+
+[Install]
+WantedBy=multi-user.target

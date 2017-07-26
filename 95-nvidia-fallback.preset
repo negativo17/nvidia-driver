@@ -1,0 +1,5 @@
+# Normally this would be part of the distro presets, but since this package
+# lives in a 3th party repo we need our own preset file. Also see:
+# https://fedoraproject.org/wiki/Starting_services_by_default
+
+enable nvidia-fallback.service
