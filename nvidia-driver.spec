@@ -37,7 +37,7 @@
 
 Name:           nvidia-driver
 Version:        384.59
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -130,7 +130,6 @@ version %{version}.
 %package libs
 Summary:        Libraries for %{name}
 Requires(post): ldconfig
-Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       libvdpau%{?_isa} >= 0.5
 Requires:       libglvnd%{?_isa} >= 0.2
 Requires:       libglvnd-egl%{?_isa} >= 0.2
@@ -507,6 +506,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Tue Aug 08 2017 Simone Caronni <negativo17@gmail.com> - 2:384.59-2
+- Remove spurious dependency on main driver for libraries.
+
 * Tue Jul 25 2017 Simone Caronni <negativo17@gmail.com> - 2:384.59-1
 - Update to 384.59.
 - Use system wide default directory for Vulkan ICD loaders.
