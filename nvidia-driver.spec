@@ -11,7 +11,7 @@
 %global _grubby         /sbin/grubby --grub --update-kernel=ALL
 %endif
 
-%if 0%{?fedora} == 24 || 0%{?rhel} == 7
+%if 0%{?rhel} == 7
 %global _dracutopts     nouveau.modeset=0 rd.driver.blacklist=nouveau
 %global _dracutopts_rm  nomodeset gfxpayload=vga=normal
 %global _dracut_conf_d	%{_prefix}/lib/dracut.conf.d
@@ -31,7 +31,7 @@
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
 %endif
 
-%if 0%{?rhel} || 0%{?fedora} == 24
+%if 0%{?rhel}
 %global _glvnd_libdir   %{_libdir}/libglvnd
 %endif
 
@@ -95,7 +95,7 @@ Requires:       vulkan-filesystem
 Requires:       xorg-x11-server-Xorg%{?_isa}
 %endif
 
-%if 0%{?fedora} == 24 || 0%{?rhel} == 7
+%if 0%{?rhel} == 7
 # X.org "OutputClass"
 Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.16
 %endif
@@ -265,7 +265,7 @@ mkdir -p %{buildroot}%{_modprobe_d}/
 mkdir -p %{buildroot}%{_dracut_conf_d}/
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
-%if 0%{?fedora} == 24 || 0%{?rhel}
+%if 0%{?rhel}
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
 %endif
 
@@ -313,7 +313,7 @@ install -p -m 0644 %{SOURCE50} %{buildroot}%{_unitdir}
 install -p -m 0644 %{SOURCE51} %{buildroot}%{_presetdir}
 %endif
 
-%if 0%{?fedora} == 24 || 0%{?rhel}
+%if 0%{?rhel}
 install -p -m 0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
 sed -i -e 's|@LIBDIR@|%{_libdir}|g' %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
 install -p -m 0644 %{SOURCE11} %{buildroot}%{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
@@ -346,7 +346,7 @@ cp -a lib*GL*_nvidia.so* libcuda.so* libnvidia-*.so* libnvcuvid.so* %{buildroot}
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
 
 # libglvnd indirect entry point and private libglvnd libraries
-%if 0%{?rhel} == 6 || 0%{?rhel} == 7 || 0%{?fedora} == 24
+%if 0%{?rhel} == 6 || 0%{?rhel} == 7
 cp -a libGLX_indirect.so* %{buildroot}%{_libdir}/
 install -m 0755 -d       $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
@@ -428,7 +428,7 @@ fi ||:
 %{_dracut_conf_d}/99-nvidia-dracut.conf
 
 # X.org configuration files
-%if 0%{?fedora} == 24 || 0%{?rhel}
+%if 0%{?rhel}
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
 %config(noreplace) %{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
 %endif
@@ -453,7 +453,7 @@ fi ||:
 %{_udevrulesdir}/60-nvidia-uvm.rules
 
 %files libs
-%if 0%{?rhel} == 6 || 0%{?rhel} == 7 || 0%{?fedora} == 24
+%if 0%{?rhel} == 6 || 0%{?rhel} == 7
 %{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %{_libdir}/libGLX_indirect.so.0
 %endif
