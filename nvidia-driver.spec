@@ -76,7 +76,7 @@ BuildRequires:  python
 BuildRequires:  systemd
 %endif
 
-%if 0%{?fedora} >= 25
+%if 0%{?fedora}
 # AppStream metadata generation
 BuildRequires:  libappstream-glib%{?_isa} >= 0.6.3
 %endif
@@ -249,7 +249,6 @@ cat nvidia_icd.json.template | sed -e 's/__NV_VK_ICD__/libGLX_nvidia.so.0/' > nv
 %install
 # Create empty tree
 mkdir -p %{buildroot}%{_bindir}
-mkdir -p %{buildroot}%{_datadir}/appdata/
 mkdir -p %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 mkdir -p %{buildroot}%{_datadir}/nvidia/
 mkdir -p %{buildroot}%{_datadir}/vulkan/icd.d/
@@ -269,7 +268,8 @@ mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
 %endif
 
-%if 0%{?fedora} >= 25
+%if 0%{?fedora}
+mkdir -p %{buildroot}%{_datadir}/appdata/
 mkdir -p %{buildroot}%{_unitdir}
 mkdir -p %{buildroot}%{_presetdir}
 %endif
@@ -299,7 +299,7 @@ install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-re
 # Man pages
 install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1/
 
-%if 0%{?fedora} >= 25
+%if 0%{?fedora}
 # install AppData and add modalias provides
 install -p -m 0644 %{SOURCE40} %{buildroot}%{_datadir}/appdata/
 fn=%{buildroot}%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
@@ -415,7 +415,7 @@ fi ||:
 %doc NVIDIA_Changelog README.txt html
 %dir %{_sysconfdir}/nvidia
 %{_bindir}/nvidia-bug-report.sh
-%if 0%{?fedora} >= 25
+%if 0%{?fedora}
 %{_datadir}/appdata/com.nvidia.driver.metainfo.xml
 %{_unitdir}/nvidia-fallback.service
 %{_presetdir}/95-nvidia-fallback.preset
