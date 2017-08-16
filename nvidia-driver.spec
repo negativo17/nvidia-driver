@@ -37,7 +37,7 @@
 
 Name:           nvidia-driver
 Version:        384.59
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -56,6 +56,7 @@ Source12:       99-nvidia-ignoreabi.conf
 Source13:       10-nvidia.conf
 
 Source20:       nvidia.conf
+Source21:       60-nvidia-drm.rules
 Source22:       60-nvidia-uvm.rules
 Source23:       nvidia-uvm.conf
 Source24:       99-nvidia-dracut.conf
@@ -338,8 +339,10 @@ install -p -m 0644 nvidia-application-profiles-%{version}-key-documentation \
 install -p -m 0644 nvidia-application-profiles-%{version}-rc \
     %{buildroot}%{_datadir}/nvidia/
 
-# UDev rules for nvidia-uvm
-install -p -m 644 %{SOURCE22} %{buildroot}%{_udevrulesdir}
+# UDev rules:
+# https://github.com/NVIDIA/nvidia-modprobe/blob/master/modprobe-utils/nvidia-modprobe-utils.h#L33-L46
+# https://github.com/negativo17/nvidia-driver/issues/27
+install -p -m 644 %{SOURCE21} %{SOURCE22} %{buildroot}%{_udevrulesdir}
 
 # Unique libraries
 cp -a lib*GL*_nvidia.so* libcuda.so* libnvidia-*.so* libnvcuvid.so* %{buildroot}%{_libdir}/
@@ -348,8 +351,8 @@ cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
 # libglvnd indirect entry point and private libglvnd libraries
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
 cp -a libGLX_indirect.so* %{buildroot}%{_libdir}/
-install -m 0755 -d       $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/
-echo -e "%{_glvnd_libdir} \n" > $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
+install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
+echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
 
 
@@ -422,10 +425,11 @@ fi ||:
 %endif
 %{_datadir}/nvidia
 %{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
+%{_dracut_conf_d}/99-nvidia-dracut.conf
 %{_libdir}/nvidia
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
 %{_modprobe_d}/nvidia.conf
-%{_dracut_conf_d}/99-nvidia-dracut.conf
+%{_udevrulesdir}/60-nvidia-drm.rules
 
 # X.org configuration files
 %if 0%{?rhel}
@@ -506,6 +510,10 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Tue Aug 15 2017 Simone Caronni <negativo17@gmail.com> - 2:384.59-3
+- Add udev rules to always create device nodes:
+  https://github.com/negativo17/nvidia-driver/issues/27
+
 * Tue Aug 08 2017 Simone Caronni <negativo17@gmail.com> - 2:384.59-2
 - Remove spurious dependency on main driver for libraries.
 

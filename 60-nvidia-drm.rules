@@ -1,0 +1,3 @@
+KERNEL=="nvidia", RUN+="/usr/bin/bash -c '/usr/bin/mknod -m 666 /dev/nvidiactl c 195 255"
+KERNEL=="nvidia", RUN+="/usr/bin/bash -c 'for i in $(cat /proc/driver/nvidia/gpus/*/information | grep Minor | cut -d \  -f 4); do /usr/bin/mknod -m 666 /dev/nvidia${i} c 195 ${i}; done"
+KERNEL=="nvidia_modeset", RUN+="/usr/bin/bash -c '/usr/bin/mknod -m 666 /dev/nvidia-modeset c 195 254"
