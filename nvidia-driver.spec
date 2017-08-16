@@ -37,7 +37,7 @@
 
 Name:           nvidia-driver
 Version:        384.59
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -342,7 +342,7 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 # UDev rules:
 # https://github.com/NVIDIA/nvidia-modprobe/blob/master/modprobe-utils/nvidia-modprobe-utils.h#L33-L46
 # https://github.com/negativo17/nvidia-driver/issues/27
-install -p -m 644 %{SOURCE21} %{SOURCE22} %{buildroot}%{_udevrulesdir}
+install -p -m 644 %{SOURCE22} %{buildroot}%{_udevrulesdir}
 
 # Unique libraries
 cp -a lib*GL*_nvidia.so* libcuda.so* libnvidia-*.so* libnvcuvid.so* %{buildroot}%{_libdir}/
@@ -413,7 +413,6 @@ fi ||:
 %postun NVML -p /sbin/ldconfig
 
 %files
-%{!?_licensedir:%global license %%doc}
 %license LICENSE
 %doc NVIDIA_Changelog README.txt html
 %dir %{_sysconfdir}/nvidia
@@ -429,7 +428,6 @@ fi ||:
 %{_libdir}/nvidia
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
 %{_modprobe_d}/nvidia.conf
-%{_udevrulesdir}/60-nvidia-drm.rules
 
 # X.org configuration files
 %if 0%{?rhel}
@@ -510,6 +508,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Wed Aug 16 2017 Simone Caronni <negativo17@gmail.com> - 2:384.59-4
+- Momentarily revert udev rules installation for basic devices.
+
 * Tue Aug 15 2017 Simone Caronni <negativo17@gmail.com> - 2:384.59-3
 - Add udev rules to always create device nodes:
   https://github.com/negativo17/nvidia-driver/issues/27
