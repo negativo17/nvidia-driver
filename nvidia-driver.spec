@@ -1,8 +1,8 @@
 %global debug_package %{nil}
 %global __strip /bin/true
 
-%if 0%{?rhel} == 6
 # RHEL 6 does not have _udevrulesdir defined
+%if 0%{?rhel} == 6
 %global _udevrulesdir   %{_prefix}/lib/udev/rules.d/
 %global _dracutopts     nouveau.modeset=0 rdblacklist=nouveau
 %global _dracutopts_rm  nomodeset vga=normal
@@ -14,19 +14,28 @@
 %if 0%{?rhel} == 7
 %global _dracutopts     nouveau.modeset=0 rd.driver.blacklist=nouveau
 %global _dracutopts_rm  nomodeset gfxpayload=vga=normal
-%global _dracut_conf_d	%{_prefix}/lib/dracut.conf.d
+%global _dracut_conf_d  %{_prefix}/lib/dracut.conf.d
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
 %endif
 
-%if 0%{?fedora} >= 25
 # Fedora 25+ has a fallback service where it tries to load nouveau if nvidia is
 # not loaded, so don't disable it. Just matching the driver with OutputClass in
 # the X.org configuration is enough to load the whole Nvidia stack or the Mesa
 # one.
+%if 0%{?fedora} == 25 || 0%{?fedora} == 26
 %global _dracutopts     rd.driver.blacklist=nouveau
 %global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0
-%global _dracut_conf_d	%{_prefix}/lib/dracut.conf.d
+%global _dracut_conf_d  %{_prefix}/lib/dracut.conf.d
+%global _modprobe_d     %{_prefix}/lib/modprobe.d/
+%global _grubby         %{_sbindir}/grubby --update-kernel=ALL
+%endif
+
+# Gnome Wayland support for Nvidia requires Mutter 3.25+
+%if 0%{?fedora} >= 27
+%global _dracutopts     rd.driver.blacklist=nouveau nvidia-drm.modeset=1
+%global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0
+%global _dracut_conf_d  %{_prefix}/lib/dracut.conf.d
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
 %endif
@@ -37,7 +46,7 @@
 
 Name:           nvidia-driver
 Version:        384.59
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -285,7 +294,7 @@ install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 install -p -m 0644 nvidia_icd.%{_target_cpu}.json %{buildroot}%{_datadir}/vulkan/icd.d/
 install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 
-# Blacklist nouveau, enable KMS
+# Blacklist nouveau
 install -p -m 0644 %{SOURCE20} %{buildroot}%{_modprobe_d}/
 
 # Autoload nvidia-uvm module after nvidia module
@@ -509,6 +518,11 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Tue Aug 29 2017 Simone Caronni <negativo17@gmail.com> - 2:384.59-6
+- Make the major number of Nvidia devices dynamic again:
+  https://github.com/negativo17/nvidia-driver/issues/29
+- Enable modeset by default for Fedora 27.
+
 * Sun Aug 27 2017 Simone Caronni <negativo17@gmail.com> - 2:384.59-5
 - Re-add udev rules to create device files with SELinux context (thanks Leigh).
 
