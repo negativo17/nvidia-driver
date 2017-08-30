@@ -45,8 +45,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        384.59
-Release:        6%{?dist}
+Version:        384.69
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -518,6 +518,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Wed Aug 30 2017 Simone Caronni <negativo17@gmail.com> - 2:384.69-1
+- Update to 384.69.
+
 * Tue Aug 29 2017 Simone Caronni <negativo17@gmail.com> - 2:384.59-6
 - Make the major number of Nvidia devices dynamic again:
   https://github.com/negativo17/nvidia-driver/issues/29
