@@ -45,7 +45,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        384.90
+Version:        384.98
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
@@ -518,6 +518,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Tue Nov 14 2017 Simone Caronni <negativo17@gmail.com> - 2:384.98-1
+- Update to 384.98.
+
 * Fri Sep 22 2017 Simone Caronni <negativo17@gmail.com> - 2:384.90-1
 - Update to 384.90.
 
