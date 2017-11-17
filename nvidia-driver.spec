@@ -23,18 +23,9 @@
 # not loaded, so don't disable it. Just matching the driver with OutputClass in
 # the X.org configuration is enough to load the whole Nvidia stack or the Mesa
 # one.
-%if 0%{?fedora} == 25 || 0%{?fedora} == 26
+%if 0%{?fedora}
 %global _dracutopts     rd.driver.blacklist=nouveau
-%global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0
-%global _dracut_conf_d  %{_prefix}/lib/dracut.conf.d
-%global _modprobe_d     %{_prefix}/lib/modprobe.d/
-%global _grubby         %{_sbindir}/grubby --update-kernel=ALL
-%endif
-
-# Gnome Wayland support for Nvidia requires Mutter 3.25+
-%if 0%{?fedora} >= 27
-%global _dracutopts     rd.driver.blacklist=nouveau nvidia-drm.modeset=1
-%global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0
+%global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0 nvidia-drm.modeset=1
 %global _dracut_conf_d  %{_prefix}/lib/dracut.conf.d
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
@@ -46,7 +37,7 @@
 
 Name:           nvidia-driver
 Version:        387.22
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -518,6 +509,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Fri Nov 17 2017 Simone Caronni <negativo17@gmail.com> - 2:387.22-2
+- Revert modeset by default for Fedora 27.
+
 * Tue Oct 31 2017 Simone Caronni <negativo17@gmail.com> - 2:387.22-1
 - Update to 387.22.
 
