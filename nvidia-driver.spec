@@ -36,8 +36,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        387.22
-Release:        2%{?dist}
+Version:        387.34
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -509,6 +509,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Tue Nov 28 2017 Simone Caronni <negativo17@gmail.com> - 2:387.34-1
+- Update to 387.34.
+
 * Fri Nov 17 2017 Simone Caronni <negativo17@gmail.com> - 2:387.22-2
 - Revert modeset by default for Fedora 27.
 
