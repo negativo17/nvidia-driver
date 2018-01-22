@@ -52,14 +52,20 @@ create_tarball() {
 ARCH=i386
 RUN_FILE=nvidia-${VERSION}-${ARCH}.run
 DIST_FILE=NVIDIA-Linux-x86-${VERSION}.run
-wget -c ${DL_SITE}/Linux-x86/${VERSION}/$DIST_FILE
-mv $DIST_FILE $RUN_FILE
+if [ -f $DIST_FILE ]; then
+    ln -s $DIST_FILE $RUN_FILE
+else
+    wget -c ${DL_SITE}/Linux-x86/${VERSION}/$DIST_FILE -O $RUN_FILE
+fi
 create_tarball
 
 ARCH=x86_64
 RUN_FILE=nvidia-${VERSION}-${ARCH}.run
 DIST_FILE=NVIDIA-Linux-${ARCH}-${VERSION}-no-compat32.run
-wget -c ${DL_SITE}/Linux-${ARCH}/${VERSION}/$DIST_FILE
-mv $DIST_FILE $RUN_FILE
+if [ -f $DIST_FILE ]; then
+    ln -s $DIST_FILE $RUN_FILE
+else
+    wget -c ${DL_SITE}/Linux-${ARCH}/${VERSION}/$DIST_FILE -O $RUN_FILE
+fi
 create_tarball
 
