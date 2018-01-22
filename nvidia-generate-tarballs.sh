@@ -9,7 +9,7 @@ create_tarball() {
     KMOD=nvidia-kmod-${VERSION}-${ARCH}
     DRIVER=nvidia-driver-${VERSION}-${ARCH}
 
-    sh nvidia-${VERSION}-${ARCH}.run --extract-only --target temp
+    sh $RUN_FILE --extract-only --target temp
     mkdir ${KMOD} ${KMOD_MULTI} ${DRIVER}
 
     cd temp
@@ -46,16 +46,18 @@ create_tarball() {
     tar --remove-files -cJf ${KMOD}.tar.xz ${KMOD}
     tar --remove-files -cJf ${DRIVER}.tar.xz ${DRIVER}
 
-    rm -f nvidia-${VERSION}-${ARCH}.run
+    rm -f $RUN_FILE
 }
 
 ARCH=i386
+RUN_FILE=nvidia-${VERSION}-${ARCH}.run
 wget -c ${DL_SITE}/Linux-x86/${VERSION}/NVIDIA-Linux-x86-${VERSION}.run
-mv NVIDIA-Linux-x86-${VERSION}.run nvidia-${VERSION}-${ARCH}.run
+mv NVIDIA-Linux-x86-${VERSION}.run $RUN_FILE
 create_tarball
 
 ARCH=x86_64
+RUN_FILE=nvidia-${VERSION}-${ARCH}.run
 wget -c ${DL_SITE}/Linux-${ARCH}/${VERSION}/NVIDIA-Linux-${ARCH}-${VERSION}-no-compat32.run
-mv NVIDIA-Linux-${ARCH}-${VERSION}-no-compat32.run nvidia-${VERSION}-${ARCH}.run
+mv NVIDIA-Linux-${ARCH}-${VERSION}-no-compat32.run $RUN_FILE
 create_tarball
 
