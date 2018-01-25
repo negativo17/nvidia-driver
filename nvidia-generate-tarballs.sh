@@ -1,18 +1,28 @@
-#!/bin/sh -x
+#!/bin/sh
 set -e
 
-VERSION=384.90
-#DL_SITE=ftp://download.nvidia.com/XFree86
-DL_SITE=http://us.download.nvidia.com/XFree86
+VERSION=${VERSION:-390.12}
+DL_SITE=${DL_SITE:-http://us.download.nvidia.com/XFree86}
+TEMP_UNPACK=${TEMP_UNPACK:-temp}
+
+get_run_file() {
+    printf "Downloading installer for ${VERSION} ${ARCH}... "
+    [[ -f $RUN_FILE ]] || wget -c -q ${DL_SITE}/${PLATFORM}/${VERSION}/$RUN_FILE
+    printf "OK\n"
+}
+
+extract_run_file() {
+    sh ${RUN_FILE} --extract-only --target ${TEMP_UNPACK}
+}
 
 create_tarball() {
+    printf "Creating tarballs for ${VERSION} ${ARCH}... "
+
     KMOD=nvidia-kmod-${VERSION}-${ARCH}
     DRIVER=nvidia-driver-${VERSION}-${ARCH}
+    mkdir ${KMOD} ${DRIVER}
 
-    sh nvidia-${VERSION}-${ARCH}.run --extract-only --target temp
-    mkdir ${KMOD} ${KMOD_MULTI} ${DRIVER}
-
-    cd temp
+    cd ${TEMP_UNPACK}
 
     # Compiled from source
     rm -f \
@@ -41,21 +51,24 @@ create_tarball() {
     mv * ../${DRIVER}/
 
     cd ..
-    rm -fr temp
+    rm -fr ${TEMP_UNPACK}
 
     tar --remove-files -cJf ${KMOD}.tar.xz ${KMOD}
     tar --remove-files -cJf ${DRIVER}.tar.xz ${DRIVER}
 
-    rm -f nvidia-${VERSION}-${ARCH}.run
+    printf "OK\n"
 }
 
 ARCH=i386
-wget -c ${DL_SITE}/Linux-x86/${VERSION}/NVIDIA-Linux-x86-${VERSION}.run
-mv NVIDIA-Linux-x86-${VERSION}.run nvidia-${VERSION}-${ARCH}.run
+PLATFORM=Linux-x86
+RUN_FILE=NVIDIA-${PLATFORM}-${VERSION}.run
+get_run_file
+extract_run_file
 create_tarball
 
 ARCH=x86_64
-wget -c ${DL_SITE}/Linux-${ARCH}/${VERSION}/NVIDIA-Linux-${ARCH}-${VERSION}-no-compat32.run
-mv NVIDIA-Linux-${ARCH}-${VERSION}-no-compat32.run nvidia-${VERSION}-${ARCH}.run
+PLATFORM=Linux-${ARCH}
+RUN_FILE=NVIDIA-${PLATFORM}-${VERSION}-no-compat32.run
+get_run_file
+extract_run_file
 create_tarball
-
