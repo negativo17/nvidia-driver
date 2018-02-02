@@ -14,7 +14,7 @@
 %if 0%{?rhel} == 7
 %global _dracutopts     nouveau.modeset=0 rd.driver.blacklist=nouveau
 %global _dracutopts_rm  nomodeset gfxpayload=vga=normal
-%global _dracut_conf_d  %{_prefix}/lib/dracut.conf.d
+%global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
 %endif
@@ -26,7 +26,7 @@
 %if 0%{?fedora}
 %global _dracutopts     rd.driver.blacklist=nouveau
 %global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0 nvidia-drm.modeset=1
-%global _dracut_conf_d  %{_prefix}/lib/dracut.conf.d
+%global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
 %endif
@@ -37,7 +37,7 @@
 
 Name:           nvidia-driver
 Version:        390.25
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -509,6 +509,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Fri Feb 02 2018 Simone Caronni <negativo17@gmail.com> - 2:390.25-2
+- Fix omitting drivers from the initrd.
+
 * Tue Jan 30 2018 Simone Caronni <negativo17@gmail.com> - 2:390.25-1
 - Update to 390.25.
 
