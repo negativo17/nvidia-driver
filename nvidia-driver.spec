@@ -37,7 +37,7 @@
 
 Name:           nvidia-driver
 Version:        390.25
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -235,6 +235,8 @@ ldconfig -vn .
 
 # Required for building gstreamer 1.0 NVENC plugins
 ln -sf libnvidia-encode.so.%{version} libnvidia-encode.so
+# Required for building for NVML usage
+ln -sf libnvidia-ml.so.%{version} libnvidia-ml.so
 # Required for building ffmpeg 3.1 Nvidia CUVID
 ln -sf libnvcuvid.so.%{version} libnvcuvid.so
 # Required for building against CUDA
@@ -507,8 +509,12 @@ fi ||:
 %{_includedir}/nvidia/
 %{_libdir}/libnvcuvid.so
 %{_libdir}/libnvidia-encode.so
+%{_libdir}/libnvidia-ml.so
 
 %changelog
+* Thu Feb 22 2018 Lars R. Damerow <lars@grandstreet.us> - 2:390.25-3
+- Include libnvidia-ml.so symlink in devel package.
+
 * Fri Feb 02 2018 Simone Caronni <negativo17@gmail.com> - 2:390.25-2
 - Fix omitting drivers from the initrd.
 
