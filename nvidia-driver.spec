@@ -37,7 +37,7 @@
 
 Name:           nvidia-driver
 Version:        390.25
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          2
 License:        NVIDIA License
@@ -214,8 +214,8 @@ Conflicts:      xorg-x11-drv-nvidia-devel-304xx
 Conflicts:      xorg-x11-drv-nvidia-devel-340xx
 Requires:       %{name}-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires:       %{name}-NVML%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       cuda-devel%{?_isa} >= 1:9.1.85
 
 %description devel
 This package provides the development files of the %{name} package,
@@ -509,6 +509,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Tue Feb 27 2018 Simone Caronni <negativo17@gmail.com> - 2:390.25-3
+- Require libnvidia-ml.so in nvidia-driver-devel package.
+
 * Fri Feb 02 2018 Simone Caronni <negativo17@gmail.com> - 2:390.25-2
 - Fix omitting drivers from the initrd.
 
