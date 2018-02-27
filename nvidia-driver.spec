@@ -215,7 +215,7 @@ Conflicts:      xorg-x11-drv-nvidia-devel-340xx
 Requires:       %{name}-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires:       cuda-devel%{?_isa} >= 1:9.1.85
+Requires:       cuda-nvml-devel%{?_isa} >= 1:9.1.85
 
 %description devel
 This package provides the development files of the %{name} package,
