@@ -37,9 +37,9 @@
 
 Name:           nvidia-driver
 Version:        390.25
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
-Epoch:          2
+Epoch:          3
 License:        NVIDIA License
 URL:            http://www.nvidia.com/object/unix.html
 ExclusiveArch:  %{ix86} x86_64
@@ -509,6 +509,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Tue Feb 27 2018 Simone Caronni <negativo17@gmail.com> - 3:390.25-4
+- Update Epoch so packages do not overlap with RPMFusion.
+
 * Tue Feb 27 2018 Simone Caronni <negativo17@gmail.com> - 2:390.25-3
 - Require libnvidia-ml.so in nvidia-driver-devel package.
 
