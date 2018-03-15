@@ -36,8 +36,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        390.25
-Release:        4%{?dist}
+Version:        390.42
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -509,6 +509,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Thu Mar 15 2018 Simone Caronni <negativo17@gmail.com> - 3:390.42-1
+- Update to 390.42.
+
 * Tue Feb 27 2018 Simone Caronni <negativo17@gmail.com> - 3:390.25-4
 - Update Epoch so packages do not overlap with RPMFusion.
 
