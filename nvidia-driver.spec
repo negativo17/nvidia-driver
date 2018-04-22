@@ -35,8 +35,10 @@
 %global _glvnd_libdir   %{_libdir}/libglvnd
 %endif
 
+%bcond_without          driver
+
 Name:           nvidia-driver
-Version:        390.48
+Version:        396.18
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -206,6 +208,13 @@ and the SDK provides the appropriate header, stub libraries and sample
 applications. Each new version of NVML is backwards compatible and is intended
 to be a platform for building 3rd party applications.
 
+%package headers
+Summary:        Development files for %{name} (headers-only)
+BuildArch:      noarch
+
+%description headers
+This package provides the development headers of the %{name} package.
+
 %package devel
 Summary:        Development files for %{name}
 Conflicts:      xorg-x11-drv-nvidia-devel
@@ -215,12 +224,12 @@ Conflicts:      xorg-x11-drv-nvidia-devel-340xx
 Requires:       %{name}-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       %{name}-headers = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       cuda-nvml-devel%{?_isa} >= 1:9.1.85
 
 %description devel
-This package provides the development files of the %{name} package,
-such as OpenGL headers.
- 
+This package provides the development files of the %{name} package.
+
 %prep
 %ifarch %{ix86}
 %setup -q -n %{name}-%{version}-i386
@@ -243,20 +252,27 @@ ln -sf libcuda.so.%{version} libcuda.so
 ln -sf libGLX_nvidia.so.%{version} libGLX_indirect.so.0
 
 # Use libglvnd for Vulkan
-cat nvidia_icd.json.template | sed -e 's/__NV_VK_ICD__/libGLX_nvidia.so.0/' > nvidia_icd.%{_target_cpu}.json
+if [ -f nvidia_icd.json.template ]; then
+    cat nvidia_icd.json.template | sed -e 's/__NV_VK_ICD__/libGLX_nvidia.so.0/' > nvidia_icd.%{_target_cpu}.json
+fi
 
 %build
 
 %install
-# Create empty tree
+# Create empty libs tree
+mkdir -p %{buildroot}%{_libdir}/nvidia/xorg/
+mkdir -p %{buildroot}%{_libdir}/vdpau/
+mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
+
+# START: driver-only
+%if %{with driver}
+
+# Create empty driver tree
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 mkdir -p %{buildroot}%{_datadir}/nvidia/
 mkdir -p %{buildroot}%{_datadir}/vulkan/icd.d/
 mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
-mkdir -p %{buildroot}%{_libdir}/nvidia/xorg/
-mkdir -p %{buildroot}%{_libdir}/vdpau/
-mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
 mkdir -p %{buildroot}%{_mandir}/man1/
 mkdir -p %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
@@ -344,6 +360,9 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 # https://github.com/negativo17/nvidia-driver/issues/27
 install -p -m 644 %{SOURCE21} %{SOURCE22} %{buildroot}%{_udevrulesdir}
 
+%endif
+# END driver-only
+
 # Unique libraries
 cp -a lib*GL*_nvidia.so* libcuda.so* libnvidia-*.so* libnvcuvid.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
@@ -355,6 +374,8 @@ install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
 
+# START: driver only
+%if %{with driver}
 
 # Apply the systemd preset for nvidia-fallback.service when upgrading from
 # a version without nvidia-fallback.service, as %%systemd_post only does this
@@ -380,6 +401,9 @@ fi || :
 %systemd_post nvidia-fallback.service
 %endif
 
+%endif
+# END driver-only
+
 %post libs -p /sbin/ldconfig
 
 %post cuda-libs -p /sbin/ldconfig
@@ -387,6 +411,9 @@ fi || :
 %post NvFBCOpenGL -p /sbin/ldconfig
 
 %post NVML -p /sbin/ldconfig
+
+# START: driver-only
+%if %{with driver}
 
 %preun
 if [ "$1" -eq "0" ]; then
@@ -404,6 +431,9 @@ fi ||:
 %systemd_postun nvidia-fallback.service
 %endif
 
+%endif
+# END: driver-only
+
 %postun libs -p /sbin/ldconfig
 
 %postun cuda-libs -p /sbin/ldconfig
@@ -411,6 +441,9 @@ fi ||:
 %postun NvFBCOpenGL -p /sbin/ldconfig
 
 %postun NVML -p /sbin/ldconfig
+
+# START: driver-only
+%if %{with driver}
 
 %files
 %license LICENSE
@@ -424,8 +457,11 @@ fi ||:
 %endif
 %{_datadir}/nvidia
 %{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
+%{_datadir}/glvnd/egl_vendor.d/*
 %{_dracut_conf_d}/99-nvidia-dracut.conf
 %{_libdir}/nvidia
+%{_libdir}/libnvidia-cfg.so.1
+%{_libdir}/libnvidia-cfg.so.%{version}
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
 %{_modprobe_d}/nvidia.conf
 %{_udevrulesdir}/60-nvidia-drm.rules
@@ -455,12 +491,17 @@ fi ||:
 %{_modprobe_d}/nvidia-uvm.conf
 %{_udevrulesdir}/60-nvidia-uvm.rules
 
+%files headers
+%{_includedir}/nvidia/
+
+%endif
+# END: driver-only
+
 %files libs
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
 %{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %{_libdir}/libGLX_indirect.so.0
 %endif
-%{_datadir}/glvnd/egl_vendor.d/*
 %{_libdir}/libEGL_nvidia.so.0
 %{_libdir}/libEGL_nvidia.so.%{version}
 %{_libdir}/libGLESv1_CM_nvidia.so.1
@@ -469,11 +510,10 @@ fi ||:
 %{_libdir}/libGLESv2_nvidia.so.%{version}
 %{_libdir}/libGLX_nvidia.so.0
 %{_libdir}/libGLX_nvidia.so.%{version}
-%{_libdir}/libnvidia-cfg.so.1
-%{_libdir}/libnvidia-cfg.so.%{version}
 %{_libdir}/libnvidia-eglcore.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
 %{_libdir}/libnvidia-glsi.so.%{version}
+%{_libdir}/libnvidia-glvkspirv.so.%{version}
 %{_libdir}/libnvidia-tls.so.%{version}
 %{_libdir}/vdpau/libvdpau_nvidia.so.1
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
@@ -504,11 +544,19 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %files devel
-%{_includedir}/nvidia/
 %{_libdir}/libnvcuvid.so
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+
+* Sun Apr 22 2018 Daniel Miranda <danielkza2@gmail.com> - 3:396.18-1
+- Update to 396.18.
+- Build i386 libraries from the x86_64 packages, now that NVIDIA will stop
+  releasing 32-bit versions of the drivers.
+- Split up a new nvidia-driver-headers package, and add it as a dependency
+  of nvidia-driver-devel, as it is architecture-independent, and now can only be
+  built from the 64-bit driver package.
+
 * Tue Apr 03 2018 Simone Caronni <negativo17@gmail.com> - 3:390.48-1
 - Update to 390.48.
 
