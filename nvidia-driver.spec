@@ -404,13 +404,17 @@ fi || :
 %endif
 # END driver-only
 
-%post libs -p /sbin/ldconfig
+%post libs
+/sbin/ldconfig
 
-%post cuda-libs -p /sbin/ldconfig
+%post cuda-libs
+/sbin/ldconfig
 
-%post NvFBCOpenGL -p /sbin/ldconfig
+%post NvFBCOpenGL
+/sbin/ldconfig
 
-%post NVML -p /sbin/ldconfig
+%post NVML
+/sbin/ldconfig
 
 # START: driver-only
 %if %{with driver}
@@ -434,13 +438,17 @@ fi ||:
 %endif
 # END: driver-only
 
-%postun libs -p /sbin/ldconfig
+%postun libs
+/sbin/ldconfig
 
-%postun cuda-libs -p /sbin/ldconfig
+%postun cuda-libs
+/sbin/ldconfig
 
-%postun NvFBCOpenGL -p /sbin/ldconfig
+%postun NvFBCOpenGL
+/sbin/ldconfig
 
-%postun NVML -p /sbin/ldconfig
+%postun NVML
+/sbin/ldconfig
 
 # START: driver-only
 %if %{with driver}
@@ -556,6 +564,8 @@ fi ||:
 - Split up a new nvidia-driver-headers package, and add it as a dependency
   of nvidia-driver-devel, as it is architecture-independent, and now can only be
   built from the 64-bit driver package.
+- Don't call ldconfig as an interpreter in scriplets. Make it a regular command.
+
 
 * Tue Apr 03 2018 Simone Caronni <negativo17@gmail.com> - 3:390.48-1
 - Update to 390.48.
