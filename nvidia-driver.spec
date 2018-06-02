@@ -91,10 +91,6 @@ Requires:       nvidia-kmod = %{?epoch:%{epoch}:}%{version}
 Provides:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
 Requires:       libva-vdpau-driver%{?_isa}
 
-%if 0%{?fedora} || 0%{?rhel} >= 7
-Requires:       vulkan-filesystem
-%endif
-
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
 # X.org "OutputClass"
 Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.16
@@ -139,6 +135,10 @@ Requires:       libglvnd-opengl%{?_isa} >= 0.2
 
 %if 0%{?fedora} >= 25 || 0%{?rhel} >= 8
 Requires:       egl-wayland
+%endif
+
+%if 0%{?fedora} || 0%{?rhel} >= 7
+Requires:       vulkan-filesystem
 %endif
 
 Conflicts:      nvidia-x11-drv-libs
