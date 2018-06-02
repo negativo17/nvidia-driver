@@ -31,13 +31,13 @@
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
 %endif
 
-%if 0%{?rhel}
+%if 0%{?rhel} == 6 || 0%{?rhel} == 7
 %global _glvnd_libdir   %{_libdir}/libglvnd
 %endif
 
 Name:           nvidia-driver
 Version:        390.59
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -46,14 +46,13 @@ ExclusiveArch:  %{ix86} x86_64
 
 Source0:        %{name}-%{version}-i386.tar.xz
 Source1:        %{name}-%{version}-x86_64.tar.xz
-# For servers up to 1.19.0-3
+# For servers without OutputClass device options
 Source10:       99-nvidia-modules.conf
-# For servers from 1.16 to 1.19.0-3
 Source11:       10-nvidia-driver.conf
+# For servers with OutputClass device options
+Source12:       10-nvidia.conf
 # For unreleased Fedora versions
-Source12:       99-nvidia-ignoreabi.conf
-# For servers 1.19.0-3+
-Source13:       10-nvidia.conf
+Source13:       99-nvidia-ignoreabi.conf
 
 Source20:       nvidia.conf
 Source21:       60-nvidia-drm.rules
@@ -88,20 +87,12 @@ Requires:       nvidia-kmod = %{?epoch:%{epoch}:}%{version}
 Provides:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
 Requires:       libva-vdpau-driver%{?_isa}
 
-%if 0%{?fedora}
-Requires:       vulkan-filesystem
-%endif
-
-%if 0%{?rhel} == 6
-Requires:       xorg-x11-server-Xorg%{?_isa}
-%endif
-
-%if 0%{?rhel} == 7
+%if 0%{?rhel} == 6 || 0%{?rhel} == 7
 # X.org "OutputClass"
 Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.16
 %endif
 
-%if 0%{?fedora} >= 25
+%if 0%{?fedora}
 # Extended "OutputClass" with device options
 Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.19.0-3
 # For auto-fallback to nouveau systemd service
@@ -138,8 +129,12 @@ Requires:       libglvnd-gles%{?_isa} >= 0.2
 Requires:       libglvnd-glx%{?_isa} >= 0.2
 Requires:       libglvnd-opengl%{?_isa} >= 0.2
 
-%if 0%{?fedora} >= 25 || 0%{?rhel} >= 8
+%if 0%{?fedora} || 0%{?rhel} >= 8
 Requires:       egl-wayland
+%endif
+
+%if 0%{?fedora} || 0%{?rhel} >= 7
+Requires:       vulkan-filesystem
 %endif
 
 Conflicts:      nvidia-x11-drv-libs
@@ -314,19 +309,19 @@ install -p -m 0644 %{SOURCE50} %{buildroot}%{_unitdir}
 install -p -m 0644 %{SOURCE51} %{buildroot}%{_presetdir}
 %endif
 
-%if 0%{?rhel}
+%if 0%{?rhel} == 6 || 0%{?rhel} == 7
 install -p -m 0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
 sed -i -e 's|@LIBDIR@|%{_libdir}|g' %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
 install -p -m 0644 %{SOURCE11} %{buildroot}%{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
 %endif
 
-%if 0%{?fedora} >= 25
-install -p -m 0644 %{SOURCE13} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
+%if 0%{?fedora}
+install -p -m 0644 %{SOURCE12} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 sed -i -e 's|@LIBDIR@|%{_libdir}|g' %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %endif
 
-%if 0%{?fedora} >= 26
-install -p -m 0644 %{SOURCE12} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-ignoreabi.conf
+%if 0%{?fedora} >= 29
+install -p -m 0644 %{SOURCE13} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-ignoreabi.conf
 %endif
 
 # X stuff
@@ -359,7 +354,7 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 # Apply the systemd preset for nvidia-fallback.service when upgrading from
 # a version without nvidia-fallback.service, as %%systemd_post only does this
 # on fresh installs
-%if 0%{?fedora} >= 25
+%if 0%{?fedora}
 %triggerun -- %{name} < 2:381.22-2
 systemctl --no-reload preset nvidia-fallback.service >/dev/null 2>&1 || :
 %endif
@@ -376,7 +371,7 @@ if [ "$1" -eq "2" ]; then
   %{_grubby} --remove-args='%{_dracutopts_rm}' &>/dev/null
   for param in %{_dracutopts_rm}; do sed -i -e "s/$param //g" /etc/default/grub; done
 fi || :
-%if 0%{?fedora} >= 25
+%if 0%{?fedora}
 %systemd_post nvidia-fallback.service
 %endif
 
@@ -395,11 +390,11 @@ if [ "$1" -eq "0" ]; then
   sed -i -e 's/%{_dracutopts} //g' /etc/default/grub
 %endif
 fi ||:
-%if 0%{?fedora} >= 25
+%if 0%{?fedora}
 %systemd_preun nvidia-fallback.service
 %endif
 
-%if 0%{?fedora} >= 25
+%if 0%{?fedora}
 %postun
 %systemd_postun nvidia-fallback.service
 %endif
@@ -423,7 +418,6 @@ fi ||:
 %{_presetdir}/95-nvidia-fallback.preset
 %endif
 %{_datadir}/nvidia
-%{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
 %{_dracut_conf_d}/99-nvidia-dracut.conf
 %{_libdir}/nvidia
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
@@ -436,11 +430,11 @@ fi ||:
 %config(noreplace) %{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
 %endif
 
-%if 0%{?fedora} >= 25
+%if 0%{?fedora}
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %endif
 
-%if 0%{?fedora} >= 26 || 0%{?rhel} >= 8
+%if 0%{?fedora} >= 29 || 0%{?rhel} >= 8
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/99-nvidia-ignoreabi.conf
 %endif
 
@@ -460,7 +454,8 @@ fi ||:
 %{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %{_libdir}/libGLX_indirect.so.0
 %endif
-%{_datadir}/glvnd/egl_vendor.d/*
+%{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
+%{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
 %{_libdir}/libEGL_nvidia.so.0
 %{_libdir}/libEGL_nvidia.so.%{version}
 %{_libdir}/libGLESv1_CM_nvidia.so.1
@@ -509,6 +504,10 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Sat Jun 02 2018 Simone Caronni <negativo17@gmail.com> - 3:390.59-2
+- Fix Vulkan ownership of files.
+- Update conditionals for distributions.
+
 * Tue May 22 2018 Simone Caronni <negativo17@gmail.com> - 3:390.59-1
 - Update to 390.59.
 
