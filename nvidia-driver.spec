@@ -36,8 +36,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        390.59
-Release:        2%{?dist}
+Version:        390.67
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -504,6 +504,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Mon Jun 11 2018 Simone Caronni <negativo17@gmail.com> - 3:390.67-1
+- Update to 390.67.
+
 * Sat Jun 02 2018 Simone Caronni <negativo17@gmail.com> - 3:390.59-2
 - Fix Vulkan ownership of files.
 - Update conditionals for distributions.
