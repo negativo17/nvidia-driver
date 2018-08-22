@@ -36,7 +36,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        396.51
+Version:        396.54
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -138,7 +138,7 @@ Requires:       egl-wayland
 %endif
 
 %if 0%{?fedora} || 0%{?rhel} >= 7
-Requires:       vulkan-filesystem
+Requires:       vulkan-loader
 %endif
 
 Conflicts:      nvidia-x11-drv-libs
@@ -528,6 +528,9 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Aug 22 2018 Simone Caronni <negativo17@gmail.com> - 3:396.54-1
+- Update to 396.54.
+
 * Sun Aug 19 2018 Simone Caronni <negativo17@gmail.com> - 3:396.51-1
 - Update to 396.51.
 
