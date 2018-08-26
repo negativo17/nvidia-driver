@@ -35,6 +35,14 @@
 %global _glvnd_libdir   %{_libdir}/libglvnd
 %endif
 
+%ifarch %{ix86}
+%global _flatpakarch i386
+%else
+%global _flatpakarch %{_arch}
+%endif
+
+%global _flatpakdir %{_sharedstatedir}/flatpak/extension/org.freedesktop.Platform.GL.host/%{_flatpakarch}/1.4
+
 Name:           nvidia-driver
 Version:        396.54
 Release:        1%{?dist}
@@ -193,6 +201,12 @@ nvidia-smi. The run-time version of NVML ships with the NVIDIA display driver,
 and the SDK provides the appropriate header, stub libraries and sample
 applications. Each new version of NVML is backwards compatible and is intended
 to be a platform for building 3rd party applications.
+
+%package flatpak-extension
+Summary:        Flatpak extension for %{name}
+
+%description flatpak-extension
+This package provides a Flatpak extension containing the shared libraries for %{name}.
 
 %ifarch x86_64
 
@@ -368,6 +382,17 @@ install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
 
+# Flatpak extension is just a copy of the normal libs
+install -d %{buildroot}%{_flatpakdir}/lib
+cp -a %{buildroot}%{_libdir}/vdpau/* %{buildroot}/%{_flatpakdir}/lib
+cp -a %{buildroot}%{_libdir}/*.so %{buildroot}%{_libdir}/*.so.* %{buildroot}/%{_flatpakdir}/lib
+install -p -Dm644 %{buildroot}%{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json %{buildroot}/%{_flatpakdir}/vulkan/icd.d/nvidia_icd.json
+install -p -Dm644 %{buildroot}%{_datadir}/glvnd/egl_vendor.d/10_nvidia.json %{buildroot}/%{_flatpakdir}/glvnd/egl_vendor.d/10_nvidia.json
+install -p -Dm644 %{buildroot}%{_sysconfdir}/OpenCL/vendors/nvidia.icd %{buildroot}/%{_flatpakdir}/OpenCL/vendors/nvidia.icd
+# With some exceptions..
+rm %{buildroot}/%{_flatpakdir}/lib/*{libnvidia-ml,libnvidia-fbc,libnvidia-ifr}*
+
+
 # Apply the systemd preset for nvidia-fallback.service when upgrading from
 # a version without nvidia-fallback.service, as %%systemd_post only does this
 # on fresh installs
@@ -501,6 +526,43 @@ fi ||:
 %{_libdir}/libnvidia-tls.so.%{version}
 %{_libdir}/vdpau/libvdpau_nvidia.so.1
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
+
+%files flatpak-extension
+%{_flatpakdir}/glvnd/egl_vendor.d/10_nvidia.json
+%{_flatpakdir}/vulkan/icd.d/nvidia_icd.json
+%{_flatpakdir}/OpenCL/vendors/nvidia.icd
+%{_flatpakdir}/lib/libEGL_nvidia.so.0
+%{_flatpakdir}/lib/libEGL_nvidia.so.%{version}
+%{_flatpakdir}/lib/libGLESv1_CM_nvidia.so.1
+%{_flatpakdir}/lib/libGLESv1_CM_nvidia.so.%{version}
+%{_flatpakdir}/lib/libGLESv2_nvidia.so.2
+%{_flatpakdir}/lib/libGLESv2_nvidia.so.%{version}
+%{_flatpakdir}/lib/libGLX_nvidia.so.0
+%{_flatpakdir}/lib/libGLX_nvidia.so.%{version}
+%{_flatpakdir}/lib//libnvidia-cfg.so.1
+%{_flatpakdir}/lib//libnvidia-cfg.so.%{version}
+%{_flatpakdir}/lib/libnvidia-eglcore.so.%{version}
+%{_flatpakdir}/lib/libnvidia-glcore.so.%{version}
+%{_flatpakdir}/lib/libnvidia-glsi.so.%{version}
+%{_flatpakdir}/lib/libnvidia-glvkspirv.so.%{version}
+%{_flatpakdir}/lib/libnvidia-tls.so.%{version}
+%{_flatpakdir}/lib/libvdpau_nvidia.so.1
+%{_flatpakdir}/lib/libvdpau_nvidia.so.%{version}
+%{_flatpakdir}/lib/libcuda.so
+%{_flatpakdir}/lib/libcuda.so.1
+%{_flatpakdir}/lib/libcuda.so.%{version}
+%{_flatpakdir}/lib/libnvcuvid.so
+%{_flatpakdir}/lib/libnvcuvid.so.1
+%{_flatpakdir}/lib/libnvcuvid.so.%{version}
+%{_flatpakdir}/lib/libnvidia-compiler.so.%{version}
+%{_flatpakdir}/lib/libnvidia-encode.so
+%{_flatpakdir}/lib/libnvidia-encode.so.1
+%{_flatpakdir}/lib/libnvidia-encode.so.%{version}
+%{_flatpakdir}/lib/libnvidia-fatbinaryloader.so.%{version}
+%{_flatpakdir}/lib/libnvidia-opencl.so.1
+%{_flatpakdir}/lib/libnvidia-opencl.so.%{version}
+%{_flatpakdir}/lib/libnvidia-ptxjitcompiler.so.1
+%{_flatpakdir}/lib/libnvidia-ptxjitcompiler.so.%{version}
 
 %files cuda-libs
 %{_libdir}/libcuda.so
