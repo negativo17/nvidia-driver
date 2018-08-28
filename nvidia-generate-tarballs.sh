@@ -49,6 +49,9 @@ rm -fr tls 32/tls
 # Add json files in both architectures
 cp -f *.json* 32/
 
+# Add header files in both architectures
+cp -f *.h 32/
+
 cd ..
 
 KMOD=nvidia-kmod-${VERSION}-x86_64

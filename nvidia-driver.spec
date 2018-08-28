@@ -37,7 +37,7 @@
 
 Name:           nvidia-driver
 Version:        396.54
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -194,6 +194,20 @@ and the SDK provides the appropriate header, stub libraries and sample
 applications. Each new version of NVML is backwards compatible and is intended
 to be a platform for building 3rd party applications.
 
+%package devel
+Summary:        Development files for %{name}
+Conflicts:      xorg-x11-drv-nvidia-devel
+Conflicts:      xorg-x11-drv-nvidia-devel-173xx
+Conflicts:      xorg-x11-drv-nvidia-devel-304xx
+Conflicts:      xorg-x11-drv-nvidia-devel-340xx
+Requires:       %{name}-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+
+%description devel
+This package provides the development files of the %{name} package,
+such as OpenGL headers.
+
 %ifarch x86_64
 
 %package cuda
@@ -206,21 +220,6 @@ Requires:       ocl-icd
 
 %description cuda
 This package provides the CUDA integration components for %{name}.
-
-%package devel
-Summary:        Development files for %{name}
-Conflicts:      xorg-x11-drv-nvidia-devel
-Conflicts:      xorg-x11-drv-nvidia-devel-173xx
-Conflicts:      xorg-x11-drv-nvidia-devel-304xx
-Conflicts:      xorg-x11-drv-nvidia-devel-340xx
-Requires:       %{name}-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires:       cuda-nvml-devel%{?_isa} >= 1:9.1.85
-
-%description devel
-This package provides the development files of the %{name} package,
-such as OpenGL headers.
 
 %endif
  
@@ -236,14 +235,10 @@ such as OpenGL headers.
 # Create symlinks for shared objects
 ldconfig -vn .
 
-%ifarch x86_64
-
 # Required for building gstreamer 1.0 NVENC plugins
 ln -sf libnvidia-encode.so.%{version} libnvidia-encode.so
 # Required for building ffmpeg 3.1 Nvidia CUVID
 ln -sf libnvcuvid.so.%{version} libnvcuvid.so
-
-%endif
 
 # Required for building against CUDA
 ln -sf libcuda.so.%{version} libcuda.so
@@ -259,13 +254,13 @@ cat nvidia_icd.json.template | sed -e 's/__NV_VK_ICD__/libGLX_nvidia.so.0/' > nv
 
 mkdir -p %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 mkdir -p %{buildroot}%{_datadir}/vulkan/icd.d/
+mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
 mkdir -p %{buildroot}%{_libdir}/vdpau/
 
 %ifarch x86_64
 
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/nvidia/
-mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
 mkdir -p %{buildroot}%{_libdir}/nvidia/xorg/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
 mkdir -p %{buildroot}%{_mandir}/man1/
@@ -285,9 +280,6 @@ mkdir -p %{buildroot}%{_datadir}/appdata/
 mkdir -p %{buildroot}%{_unitdir}
 mkdir -p %{buildroot}%{_presetdir}
 %endif
-
-# Headers
-install -p -m 0644 *.h %{buildroot}%{_includedir}/nvidia/GL/
 
 # OpenCL config
 install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
@@ -352,6 +344,9 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 install -p -m 644 %{SOURCE21} %{SOURCE22} %{buildroot}%{_udevrulesdir}
 
 %endif
+
+# Headers
+install -p -m 0644 *.h %{buildroot}%{_includedir}/nvidia/GL/
 
 # Vulkan and EGL loaders
 install -p -m 0644 nvidia_icd.%{_target_cpu}.json %{buildroot}%{_datadir}/vulkan/icd.d/
@@ -468,12 +463,12 @@ fi ||:
 %{_modprobe_d}/nvidia-uvm.conf
 %{_udevrulesdir}/60-nvidia-uvm.rules
 
+%endif
+
 %files devel
 %{_includedir}/nvidia/
 %{_libdir}/libnvcuvid.so
 %{_libdir}/libnvidia-encode.so
-
-%endif
 
 %files libs
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
@@ -528,6 +523,11 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Tue Aug 28 2018 Simone Caronni <negativo17@gmail.com> - 3:396.54-2
+- Re-add devel subpackage to x86.
+- Remove nvml header requirements for devel subpackage (pulled in by CUDA
+  devel subpackage if needed).
+
 * Wed Aug 22 2018 Simone Caronni <negativo17@gmail.com> - 3:396.54-1
 - Update to 396.54.
 
