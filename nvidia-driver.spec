@@ -36,7 +36,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        390.77
+Version:        390.87
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -504,6 +504,9 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %changelog
+* Thu Sep 06 2018 Simone Caronni <negativo17@gmail.com> - 3:390.87-1
+- Update to 390.87.
+
 * Tue Jul 17 2018 Simone Caronni <negativo17@gmail.com> - 3:390.77-1
 - Update to 390.77.
 
