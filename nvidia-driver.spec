@@ -42,6 +42,7 @@
 %endif
 
 %global _flatpakdir %{_sharedstatedir}/flatpak/extension/org.freedesktop.Platform.GL.host/%{_flatpakarch}/1.4
+%global __provides_exclude_from ^%{_flatpakdir}/.*$
 
 Name:           nvidia-driver
 Version:        396.54
