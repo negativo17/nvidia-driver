@@ -36,8 +36,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        396.54
-Release:        2%{?dist}
+Version:        410.57
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -205,8 +205,7 @@ Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{rele
 Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description devel
-This package provides the development files of the %{name} package,
-such as OpenGL headers.
+This package provides the development files of the %{name} package.
 
 %ifarch x86_64
 
@@ -261,8 +260,8 @@ mkdir -p %{buildroot}%{_libdir}/vdpau/
 
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/nvidia/
-mkdir -p %{buildroot}%{_libdir}/nvidia/xorg/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
+mkdir -p %{buildroot}%{_libdir}/xorg/modules/extensions/
 mkdir -p %{buildroot}%{_mandir}/man1/
 mkdir -p %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
@@ -330,7 +329,7 @@ install -p -m 0644 %{SOURCE13} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvi
 
 # X stuff
 install -p -m 0755 nvidia_drv.so %{buildroot}%{_libdir}/xorg/modules/drivers/
-install -p -m 0755 libglx.so.%{version} %{buildroot}%{_libdir}/nvidia/xorg/libglx.so
+install -p -m 0755 libglxserver_nvidia.so.%{version} %{buildroot}%{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
 
 # NVIDIA specific configuration files
 install -p -m 0644 nvidia-application-profiles-%{version}-key-documentation \
@@ -345,15 +344,12 @@ install -p -m 644 %{SOURCE21} %{SOURCE22} %{buildroot}%{_udevrulesdir}
 
 %endif
 
-# Headers
-install -p -m 0644 *.h %{buildroot}%{_includedir}/nvidia/GL/
-
 # Vulkan and EGL loaders
 install -p -m 0644 nvidia_icd.%{_target_cpu}.json %{buildroot}%{_datadir}/vulkan/icd.d/
 install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 
 # Unique libraries
-cp -a lib*GL*_nvidia.so* libcuda.so* libnvidia-*.so* libnvcuvid.so* %{buildroot}%{_libdir}/
+cp -a lib*GL*_nvidia.so* libcuda.so* libnv*.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
 
 # libglvnd indirect entry point and private libglvnd libraries
@@ -433,7 +429,7 @@ fi ||:
 %endif
 %{_datadir}/nvidia
 %{_dracut_conf_d}/99-nvidia-dracut.conf
-%{_libdir}/nvidia
+%{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
 %{_modprobe_d}/nvidia.conf
 %{_udevrulesdir}/60-nvidia-drm.rules
@@ -486,8 +482,12 @@ fi ||:
 %{_libdir}/libGLX_nvidia.so.0
 %{_libdir}/libGLX_nvidia.so.%{version}
 %ifarch x86_64
+%{_libdir}/libnvidia-cbl.so.%{version}
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
+%{_libdir}/libnvidia-rtcore.so.%{version}
+%{_libdir}/libnvoptix.so.1
+%{_libdir}/libnvoptix.so.%{version}
 %endif
 %{_libdir}/libnvidia-eglcore.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
@@ -523,6 +523,9 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Sat Sep 22 2018 Simone Caronni <negativo17@gmail.com> - 3:410.57-1
+- Update to 410.57.
+
 * Tue Aug 28 2018 Simone Caronni <negativo17@gmail.com> - 3:396.54-2
 - Re-add devel subpackage to x86.
 - Remove nvml header requirements for devel subpackage (pulled in by CUDA

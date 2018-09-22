@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-VERSION=${VERSION:-396.54}
+VERSION=${VERSION:-410.57}
 DL_SITE=${DL_SITE:-http://us.download.nvidia.com/XFree86}
 TEMP_UNPACK=${TEMP_UNPACK:-temp}
 
@@ -48,9 +48,6 @@ rm -fr tls 32/tls
 
 # Add json files in both architectures
 cp -f *.json* 32/
-
-# Add header files in both architectures
-cp -f *.h 32/
 
 cd ..
 
