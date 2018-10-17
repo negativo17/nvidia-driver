@@ -12,7 +12,7 @@
 %endif
 
 %if 0%{?rhel} == 7
-%global _dracutopts     nouveau.modeset=0 rd.driver.blacklist=nouveau
+%global _dracutopts     nouveau.modeset=0 rd.driver.blacklist=nouveau nvidia-drm.modeset=1
 %global _dracutopts_rm  nomodeset gfxpayload=vga=normal
 %global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
@@ -36,7 +36,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        410.57
+Version:        410.66
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -523,6 +523,10 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Oct 17 2018 Simone Caronni <negativo17@gmail.com> - 3:410.66-1
+- Update to 410.66.
+- Enable modeset for RHEL/CentOS 7 (7.6).
+
 * Sat Sep 22 2018 Simone Caronni <negativo17@gmail.com> - 3:410.57-1
 - Update to 410.57.
 
