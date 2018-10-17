@@ -37,7 +37,7 @@
 
 Name:           nvidia-driver
 Version:        410.66
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -133,12 +133,16 @@ Requires:       libglvnd-gles%{?_isa} >= 0.2
 Requires:       libglvnd-glx%{?_isa} >= 0.2
 Requires:       libglvnd-opengl%{?_isa} >= 0.2
 
-%if 0%{?fedora} >= 25 || 0%{?rhel} >= 8
+%if 0%{?fedora} || 0%{?rhel} >= 8
 Requires:       egl-wayland
 %endif
 
-%if 0%{?fedora} || 0%{?rhel} >= 7
+%if 0%{?fedora} || 0%{?rhel} >= 8
 Requires:       vulkan-loader
+%endif
+
+%if 0%{?rhel} == 7
+Requires:       vulkan-filesystem
 %endif
 
 Conflicts:      nvidia-x11-drv-libs
@@ -244,8 +248,11 @@ ln -sf libcuda.so.%{version} libcuda.so
 # libglvnd indirect entry point
 ln -sf libGLX_nvidia.so.%{version} libGLX_indirect.so.0
 
-# Use libglvnd for Vulkan
+%if 0%{?fedora} || 0%{?rhel} >= 7
 cat nvidia_icd.json.template | sed -e 's/__NV_VK_ICD__/libGLX_nvidia.so.0/' > nvidia_icd.%{_target_cpu}.json
+%else
+rm -f libnvidia-glvkspirv.so.%{version}
+%endif
 
 %build
 
@@ -323,7 +330,7 @@ install -p -m 0644 %{SOURCE12} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvi
 sed -i -e 's|@LIBDIR@|%{_libdir}|g' %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %endif
 
-%if 0%{?fedora} >= 29
+%if 0%{?fedora}
 install -p -m 0644 %{SOURCE13} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-ignoreabi.conf
 %endif
 
@@ -344,8 +351,10 @@ install -p -m 644 %{SOURCE21} %{SOURCE22} %{buildroot}%{_udevrulesdir}
 
 %endif
 
+%if 0%{?fedora} || 0%{?rhel} >= 7
 # Vulkan and EGL loaders
 install -p -m 0644 nvidia_icd.%{_target_cpu}.json %{buildroot}%{_datadir}/vulkan/icd.d/
+%endif
 install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 
 # Unique libraries
@@ -444,7 +453,7 @@ fi ||:
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %endif
 
-%if 0%{?fedora} >= 29
+%if 0%{?fedora}
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/99-nvidia-ignoreabi.conf
 %endif
 
@@ -472,7 +481,9 @@ fi ||:
 %{_libdir}/libGLX_indirect.so.0
 %endif
 %{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
+%if 0%{?fedora} || 0%{?rhel} >= 7
 %{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
+%endif
 %{_libdir}/libEGL_nvidia.so.0
 %{_libdir}/libEGL_nvidia.so.%{version}
 %{_libdir}/libGLESv1_CM_nvidia.so.1
@@ -492,7 +503,9 @@ fi ||:
 %{_libdir}/libnvidia-eglcore.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
 %{_libdir}/libnvidia-glsi.so.%{version}
+%if 0%{?fedora} || 0%{?rhel} >= 7
 %{_libdir}/libnvidia-glvkspirv.so.%{version}
+%endif
 %{_libdir}/libnvidia-tls.so.%{version}
 %{_libdir}/vdpau/libvdpau_nvidia.so.1
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
@@ -523,6 +536,9 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Oct 17 2018 Simone Caronni <negativo17@gmail.com> - 3:410.66-2
+- Do not enable Vulkan components on RHEL/CentOS 6.
+
 * Wed Oct 17 2018 Simone Caronni <negativo17@gmail.com> - 3:410.66-1
 - Update to 410.66.
 - Enable modeset for RHEL/CentOS 7 (7.6).
