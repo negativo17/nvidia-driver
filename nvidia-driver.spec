@@ -12,7 +12,7 @@
 %endif
 
 %if 0%{?rhel} == 7
-%global _dracutopts     nouveau.modeset=0 rd.driver.blacklist=nouveau
+%global _dracutopts     nouveau.modeset=0 rd.driver.blacklist=nouveau nvidia-drm.modeset=1
 %global _dracutopts_rm  nomodeset gfxpayload=vga=normal
 %global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
@@ -23,7 +23,7 @@
 # not loaded, so don't disable it. Just matching the driver with OutputClass in
 # the X.org configuration is enough to load the whole Nvidia stack or the Mesa
 # one.
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} >= 8
 %global _dracutopts     rd.driver.blacklist=nouveau
 %global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0 nvidia-drm.modeset=1
 %global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
@@ -31,12 +31,12 @@
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
 %endif
 
-%if 0%{?rhel} == 6 || 0%{?rhel} == 7
+%if 0%{?rhel}
 %global _glvnd_libdir   %{_libdir}/libglvnd
 %endif
 
 Name:           nvidia-driver
-Version:        390.87
+Version:        410.66
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -69,6 +69,8 @@ Source51:       95-nvidia-fallback.preset
 
 Source99:       nvidia-generate-tarballs.sh
 
+%ifarch x86_64
+
 BuildRequires:  python
 
 %if 0%{?fedora} || 0%{?rhel} >= 7
@@ -76,9 +78,11 @@ BuildRequires:  python
 BuildRequires:  systemd
 %endif
 
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} >= 8
 # AppStream metadata generation
 BuildRequires:  libappstream-glib%{?_isa} >= 0.6.3
+%endif
+
 %endif
 
 Requires:       grubby
@@ -129,12 +133,12 @@ Requires:       libglvnd-gles%{?_isa} >= 0.2
 Requires:       libglvnd-glx%{?_isa} >= 0.2
 Requires:       libglvnd-opengl%{?_isa} >= 0.2
 
-%if 0%{?fedora} || 0%{?rhel} >= 8
+%if 0%{?fedora} >= 25 || 0%{?rhel} >= 8
 Requires:       egl-wayland
 %endif
 
 %if 0%{?fedora} || 0%{?rhel} >= 7
-Requires:       vulkan-filesystem
+Requires:       vulkan-loader
 %endif
 
 Conflicts:      nvidia-x11-drv-libs
@@ -157,17 +161,6 @@ Conflicts:      nvidia-x11-drv-32bit-340xx
 
 %description libs
 This package provides the shared libraries for %{name}.
-
-%package cuda
-Summary:        CUDA integration for %{name}
-Conflicts:      xorg-x11-drv-nvidia-cuda
-Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
-Requires:       nvidia-persistenced = %{?epoch:%{epoch}:}%{version}
-Requires:       opencl-filesystem
-Requires:       ocl-icd
-
-%description cuda
-This package provides the CUDA integration components for %{name}.
 
 %package cuda-libs
 Summary:        Libraries for %{name}-cuda
@@ -210,11 +203,24 @@ Conflicts:      xorg-x11-drv-nvidia-devel-340xx
 Requires:       %{name}-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires:       cuda-nvml-devel%{?_isa} >= 1:9.1.85
 
 %description devel
-This package provides the development files of the %{name} package,
-such as OpenGL headers.
+This package provides the development files of the %{name} package.
+
+%ifarch x86_64
+
+%package cuda
+Summary:        CUDA integration for %{name}
+Conflicts:      xorg-x11-drv-nvidia-cuda
+Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       nvidia-persistenced = %{?epoch:%{epoch}:}%{version}
+Requires:       opencl-filesystem
+Requires:       ocl-icd
+
+%description cuda
+This package provides the CUDA integration components for %{name}.
+
+%endif
  
 %prep
 %ifarch %{ix86}
@@ -232,6 +238,7 @@ ldconfig -vn .
 ln -sf libnvidia-encode.so.%{version} libnvidia-encode.so
 # Required for building ffmpeg 3.1 Nvidia CUVID
 ln -sf libnvcuvid.so.%{version} libnvcuvid.so
+
 # Required for building against CUDA
 ln -sf libcuda.so.%{version} libcuda.so
 # libglvnd indirect entry point
@@ -243,15 +250,18 @@ cat nvidia_icd.json.template | sed -e 's/__NV_VK_ICD__/libGLX_nvidia.so.0/' > nv
 %build
 
 %install
-# Create empty tree
-mkdir -p %{buildroot}%{_bindir}
+
 mkdir -p %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
-mkdir -p %{buildroot}%{_datadir}/nvidia/
 mkdir -p %{buildroot}%{_datadir}/vulkan/icd.d/
 mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
-mkdir -p %{buildroot}%{_libdir}/nvidia/xorg/
 mkdir -p %{buildroot}%{_libdir}/vdpau/
+
+%ifarch x86_64
+
+mkdir -p %{buildroot}%{_bindir}
+mkdir -p %{buildroot}%{_datadir}/nvidia/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
+mkdir -p %{buildroot}%{_libdir}/xorg/modules/extensions/
 mkdir -p %{buildroot}%{_mandir}/man1/
 mkdir -p %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
@@ -270,15 +280,8 @@ mkdir -p %{buildroot}%{_unitdir}
 mkdir -p %{buildroot}%{_presetdir}
 %endif
 
-# Headers
-install -p -m 0644 *.h %{buildroot}%{_includedir}/nvidia/GL/
-
 # OpenCL config
 install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
-
-# Vulkan and EGL loaders
-install -p -m 0644 nvidia_icd.%{_target_cpu}.json %{buildroot}%{_datadir}/vulkan/icd.d/
-install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 
 # Blacklist nouveau
 install -p -m 0644 %{SOURCE20} %{buildroot}%{_modprobe_d}/
@@ -315,7 +318,7 @@ sed -i -e 's|@LIBDIR@|%{_libdir}|g' %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/9
 install -p -m 0644 %{SOURCE11} %{buildroot}%{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
 %endif
 
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} >= 8
 install -p -m 0644 %{SOURCE12} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 sed -i -e 's|@LIBDIR@|%{_libdir}|g' %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %endif
@@ -326,7 +329,7 @@ install -p -m 0644 %{SOURCE13} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvi
 
 # X stuff
 install -p -m 0755 nvidia_drv.so %{buildroot}%{_libdir}/xorg/modules/drivers/
-install -p -m 0755 libglx.so.%{version} %{buildroot}%{_libdir}/nvidia/xorg/libglx.so
+install -p -m 0755 libglxserver_nvidia.so.%{version} %{buildroot}%{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
 
 # NVIDIA specific configuration files
 install -p -m 0644 nvidia-application-profiles-%{version}-key-documentation \
@@ -339,8 +342,14 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 # https://github.com/negativo17/nvidia-driver/issues/27
 install -p -m 644 %{SOURCE21} %{SOURCE22} %{buildroot}%{_udevrulesdir}
 
+%endif
+
+# Vulkan and EGL loaders
+install -p -m 0644 nvidia_icd.%{_target_cpu}.json %{buildroot}%{_datadir}/vulkan/icd.d/
+install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
+
 # Unique libraries
-cp -a lib*GL*_nvidia.so* libcuda.so* libnvidia-*.so* libnvcuvid.so* %{buildroot}%{_libdir}/
+cp -a lib*GL*_nvidia.so* libcuda.so* libnv*.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
 
 # libglvnd indirect entry point and private libglvnd libraries
@@ -349,7 +358,6 @@ cp -a libGLX_indirect.so* %{buildroot}%{_libdir}/
 install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
-
 
 # Apply the systemd preset for nvidia-fallback.service when upgrading from
 # a version without nvidia-fallback.service, as %%systemd_post only does this
@@ -407,6 +415,8 @@ fi ||:
 
 %postun NVML -p /sbin/ldconfig
 
+%ifarch x86_64
+
 %files
 %license LICENSE
 %doc NVIDIA_Changelog README.txt html
@@ -419,22 +429,22 @@ fi ||:
 %endif
 %{_datadir}/nvidia
 %{_dracut_conf_d}/99-nvidia-dracut.conf
-%{_libdir}/nvidia
+%{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
 %{_modprobe_d}/nvidia.conf
 %{_udevrulesdir}/60-nvidia-drm.rules
 
 # X.org configuration files
-%if 0%{?rhel}
+%if 0%{?rhel} == 6 || 0%{?rhel} == 7
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
 %config(noreplace) %{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
 %endif
 
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} >= 8
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %endif
 
-%if 0%{?fedora} >= 29 || 0%{?rhel} >= 8
+%if 0%{?fedora} >= 29
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/99-nvidia-ignoreabi.conf
 %endif
 
@@ -448,6 +458,13 @@ fi ||:
 %{_mandir}/man1/nvidia-smi.*
 %{_modprobe_d}/nvidia-uvm.conf
 %{_udevrulesdir}/60-nvidia-uvm.rules
+
+%endif
+
+%files devel
+%{_includedir}/nvidia/
+%{_libdir}/libnvcuvid.so
+%{_libdir}/libnvidia-encode.so
 
 %files libs
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
@@ -464,11 +481,18 @@ fi ||:
 %{_libdir}/libGLESv2_nvidia.so.%{version}
 %{_libdir}/libGLX_nvidia.so.0
 %{_libdir}/libGLX_nvidia.so.%{version}
+%ifarch x86_64
+%{_libdir}/libnvidia-cbl.so.%{version}
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
+%{_libdir}/libnvidia-rtcore.so.%{version}
+%{_libdir}/libnvoptix.so.1
+%{_libdir}/libnvoptix.so.%{version}
+%endif
 %{_libdir}/libnvidia-eglcore.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
 %{_libdir}/libnvidia-glsi.so.%{version}
+%{_libdir}/libnvidia-glvkspirv.so.%{version}
 %{_libdir}/libnvidia-tls.so.%{version}
 %{_libdir}/vdpau/libvdpau_nvidia.so.1
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
@@ -498,12 +522,11 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.1
 %{_libdir}/libnvidia-ml.so.%{version}
 
-%files devel
-%{_includedir}/nvidia/
-%{_libdir}/libnvcuvid.so
-%{_libdir}/libnvidia-encode.so
-
 %changelog
+* Wed Oct 17 2018 Simone Caronni <negativo17@gmail.com> - 3:410.66-1
+- Update to 410.66.
+- Enable modeset for RHEL/CentOS 7 (7.6).
+
 * Thu Sep 06 2018 Simone Caronni <negativo17@gmail.com> - 3:390.87-1
 - Update to 390.87.
 
