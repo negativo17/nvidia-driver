@@ -8,7 +8,7 @@
 %global _dracutopts_rm  nomodeset vga=normal
 %global _dracut_conf_d	%{_sysconfdir}/dracut.conf.d
 %global _modprobe_d     %{_sysconfdir}/modprobe.d/
-%global _grubby         /sbin/grubby --grub --update-kernel=ALL
+%global _grubby         %{_sbindir}/grubby --grub --update-kernel=ALL
 %global _glvnd_libdir   %{_libdir}/libglvnd
 %endif
 
@@ -34,7 +34,7 @@
 
 Name:           nvidia-driver
 Version:        410.73
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -371,16 +371,25 @@ systemctl --no-reload preset nvidia-fallback.service >/dev/null 2>&1 || :
 %endif
 
 %post
-if [ "$1" -eq "1" ]; then
-  %{_grubby} --args='%{_dracutopts}' &>/dev/null
+%{_grubby} --args='%{_dracutopts}' &>/dev/null
 %if 0%{?fedora} || 0%{?rhel} >= 7
-  sed -i -e 's/GRUB_CMDLINE_LINUX="/GRUB_CMDLINE_LINUX="%{_dracutopts} /g' /etc/default/grub
+. %{_sysconfdir}/default/grub
+if [ -z "${GRUB_CMDLINE_LINUX}" ]; then
+  echo GRUB_CMDLINE_LINUX="%{_dracutopts}" >> %{_sysconfdir}/default/grub
+else
+  for param in %{_dracutopts}; do
+    echo ${GRUB_CMDLINE_LINUX} | grep -q $param
+    [ $? -eq 1 ] && GRUB_CMDLINE_LINUX="${GRUB_CMDLINE_LINUX} ${param}"
+  done
+  sed -i -e "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"${GRUB_CMDLINE_LINUX}\"|g" %{_sysconfdir}/default/grub
+fi
 %endif
-fi || :
 if [ "$1" -eq "2" ]; then
   # Remove no longer needed options
   %{_grubby} --remove-args='%{_dracutopts_rm}' &>/dev/null
-  for param in %{_dracutopts_rm}; do sed -i -e "s/$param //g" /etc/default/grub; done
+  for param in %{_dracutopts_rm}; do
+    sed -i -e "s|$param ||g" %{_sysconfdir}/default/grub
+  done
 fi || :
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %systemd_post nvidia-fallback.service
@@ -398,7 +407,9 @@ fi || :
 if [ "$1" -eq "0" ]; then
   %{_grubby} --remove-args='%{_dracutopts}' &>/dev/null
 %if 0%{?fedora} || 0%{?rhel} >= 7
-  sed -i -e 's/%{_dracutopts} //g' /etc/default/grub
+  for param in %{_dracutopts}; do
+    sed -i -e "s|$param ||g" %{_sysconfdir}/default/grub
+  done
 %endif
 fi ||:
 %if 0%{?fedora} || 0%{?rhel} >= 8
@@ -526,6 +537,9 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Fri Oct 26 2018 Simone Caronni <negativo17@gmail.com> - 3:410.73-2
+- Update post scriptlets to make sure new parameters are added correctly.
+
 * Fri Oct 26 2018 Simone Caronni <negativo17@gmail.com> - 3:410.73-1
 - Update to 410.73.
 - Enable modesetting and remove ignoreabi setting for Fedora.
