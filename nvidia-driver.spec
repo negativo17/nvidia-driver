@@ -66,7 +66,7 @@ Source99:       nvidia-generate-tarballs.sh
 
 %ifarch x86_64
 
-BuildRequires:  python
+BuildRequires:  python2
 
 %if 0%{?fedora} || 0%{?rhel} >= 7
 # UDev rule location (_udevrulesdir) and systemd macros
@@ -395,14 +395,6 @@ fi || :
 %systemd_post nvidia-fallback.service
 %endif
 
-%post libs -p /sbin/ldconfig
-
-%post cuda-libs -p /sbin/ldconfig
-
-%post NvFBCOpenGL -p /sbin/ldconfig
-
-%post NVML -p /sbin/ldconfig
-
 %preun
 if [ "$1" -eq "0" ]; then
   %{_grubby} --remove-args='%{_dracutopts}' &>/dev/null
@@ -421,13 +413,13 @@ fi ||:
 %systemd_postun nvidia-fallback.service
 %endif
 
-%postun libs -p /sbin/ldconfig
+%ldconfig_scriptlets libs
 
-%postun cuda-libs -p /sbin/ldconfig
+%ldconfig_scriptlets cuda-libs
 
-%postun NvFBCOpenGL -p /sbin/ldconfig
+%ldconfig_scriptlets NvFBCOpenGL
 
-%postun NVML -p /sbin/ldconfig
+%ldconfig_scriptlets NVML
 
 %ifarch x86_64
 
