@@ -9,6 +9,7 @@
 %global _dracut_conf_d	%{_sysconfdir}/dracut.conf.d
 %global _modprobe_d     %{_sysconfdir}/modprobe.d/
 %global _grubby         /sbin/grubby --grub --update-kernel=ALL
+%global _glvnd_libdir   %{_libdir}/libglvnd
 %endif
 
 %if 0%{?rhel} == 7
@@ -17,27 +18,23 @@
 %global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
+%global _glvnd_libdir   %{_libdir}/libglvnd
 %endif
 
-# Fedora 25+ has a fallback service where it tries to load nouveau if nvidia is
-# not loaded, so don't disable it. Just matching the driver with OutputClass in
-# the X.org configuration is enough to load the whole Nvidia stack or the Mesa
-# one.
+# Fallback service where it tries to load nouveau if nvidia is not loaded, so
+# don't disable it. Just matching the driver with OutputClass in the X.org
+# configuration is enough to load the whole Nvidia stack or the Mesa one.
 %if 0%{?fedora} || 0%{?rhel} >= 8
-%global _dracutopts     rd.driver.blacklist=nouveau
-%global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0 nvidia-drm.modeset=1
+%global _dracutopts     rd.driver.blacklist=nouveau nvidia-drm.modeset=1
+%global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0
 %global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
 %endif
 
-%if 0%{?rhel}
-%global _glvnd_libdir   %{_libdir}/libglvnd
-%endif
-
 Name:           nvidia-driver
-Version:        410.66
-Release:        2%{?dist}
+Version:        410.73
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -51,8 +48,6 @@ Source10:       99-nvidia-modules.conf
 Source11:       10-nvidia-driver.conf
 # For servers with OutputClass device options
 Source12:       10-nvidia.conf
-# For unreleased Fedora versions
-Source13:       99-nvidia-ignoreabi.conf
 
 Source20:       nvidia.conf
 Source21:       60-nvidia-drm.rules
@@ -96,7 +91,7 @@ Requires:       libva-vdpau-driver%{?_isa}
 Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.16
 %endif
 
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} >= 8
 # Extended "OutputClass" with device options
 Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.19.0-3
 # For auto-fallback to nouveau systemd service
@@ -111,10 +106,12 @@ Conflicts:      nvidia-x11-drv
 Conflicts:      nvidia-x11-drv-173xx
 Conflicts:      nvidia-x11-drv-304xx
 Conflicts:      nvidia-x11-drv-340xx
+Conflicts:      nvidia-x11-drv-390xx
 Conflicts:      xorg-x11-drv-nvidia
 Conflicts:      xorg-x11-drv-nvidia-173xx
 Conflicts:      xorg-x11-drv-nvidia-304xx
 Conflicts:      xorg-x11-drv-nvidia-340xx
+Conflicts:      xorg-x11-drv-nvidia-390xx
 
 %description
 This package provides the most recent NVIDIA display driver which allows for
@@ -127,17 +124,14 @@ version %{version}.
 Summary:        Libraries for %{name}
 Requires(post): ldconfig
 Requires:       libvdpau%{?_isa} >= 0.5
-Requires:       libglvnd%{?_isa} >= 0.2
-Requires:       libglvnd-egl%{?_isa} >= 0.2
-Requires:       libglvnd-gles%{?_isa} >= 0.2
-Requires:       libglvnd-glx%{?_isa} >= 0.2
-Requires:       libglvnd-opengl%{?_isa} >= 0.2
+Requires:       libglvnd%{?_isa} >= 1.0
+Requires:       libglvnd-egl%{?_isa} >= 1.0
+Requires:       libglvnd-gles%{?_isa} >= 1.0
+Requires:       libglvnd-glx%{?_isa} >= 1.0
+Requires:       libglvnd-opengl%{?_isa} >= 1.0
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
 Requires:       egl-wayland
-%endif
-
-%if 0%{?fedora} || 0%{?rhel} >= 8
 Requires:       vulkan-loader
 %endif
 
@@ -150,17 +144,20 @@ Conflicts:      nvidia-x11-drv-libs-96xx
 Conflicts:      nvidia-x11-drv-libs-173xx
 Conflicts:      nvidia-x11-drv-libs-304xx
 Conflicts:      nvidia-x11-drv-libs-340xx
+Conflicts:      nvidia-x11-drv-libs-390xx
 Conflicts:      xorg-x11-drv-nvidia-gl
 Conflicts:      xorg-x11-drv-nvidia-libs
 Conflicts:      xorg-x11-drv-nvidia-libs-173xx
 Conflicts:      xorg-x11-drv-nvidia-libs-304xx
 Conflicts:      xorg-x11-drv-nvidia-libs-340xx
+Conflicts:      xorg-x11-drv-nvidia-libs-390xx
 %ifarch %{ix86}
 Conflicts:      nvidia-x11-drv-32bit
 Conflicts:      nvidia-x11-drv-32bit-96xx
 Conflicts:      nvidia-x11-drv-32bit-173xx
 Conflicts:      nvidia-x11-drv-32bit-304xx
 Conflicts:      nvidia-x11-drv-32bit-340xx
+Conflicts:      nvidia-x11-drv-32bit-390xx
 %endif
 
 %description libs
@@ -204,6 +201,7 @@ Conflicts:      xorg-x11-drv-nvidia-devel
 Conflicts:      xorg-x11-drv-nvidia-devel-173xx
 Conflicts:      xorg-x11-drv-nvidia-devel-304xx
 Conflicts:      xorg-x11-drv-nvidia-devel-340xx
+Conflicts:      xorg-x11-drv-nvidia-devel-390xx
 Requires:       %{name}-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
@@ -277,11 +275,11 @@ mkdir -p %{buildroot}%{_modprobe_d}/
 mkdir -p %{buildroot}%{_dracut_conf_d}/
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
-%if 0%{?rhel}
+%if 0%{?rhel} == 7
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
 %endif
 
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} >= 8
 mkdir -p %{buildroot}%{_datadir}/appdata/
 mkdir -p %{buildroot}%{_unitdir}
 mkdir -p %{buildroot}%{_presetdir}
@@ -328,10 +326,6 @@ install -p -m 0644 %{SOURCE11} %{buildroot}%{_datadir}/X11/xorg.conf.d/10-nvidia
 %if 0%{?fedora} || 0%{?rhel} >= 8
 install -p -m 0644 %{SOURCE12} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 sed -i -e 's|@LIBDIR@|%{_libdir}|g' %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
-%endif
-
-%if 0%{?fedora}
-install -p -m 0644 %{SOURCE13} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-ignoreabi.conf
 %endif
 
 # X stuff
@@ -388,7 +382,7 @@ if [ "$1" -eq "2" ]; then
   %{_grubby} --remove-args='%{_dracutopts_rm}' &>/dev/null
   for param in %{_dracutopts_rm}; do sed -i -e "s/$param //g" /etc/default/grub; done
 fi || :
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} >= 8
 %systemd_post nvidia-fallback.service
 %endif
 
@@ -407,11 +401,11 @@ if [ "$1" -eq "0" ]; then
   sed -i -e 's/%{_dracutopts} //g' /etc/default/grub
 %endif
 fi ||:
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} >= 8
 %systemd_preun nvidia-fallback.service
 %endif
 
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} >= 8
 %postun
 %systemd_postun nvidia-fallback.service
 %endif
@@ -451,10 +445,6 @@ fi ||:
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
-%endif
-
-%if 0%{?fedora}
-%config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/99-nvidia-ignoreabi.conf
 %endif
 
 %files cuda
@@ -536,6 +526,13 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Fri Oct 26 2018 Simone Caronni <negativo17@gmail.com> - 3:410.73-1
+- Update to 410.73.
+- Enable modesetting and remove ignoreabi setting for Fedora.
+- Update conditionals for RHEL/CentOS.
+- Add additional conflicting packages.
+- Bump GLVND requirements.
+
 * Wed Oct 17 2018 Simone Caronni <negativo17@gmail.com> - 3:410.66-2
 - Do not enable Vulkan components on RHEL/CentOS 6.
 
