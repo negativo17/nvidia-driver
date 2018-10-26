@@ -275,7 +275,7 @@ mkdir -p %{buildroot}%{_modprobe_d}/
 mkdir -p %{buildroot}%{_dracut_conf_d}/
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
-%if 0%{?rhel} == 7
+%if 0%{?rhel}
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
 %endif
 
