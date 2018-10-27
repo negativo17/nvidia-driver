@@ -8,7 +8,7 @@
 %global _dracutopts_rm  nomodeset vga=normal
 %global _dracut_conf_d	%{_sysconfdir}/dracut.conf.d
 %global _modprobe_d     %{_sysconfdir}/modprobe.d/
-%global _grubby         %{_sbindir}/grubby --grub --update-kernel=ALL
+%global _grubby         /sbin/grubby --grub --update-kernel=ALL
 %global _glvnd_libdir   %{_libdir}/libglvnd
 %endif
 
@@ -34,7 +34,7 @@
 
 Name:           nvidia-driver
 Version:        410.73
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -529,6 +529,9 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Sat Oct 27 2018 Simone Caronni <negativo17@gmail.com> - 3:410.73-3
+- Revert grubby invocation on RHEL/CentOS 6.
+
 * Fri Oct 26 2018 Simone Caronni <negativo17@gmail.com> - 3:410.73-2
 - Update post scriptlets to make sure new parameters are added correctly.
 
