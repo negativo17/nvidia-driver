@@ -24,7 +24,15 @@
 # Fallback service where it tries to load nouveau if nvidia is not loaded, so
 # don't disable it. Just matching the driver with OutputClass in the X.org
 # configuration is enough to load the whole Nvidia stack or the Mesa one.
-%if 0%{?fedora} || 0%{?rhel} >= 8
+%if 0%{?fedora} == 27 || 0%{?fedora} == 28
+%global _dracutopts     rd.driver.blacklist=nouveau
+%global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0 nvidia-drm.modeset=1
+%global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
+%global _modprobe_d     %{_prefix}/lib/modprobe.d/
+%global _grubby         %{_sbindir}/grubby --update-kernel=ALL
+%endif
+
+%if 0%{?fedora} >= 29 || 0%{?rhel} >= 8
 %global _dracutopts     rd.driver.blacklist=nouveau nvidia-drm.modeset=1
 %global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0
 %global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
@@ -34,7 +42,7 @@
 
 Name:           nvidia-driver
 Version:        410.73
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -529,6 +537,9 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Tue Oct 30 2018 Simone Caronni <negativo17@gmail.com> - 3:410.73-4
+- Disable modesetting on Fedora < 29.
+
 * Sat Oct 27 2018 Simone Caronni <negativo17@gmail.com> - 3:410.73-3
 - Revert grubby invocation on RHEL/CentOS 6.
 
