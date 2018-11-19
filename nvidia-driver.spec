@@ -41,8 +41,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        410.73
-Release:        4%{?dist}
+Version:        410.78
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -537,6 +537,9 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Mon Nov 19 2018 Simone Caronni <negativo17@gmail.com> - 3:410.78-1
+- Update to 410.78.
+
 * Tue Oct 30 2018 Simone Caronni <negativo17@gmail.com> - 3:410.73-4
 - Disable modesetting on Fedora < 29.
 
