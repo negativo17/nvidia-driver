@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-VERSION=${VERSION:-410.78}
+VERSION=${VERSION:-415.18}
 DL_SITE=${DL_SITE:-http://us.download.nvidia.com/XFree86}
 TEMP_UNPACK=${TEMP_UNPACK:-temp}
 
@@ -40,11 +40,6 @@ rm -f nvidia-installer* .manifest make* mk* tls_test*
 
 # useless on modern distributions
 rm -f libnvidia-wfb*
-
-# Use correct tls implementation
-mv -f tls/libnvidia-tls.so* ./
-mv -f 32/tls/libnvidia-tls.so* 32/
-rm -fr tls 32/tls
 
 # Add json files in both architectures
 cp -f *.json* 32/
