@@ -24,7 +24,7 @@
 # Fallback service where it tries to load nouveau if nvidia is not loaded, so
 # don't disable it. Just matching the driver with OutputClass in the X.org
 # configuration is enough to load the whole Nvidia stack or the Mesa one.
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} >= 8
 %global _dracutopts     rd.driver.blacklist=nouveau
 %global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0 nvidia-drm.modeset=1
 %global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
@@ -34,7 +34,7 @@
 
 Name:           nvidia-driver
 Version:        410.78
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -371,7 +371,7 @@ systemctl --no-reload preset nvidia-fallback.service >/dev/null 2>&1 || :
 %endif
 
 %post
-%{_grubby} --args='%{_dracutopts}' &>/dev/null
+%{_grubby} --args='%{_dracutopts}' --remove-args='%{_dracutopts_rm}' &>/dev/null
 %if 0%{?fedora} || 0%{?rhel} >= 7
 . %{_sysconfdir}/default/grub
 if [ -z "${GRUB_CMDLINE_LINUX}" ]; then
@@ -381,16 +381,13 @@ else
     echo ${GRUB_CMDLINE_LINUX} | grep -q $param
     [ $? -eq 1 ] && GRUB_CMDLINE_LINUX="${GRUB_CMDLINE_LINUX} ${param}"
   done
+  for param in %{_dracutopts_rm}; do
+    echo ${GRUB_CMDLINE_LINUX} | grep -q $param
+    [ $? -eq 0 ] && GRUB_CMDLINE_LINUX="$(echo ${GRUB_CMDLINE_LINUX} | sed -e "s/$param//g")"
+  done
   sed -i -e "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"${GRUB_CMDLINE_LINUX}\"|g" %{_sysconfdir}/default/grub
 fi
 %endif
-if [ "$1" -eq "2" ]; then
-  # Remove no longer needed options
-  %{_grubby} --remove-args='%{_dracutopts_rm}' &>/dev/null
-  for param in %{_dracutopts_rm}; do
-    sed -i -e "s|$param ||g" %{_sysconfdir}/default/grub
-  done
-fi || :
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %systemd_post nvidia-fallback.service
 %endif
@@ -400,8 +397,10 @@ if [ "$1" -eq "0" ]; then
   %{_grubby} --remove-args='%{_dracutopts}' &>/dev/null
 %if 0%{?fedora} || 0%{?rhel} >= 7
   for param in %{_dracutopts}; do
-    sed -i -e "s|$param ||g" %{_sysconfdir}/default/grub
+    echo ${GRUB_CMDLINE_LINUX} | grep -q $param
+    [ $? -eq 0 ] && GRUB_CMDLINE_LINUX="$(echo ${GRUB_CMDLINE_LINUX} | sed -e "s/$param//g")"
   done
+  sed -i -e "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"${GRUB_CMDLINE_LINUX}\"|g" %{_sysconfdir}/default/grub
 %endif
 fi ||:
 %if 0%{?fedora} || 0%{?rhel} >= 8
@@ -529,6 +528,9 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Thu Nov 22 2018 Simone Caronni <negativo17@gmail.com> - 3:410.78-3
+- Update scripts to always perform updates/removal of boot options.
+
 * Thu Nov 22 2018 Simone Caronni <negativo17@gmail.com> - 3:410.78-2
 - Remove modesetting again on Fedora.
 
