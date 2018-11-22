@@ -24,7 +24,7 @@
 # Fallback service where it tries to load nouveau if nvidia is not loaded, so
 # don't disable it. Just matching the driver with OutputClass in the X.org
 # configuration is enough to load the whole Nvidia stack or the Mesa one.
-%if 0%{?fedora} == 27 || 0%{?fedora} == 28
+%if 0%{?fedora}
 %global _dracutopts     rd.driver.blacklist=nouveau
 %global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0 nvidia-drm.modeset=1
 %global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
@@ -32,17 +32,9 @@
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
 %endif
 
-%if 0%{?fedora} >= 29 || 0%{?rhel} >= 8
-%global _dracutopts     rd.driver.blacklist=nouveau nvidia-drm.modeset=1
-%global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0
-%global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
-%global _modprobe_d     %{_prefix}/lib/modprobe.d/
-%global _grubby         %{_sbindir}/grubby --update-kernel=ALL
-%endif
-
 Name:           nvidia-driver
 Version:        410.78
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -537,6 +529,9 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Thu Nov 22 2018 Simone Caronni <negativo17@gmail.com> - 3:410.78-2
+- Remove modesetting again on Fedora.
+
 * Mon Nov 19 2018 Simone Caronni <negativo17@gmail.com> - 3:410.78-1
 - Update to 410.78.
 
