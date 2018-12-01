@@ -18,7 +18,6 @@
 %global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
 %global _modprobe_d     %{_prefix}/lib/modprobe.d/
 %global _grubby         %{_sbindir}/grubby --update-kernel=ALL
-%global _glvnd_libdir   %{_libdir}/libglvnd
 %endif
 
 # Fallback service where it tries to load nouveau if nvidia is not loaded, so
@@ -34,7 +33,7 @@
 
 Name:           nvidia-driver
 Version:        415.18
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -356,7 +355,7 @@ cp -a lib*GL*_nvidia.so* libcuda.so* libnv*.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
 
 # libglvnd indirect entry point and private libglvnd libraries
-%if 0%{?rhel} == 6 || 0%{?rhel} == 7
+%if 0%{?rhel} == 6
 cp -a libGLX_indirect.so* %{buildroot}%{_libdir}/
 install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
@@ -468,7 +467,7 @@ fi ||:
 %{_libdir}/libnvidia-encode.so
 
 %files libs
-%if 0%{?rhel} == 6 || 0%{?rhel} == 7
+%if 0%{?rhel} == 6
 %{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %{_libdir}/libGLX_indirect.so.0
 %endif
@@ -528,6 +527,9 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Sat Dec 01 2018 Simone Caronni <negativo17@gmail.com> - 3:415.18-3
+- No more private GLVND libraries on RHEL 7.
+
 * Thu Nov 22 2018 Simone Caronni <negativo17@gmail.com> - 3:415.18-2
 - Update scripts to always perform updates/removal of boot options.
 
