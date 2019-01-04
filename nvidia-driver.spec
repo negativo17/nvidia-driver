@@ -32,8 +32,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        410.78
-Release:        4%{?dist}
+Version:        410.93
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -527,6 +527,9 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Fri Jan 04 2019 Simone Caronni <negativo17@gmail.com> - 3:410.93-1
+- Update to 410.93.
+
 * Sat Dec 01 2018 Simone Caronni <negativo17@gmail.com> - 3:410.78-4
 - No more private GLVND libraries on RHEL 7.
 
