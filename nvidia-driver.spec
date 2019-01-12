@@ -33,7 +33,7 @@
 
 Name:           nvidia-driver
 Version:        415.25
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -121,7 +121,7 @@ version %{version}.
 
 %package libs
 Summary:        Libraries for %{name}
-Requires(post): ldconfig
+Requires:       egl-wayland
 Requires:       libvdpau%{?_isa} >= 0.5
 Requires:       libglvnd%{?_isa} >= 1.0
 Requires:       libglvnd-egl%{?_isa} >= 1.0
@@ -130,7 +130,6 @@ Requires:       libglvnd-glx%{?_isa} >= 1.0
 Requires:       libglvnd-opengl%{?_isa} >= 1.0
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
-Requires:       egl-wayland
 Requires:       vulkan-loader
 %endif
 
@@ -164,14 +163,12 @@ This package provides the shared libraries for %{name}.
 
 %package cuda-libs
 Summary:        Libraries for %{name}-cuda
-Requires(post): ldconfig
 
 %description cuda-libs
 This package provides the CUDA libraries for %{name}-cuda.
 
 %package NvFBCOpenGL
 Summary:        NVIDIA OpenGL-based Framebuffer Capture libraries
-Requires(post): ldconfig
 # Loads libnvidia-encode.so at runtime
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
@@ -183,7 +180,6 @@ remote graphics scenarios.
 
 %package NVML
 Summary:        NVIDIA Management Library (NVML)
-Requires(post): ldconfig
 Provides:       cuda-nvml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description NVML
@@ -527,6 +523,9 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Sat Jan 12 2019 Simone Caronni <negativo17@gmail.com> - 3:415.25-2
+- Update requirements.
+
 * Thu Dec 20 2018 Simone Caronni <negativo17@gmail.com> - 3:415.25-1
 - Update to 415.25.
 
