@@ -32,8 +32,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        415.25
-Release:        2%{?dist}
+Version:        415.27
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -523,6 +523,9 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Thu Jan 17 2019 Simone Caronni <negativo17@gmail.com> - 3:415.27-1
+- Update to 415.27.
+
 * Sat Jan 12 2019 Simone Caronni <negativo17@gmail.com> - 3:415.25-2
 - Update requirements.
 
