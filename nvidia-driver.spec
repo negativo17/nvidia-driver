@@ -33,7 +33,7 @@
 
 Name:           nvidia-driver
 Version:        415.27
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -84,6 +84,10 @@ Requires:       nvidia-driver-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-kmod = %{?epoch:%{epoch}:}%{version}
 Provides:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
 Requires:       libva-vdpau-driver%{?_isa}
+
+# Official Nvidia CUDA repository requirements
+Provides:       cuda-drivers = %{?epoch:%{epoch}:}%{version}
+Provides:       nvidia-drivers = %{?epoch:%{epoch}:}%{version}
 
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
 # X.org "OutputClass"
@@ -523,6 +527,9 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Sat Feb 02 2019 Simone Caronni <negativo17@gmail.com> - 3:415.27-2
+- Add nvidia-drivers and cuda-drivers virtual provides as requested by Red Hat.
+
 * Thu Jan 17 2019 Simone Caronni <negativo17@gmail.com> - 3:415.27-1
 - Update to 415.27.
 
