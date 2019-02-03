@@ -33,7 +33,7 @@
 
 Name:           nvidia-driver
 Version:        410.93
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -84,10 +84,6 @@ Requires:       nvidia-driver-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-kmod = %{?epoch:%{epoch}:}%{version}
 Provides:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
 Requires:       libva-vdpau-driver%{?_isa}
-
-# Official Nvidia CUDA repository requirements
-Provides:       cuda-drivers = %{?epoch:%{epoch}:}%{version}
-Provides:       nvidia-drivers = %{?epoch:%{epoch}:}%{version}
 
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
 # X.org "OutputClass"
@@ -527,6 +523,9 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Sun Feb 03 2019 Simone Caronni <negativo17@gmail.com> - 3:410.93-4
+- Remove CUDA provides/requires, move them to separate package.
+
 * Sat Feb 02 2019 Simone Caronni <negativo17@gmail.com> - 3:410.93-3
 - Add nvidia-drivers and cuda-drivers virtual provides as requested by Red Hat.
 
