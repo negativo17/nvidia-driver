@@ -1,39 +1,13 @@
 %global debug_package %{nil}
 %global __strip /bin/true
 
-# RHEL 6 does not have _udevrulesdir defined
 %if 0%{?rhel} == 6
-%global _udevrulesdir   %{_prefix}/lib/udev/rules.d/
-%global _dracutopts     nouveau.modeset=0 rdblacklist=nouveau
-%global _dracutopts_rm  nomodeset vga=normal
-%global _dracut_conf_d	%{_sysconfdir}/dracut.conf.d
-%global _modprobe_d     %{_sysconfdir}/modprobe.d/
-%global _grubby         /sbin/grubby --grub --update-kernel=ALL
 %global _glvnd_libdir   %{_libdir}/libglvnd
-%endif
-
-%if 0%{?rhel} == 7
-%global _dracutopts     nouveau.modeset=0 rd.driver.blacklist=nouveau nvidia-drm.modeset=1
-%global _dracutopts_rm  nomodeset gfxpayload=vga=normal
-%global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
-%global _modprobe_d     %{_prefix}/lib/modprobe.d/
-%global _grubby         %{_sbindir}/grubby --update-kernel=ALL
-%endif
-
-# Fallback service where it tries to load nouveau if nvidia is not loaded, so
-# don't disable it. Just matching the driver with OutputClass in the X.org
-# configuration is enough to load the whole Nvidia stack or the Mesa one.
-%if 0%{?fedora} || 0%{?rhel} >= 8
-%global _dracutopts     rd.driver.blacklist=nouveau
-%global _dracutopts_rm  nomodeset gfxpayload=vga=normal nouveau.modeset=0 nvidia-drm.modeset=1
-%global _dracut_conf_d  %{_prefix}/lib/dracut/dracut.conf.d
-%global _modprobe_d     %{_prefix}/lib/modprobe.d/
-%global _grubby         %{_sbindir}/grubby --update-kernel=ALL
 %endif
 
 Name:           nvidia-driver
 Version:        415.27
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -48,29 +22,14 @@ Source11:       10-nvidia-driver.conf
 # For servers with OutputClass device options
 Source12:       10-nvidia.conf
 
-Source20:       nvidia.conf
-Source21:       60-nvidia-drm.rules
-Source22:       60-nvidia-uvm.rules
-Source23:       nvidia-uvm.conf
-Source24:       99-nvidia-dracut.conf
-
 Source40:       com.nvidia.driver.metainfo.xml
 Source41:       parse-readme.py
-
-# Auto-fallback to nouveau, requires server 1.19.0-3+, glvnd enabled mesa
-Source50:       nvidia-fallback.service
-Source51:       95-nvidia-fallback.preset
 
 Source99:       nvidia-generate-tarballs.sh
 
 %ifarch x86_64
 
 BuildRequires:  python2
-
-%if 0%{?fedora} || 0%{?rhel} >= 7
-# UDev rule location (_udevrulesdir) and systemd macros
-BuildRequires:  systemd
-%endif
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
 # AppStream metadata generation
@@ -79,10 +38,8 @@ BuildRequires:  libappstream-glib%{?_isa} >= 0.6.3
 
 %endif
 
-Requires:       grubby
 Requires:       nvidia-driver-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
-Requires:       nvidia-kmod = %{?epoch:%{epoch}:}%{version}
-Provides:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
+Requires:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
 Requires:       libva-vdpau-driver%{?_isa}
 
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
@@ -99,7 +56,6 @@ Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.19.0-3
 
 Conflicts:      catalyst-x11-drv
 Conflicts:      catalyst-x11-drv-legacy
-Conflicts:      cuda-drivers
 Conflicts:      fglrx-x11-drv
 Conflicts:      nvidia-x11-drv
 Conflicts:      nvidia-x11-drv-173xx
@@ -209,6 +165,7 @@ This package provides the development files of the %{name} package.
 %package cuda
 Summary:        CUDA integration for %{name}
 Conflicts:      xorg-x11-drv-nvidia-cuda
+Requires:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-persistenced = %{?epoch:%{epoch}:}%{version}
 Requires:       opencl-filesystem
@@ -265,9 +222,6 @@ mkdir -p %{buildroot}%{_libdir}/xorg/modules/extensions/
 mkdir -p %{buildroot}%{_mandir}/man1/
 mkdir -p %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
-mkdir -p %{buildroot}%{_udevrulesdir}
-mkdir -p %{buildroot}%{_modprobe_d}/
-mkdir -p %{buildroot}%{_dracut_conf_d}/
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
 %if 0%{?rhel}
@@ -276,21 +230,10 @@ mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
 mkdir -p %{buildroot}%{_datadir}/appdata/
-mkdir -p %{buildroot}%{_unitdir}
-mkdir -p %{buildroot}%{_presetdir}
 %endif
 
 # OpenCL config
 install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
-
-# Blacklist nouveau
-install -p -m 0644 %{SOURCE20} %{buildroot}%{_modprobe_d}/
-
-# Autoload nvidia-uvm module after nvidia module
-install -p -m 0644 %{SOURCE23} %{buildroot}%{_modprobe_d}/
-
-# dracut.conf.d file, nvidia modules must never be in the initrd
-install -p -m 0644 %{SOURCE24} %{buildroot}%{_dracut_conf_d}/
 
 # Binaries
 install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-report.sh} %{buildroot}%{_bindir}
@@ -307,9 +250,6 @@ fn=%{buildroot}%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
 %{SOURCE41} README.txt "NVIDIA NVS GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA TESLA GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA GRID GPUS" | xargs appstream-util add-provide ${fn} modalias
-# install auto-fallback to nouveau service
-install -p -m 0644 %{SOURCE50} %{buildroot}%{_unitdir}
-install -p -m 0644 %{SOURCE51} %{buildroot}%{_presetdir}
 %endif
 
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
@@ -333,11 +273,6 @@ install -p -m 0644 nvidia-application-profiles-%{version}-key-documentation \
 install -p -m 0644 nvidia-application-profiles-%{version}-rc \
     %{buildroot}%{_datadir}/nvidia/
 
-# UDev rules:
-# https://github.com/NVIDIA/nvidia-modprobe/blob/master/modprobe-utils/nvidia-modprobe-utils.h#L33-L46
-# https://github.com/negativo17/nvidia-driver/issues/27
-install -p -m 644 %{SOURCE21} %{SOURCE22} %{buildroot}%{_udevrulesdir}
-
 %endif
 
 %if 0%{?fedora} || 0%{?rhel} >= 7
@@ -357,56 +292,6 @@ install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
 
-# Apply the systemd preset for nvidia-fallback.service when upgrading from
-# a version without nvidia-fallback.service, as %%systemd_post only does this
-# on fresh installs
-%if 0%{?fedora}
-%triggerun -- %{name} < 2:381.22-2
-systemctl --no-reload preset nvidia-fallback.service >/dev/null 2>&1 || :
-%endif
-
-%post
-%{_grubby} --args='%{_dracutopts}' --remove-args='%{_dracutopts_rm}' &>/dev/null
-%if 0%{?fedora} || 0%{?rhel} >= 7
-. %{_sysconfdir}/default/grub
-if [ -z "${GRUB_CMDLINE_LINUX}" ]; then
-  echo GRUB_CMDLINE_LINUX="%{_dracutopts}" >> %{_sysconfdir}/default/grub
-else
-  for param in %{_dracutopts}; do
-    echo ${GRUB_CMDLINE_LINUX} | grep -q $param
-    [ $? -eq 1 ] && GRUB_CMDLINE_LINUX="${GRUB_CMDLINE_LINUX} ${param}"
-  done
-  for param in %{_dracutopts_rm}; do
-    echo ${GRUB_CMDLINE_LINUX} | grep -q $param
-    [ $? -eq 0 ] && GRUB_CMDLINE_LINUX="$(echo ${GRUB_CMDLINE_LINUX} | sed -e "s/$param//g")"
-  done
-  sed -i -e "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"${GRUB_CMDLINE_LINUX}\"|g" %{_sysconfdir}/default/grub
-fi
-%endif
-%if 0%{?fedora} || 0%{?rhel} >= 8
-%systemd_post nvidia-fallback.service
-%endif
-
-%preun
-if [ "$1" -eq "0" ]; then
-  %{_grubby} --remove-args='%{_dracutopts}' &>/dev/null
-%if 0%{?fedora} || 0%{?rhel} >= 7
-  for param in %{_dracutopts}; do
-    echo ${GRUB_CMDLINE_LINUX} | grep -q $param
-    [ $? -eq 0 ] && GRUB_CMDLINE_LINUX="$(echo ${GRUB_CMDLINE_LINUX} | sed -e "s/$param//g")"
-  done
-  sed -i -e "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"${GRUB_CMDLINE_LINUX}\"|g" %{_sysconfdir}/default/grub
-%endif
-fi ||:
-%if 0%{?fedora} || 0%{?rhel} >= 8
-%systemd_preun nvidia-fallback.service
-%endif
-
-%if 0%{?fedora} || 0%{?rhel} >= 8
-%postun
-%systemd_postun nvidia-fallback.service
-%endif
-
 %ldconfig_scriptlets libs
 
 %ldconfig_scriptlets cuda-libs
@@ -424,15 +309,10 @@ fi ||:
 %{_bindir}/nvidia-bug-report.sh
 %if 0%{?fedora}
 %{_datadir}/appdata/com.nvidia.driver.metainfo.xml
-%{_unitdir}/nvidia-fallback.service
-%{_presetdir}/95-nvidia-fallback.preset
 %endif
 %{_datadir}/nvidia
-%{_dracut_conf_d}/99-nvidia-dracut.conf
 %{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
-%{_modprobe_d}/nvidia.conf
-%{_udevrulesdir}/60-nvidia-drm.rules
 
 # X.org configuration files
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
@@ -452,8 +332,6 @@ fi ||:
 %{_bindir}/nvidia-smi
 %{_mandir}/man1/nvidia-cuda-mps-control.1.*
 %{_mandir}/man1/nvidia-smi.*
-%{_modprobe_d}/nvidia-uvm.conf
-%{_udevrulesdir}/60-nvidia-uvm.rules
 
 %endif
 
@@ -523,6 +401,11 @@ fi ||:
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Sun Feb 03 2019 Simone Caronni <negativo17@gmail.com> - 3:415.27-4
+- Split out all kernel related interactions into the nvidia-kmod-common package.
+- Require nvidia-kmod-common in both nvidia-driver and nvidia-driver-cuda as
+  they can now be installed separately.
+
 * Sun Feb 03 2019 Simone Caronni <negativo17@gmail.com> - 3:415.27-3
 - Remove CUDA provides/requires, move them to separate package.
 
