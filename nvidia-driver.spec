@@ -7,7 +7,7 @@
 
 Name:           nvidia-driver
 Version:        415.27
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -366,6 +366,7 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvoptix.so.%{version}
 %endif
 %{_libdir}/libnvidia-eglcore.so.%{version}
+%{_libdir}/libnvidia-fatbinaryloader.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
 %{_libdir}/libnvidia-glsi.so.%{version}
 %if 0%{?fedora} || 0%{?rhel} >= 7
@@ -384,7 +385,6 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-compiler.so.%{version}
 %{_libdir}/libnvidia-encode.so.1
 %{_libdir}/libnvidia-encode.so.%{version}
-%{_libdir}/libnvidia-fatbinaryloader.so.%{version}
 %{_libdir}/libnvidia-opencl.so.1
 %{_libdir}/libnvidia-opencl.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
@@ -401,6 +401,9 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Mon Feb 04 2019 Simone Caronni <negativo17@gmail.com> - 3:415.27-5
+- Move fatbinaryloader in main libraries subpackage.
+
 * Sun Feb 03 2019 Simone Caronni <negativo17@gmail.com> - 3:415.27-4
 - Split out all kernel related interactions into the nvidia-kmod-common package.
 - Require nvidia-kmod-common in both nvidia-driver and nvidia-driver-cuda as
