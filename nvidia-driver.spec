@@ -6,8 +6,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        415.27
-Release:        5%{?dist}
+Version:        418.30
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -387,6 +387,8 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-encode.so.%{version}
 %{_libdir}/libnvidia-opencl.so.1
 %{_libdir}/libnvidia-opencl.so.%{version}
+%{_libdir}/libnvidia-opticalflow.1
+%{_libdir}/libnvidia-opticalflow.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
 
@@ -401,6 +403,9 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Feb 06 2019 Simone Caronni <negativo17@gmail.com> - 3:418.30-1
+- Update to 418.30.
+
 * Mon Feb 04 2019 Simone Caronni <negativo17@gmail.com> - 3:415.27-5
 - Move fatbinaryloader in main libraries subpackage.
 
