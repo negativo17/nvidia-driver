@@ -387,7 +387,7 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-encode.so.%{version}
 %{_libdir}/libnvidia-opencl.so.1
 %{_libdir}/libnvidia-opencl.so.%{version}
-%{_libdir}/libnvidia-opticalflow.1
+%{_libdir}/libnvidia-opticalflow.so.1
 %{_libdir}/libnvidia-opticalflow.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
