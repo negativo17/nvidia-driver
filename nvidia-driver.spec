@@ -50,8 +50,6 @@ Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.16
 %if 0%{?fedora} || 0%{?rhel} >= 8
 # Extended "OutputClass" with device options
 Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.19.0-3
-# For auto-fallback to nouveau systemd service
-%{?systemd_requires}
 %endif
 
 Conflicts:      catalyst-x11-drv
