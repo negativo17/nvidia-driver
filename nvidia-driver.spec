@@ -7,7 +7,7 @@
 
 Name:           nvidia-driver
 Version:        418.43
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -75,7 +75,6 @@ version %{version}.
 
 %package libs
 Summary:        Libraries for %{name}
-Requires:       egl-wayland
 Requires:       libvdpau%{?_isa} >= 0.5
 Requires:       libglvnd%{?_isa} >= 1.0
 Requires:       libglvnd-egl%{?_isa} >= 1.0
@@ -84,11 +83,15 @@ Requires:       libglvnd-glx%{?_isa} >= 1.0
 Requires:       libglvnd-opengl%{?_isa} >= 1.0
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
+Requires:       egl-wayland%{?_isa}
 Requires:       vulkan-loader
 %endif
 
 %if 0%{?rhel} == 7
 Requires:       vulkan-filesystem
+%ifarch x86_64
+Requires:       egl-wayland%{?_isa}
+%endif
 %endif
 
 Conflicts:      nvidia-x11-drv-libs
@@ -401,6 +404,9 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Thu Feb 28 2019 Simone Caronni <negativo17@gmail.com> - 3:418.43-2
+- Do not require egl-wayland on EPEL 32 bit.
+
 * Fri Feb 22 2019 Simone Caronni <negativo17@gmail.com> - 3:418.43-1
 - Update to 418.43.
 - Trim changelog.
