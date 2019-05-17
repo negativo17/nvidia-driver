@@ -29,7 +29,11 @@ Source99:       nvidia-generate-tarballs.sh
 
 %ifarch x86_64
 
+# We only generate appstream metadata from the
+# readme on Fedora
+%if 0%{?fedora}
 BuildRequires:  python2
+%endif
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
 # AppStream metadata generation
