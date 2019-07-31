@@ -6,7 +6,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        430.34
+Version:        430.40
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -404,6 +404,9 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Jul 31 2019 Simone Caronni <negativo17@gmail.com> - 3:430.40-1
+- Update to 430.40.
+
 * Fri Jul 12 2019 Simone Caronni <negativo17@gmail.com> - 3:430.34-1
 - Update to 430.34.
 
