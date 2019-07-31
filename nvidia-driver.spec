@@ -32,7 +32,7 @@ Source99:       nvidia-generate-tarballs.sh
 BuildRequires:  python2
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
-BuildRequires:  libappstream-glib%{?_isa}
+BuildRequires:  libappstream-glib
 %endif
 
 %endif
@@ -288,8 +288,14 @@ install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
 
+%ifarch x86_64
+
+%if 0%{?fedora} || 0%{?rhel} >= 8
 %check
 appstream-util validate-relax --nonet %{buildroot}/%{_metainfodir}/com.nvidia.driver.metainfo.xml
+%endif
+
+%endif
 
 %ldconfig_scriptlets libs
 
