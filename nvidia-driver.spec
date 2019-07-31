@@ -32,8 +32,7 @@ Source99:       nvidia-generate-tarballs.sh
 BuildRequires:  python2
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
-# AppStream metadata generation
-BuildRequires:  libappstream-glib%{?_isa} >= 0.6.3
+BuildRequires:  libappstream-glib%{?_isa}
 %endif
 
 %endif
@@ -229,10 +228,6 @@ mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
 %endif
 
-%if 0%{?fedora} || 0%{?rhel} >= 8
-mkdir -p %{buildroot}%{_datadir}/appdata/
-%endif
-
 # OpenCL config
 install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
@@ -242,10 +237,10 @@ install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-re
 # Man pages
 install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1/
 
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} >= 8
 # install AppData and add modalias provides
-install -p -m 0644 %{SOURCE40} %{buildroot}%{_datadir}/appdata/
-fn=%{buildroot}%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
+install -D -p -m 0644 %{SOURCE40} %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
+fn=%{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
 %{SOURCE41} README.txt "NVIDIA GEFORCE GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA QUADRO GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA NVS GPUS" | xargs appstream-util add-provide ${fn} modalias
@@ -293,6 +288,9 @@ install -m 0755 -d %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%{_target_cpu}.conf
 %endif
 
+%check
+appstream-util validate-relax --nonet %{buildroot}/%{_metainfodir}/com.nvidia.driver.metainfo.xml
+
 %ldconfig_scriptlets libs
 
 %ldconfig_scriptlets cuda-libs
@@ -308,8 +306,8 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %doc NVIDIA_Changelog README.txt html
 %dir %{_sysconfdir}/nvidia
 %{_bindir}/nvidia-bug-report.sh
-%if 0%{?fedora}
-%{_datadir}/appdata/com.nvidia.driver.metainfo.xml
+%if 0%{?fedora} || 0%{?rhel} >= 8
+%{_metainfodir}/com.nvidia.driver.metainfo.xml
 %endif
 %{_datadir}/nvidia
 %{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
@@ -406,6 +404,7 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 %changelog
 * Wed Jul 31 2019 Simone Caronni <negativo17@gmail.com> - 3:430.40-1
 - Update to 430.40.
+- Update AppData installation.
 
 * Fri Jul 12 2019 Simone Caronni <negativo17@gmail.com> - 3:430.34-1
 - Update to 430.34.
