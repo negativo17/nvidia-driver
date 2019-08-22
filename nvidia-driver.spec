@@ -6,7 +6,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        430.40
+Version:        435.17
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -31,8 +31,13 @@ Source99:       nvidia-generate-tarballs.sh
 
 BuildRequires:  python2
 
+%if 0%{?rhel} == 7
+BuildRequires:  systemd
+%endif
+
 %if 0%{?fedora} || 0%{?rhel} >= 8
 BuildRequires:  libappstream-glib
+BuildRequires:  systemd-rpm-macros
 %endif
 
 %endif
@@ -198,9 +203,7 @@ ln -sf libcuda.so.%{version} libcuda.so
 # libglvnd indirect entry point
 ln -sf libGLX_nvidia.so.%{version} libGLX_indirect.so.0
 
-%if 0%{?fedora} || 0%{?rhel} >= 7
-cat nvidia_icd.json.template | sed -e 's/__NV_VK_ICD__/libGLX_nvidia.so.0/' > nvidia_icd.%{_target_cpu}.json
-%else
+%if 0%{?rhel} == 6
 rm -f libnvidia-glvkspirv.so.%{version}
 %endif
 
@@ -217,6 +220,7 @@ mkdir -p %{buildroot}%{_libdir}/vdpau/
 
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/nvidia/
+mkdir -p %{buildroot}%{_datadir}/vulkan/implicit_layer.d/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/extensions/
 mkdir -p %{buildroot}%{_mandir}/man1/
@@ -224,7 +228,11 @@ mkdir -p %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
-%if 0%{?rhel}
+%if 0%{?fedora} || 0%{?rhel} >= 7
+mkdir -p %{buildroot}%{_unitdir}/
+%endif
+
+%if 0%{?rhel} == 6 || 0%{?rhel} == 7
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
 %endif
 
@@ -272,9 +280,18 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 %endif
 
 %if 0%{?fedora} || 0%{?rhel} >= 7
-# Vulkan and EGL loaders
-install -p -m 0644 nvidia_icd.%{_target_cpu}.json %{buildroot}%{_datadir}/vulkan/icd.d/
+# Vulkan loader
+install -p -m 0644 nvidia_icd.json %{buildroot}%{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
 %endif
+
+%ifarch x86_64
+%if 0%{?fedora} || 0%{?rhel} >= 8
+# Vulkan layer
+install -p -m 0644 nvidia_layers.json %{buildroot}%{_datadir}/vulkan/implicit_layer.d/
+%endif
+%endif
+
+# EGL loader
 install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 
 # Unique libraries
@@ -290,9 +307,15 @@ echo -e "%{_glvnd_libdir} \n" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/nvidia-%
 
 %ifarch x86_64
 
+%if 0%{?fedora} || 0%{?rhel} >= 7
+# Systemd units and script for suspending/resuming
+install -p -m 0644 nvidia-hibernate.service nvidia-resume.service nvidia-suspend.service %{buildroot}%{_unitdir}
+install -p -m 0755 nvidia-sleep.sh %{buildroot}%{_bindir}
+%endif
+
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %check
-appstream-util validate-relax --nonet %{buildroot}/%{_metainfodir}/com.nvidia.driver.metainfo.xml
+appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
 %endif
 
 %endif
@@ -307,6 +330,25 @@ appstream-util validate-relax --nonet %{buildroot}/%{_metainfodir}/com.nvidia.dr
 
 %ifarch x86_64
 
+%if 0%{?fedora} || 0%{?rhel} >= 7
+
+%post
+%systemd_post nvidia-hibernate.service
+%systemd_post nvidia-resume.service
+%systemd_post nvidia-suspend.service
+
+%preun
+%systemd_preun nvidia-hibernate.service
+%systemd_preun nvidia-resume.service
+%systemd_preun nvidia-suspend.service
+
+%postun
+%systemd_postun nvidia-hibernate.service
+%systemd_postun nvidia-resume.service
+%systemd_postun nvidia-suspend.service
+
+%endif
+
 %files
 %license LICENSE
 %doc NVIDIA_Changelog README.txt html
@@ -318,6 +360,12 @@ appstream-util validate-relax --nonet %{buildroot}/%{_metainfodir}/com.nvidia.dr
 %{_datadir}/nvidia
 %{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
+%if 0%{?fedora} || 0%{?rhel} >= 7
+%{_bindir}/nvidia-sleep.sh
+%{_unitdir}/nvidia-hibernate.service
+%{_unitdir}/nvidia-resume.service
+%{_unitdir}/nvidia-suspend.service
+%endif
 
 # X.org configuration files
 %if 0%{?rhel} == 6 || 0%{?rhel} == 7
@@ -353,6 +401,11 @@ appstream-util validate-relax --nonet %{buildroot}/%{_metainfodir}/com.nvidia.dr
 %{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
 %if 0%{?fedora} || 0%{?rhel} >= 7
 %{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
+%endif
+%ifarch x86_64
+%if 0%{?fedora} || 0%{?rhel} >= 8
+%{_datadir}/vulkan/implicit_layer.d/nvidia_layers.json
+%endif
 %endif
 %{_libdir}/libEGL_nvidia.so.0
 %{_libdir}/libEGL_nvidia.so.%{version}
@@ -408,6 +461,11 @@ appstream-util validate-relax --nonet %{buildroot}/%{_metainfodir}/com.nvidia.dr
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Thu Aug 22 2019 Simone Caronni <negativo17@gmail.com> - 3:435.17-1
+- Update to 435.17.
+- Add hibernate/resume/suspend systemd hooks.
+- Add Vulkan layer file and default powermanagement.
+
 * Wed Jul 31 2019 Simone Caronni <negativo17@gmail.com> - 3:430.40-1
 - Update to 430.40.
 - Update AppData installation.
