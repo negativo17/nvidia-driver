@@ -6,7 +6,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        435.17
+Version:        435.21
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -461,6 +461,9 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Mon Sep 02 2019 Simone Caronni <negativo17@gmail.com> - 3:435.21-1
+- Update to 435.21.
+
 * Thu Aug 22 2019 Simone Caronni <negativo17@gmail.com> - 3:435.17-1
 - Update to 435.17.
 - Add hibernate/resume/suspend systemd hooks.
