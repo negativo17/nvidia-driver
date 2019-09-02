@@ -29,7 +29,7 @@ Source99:       nvidia-generate-tarballs.sh
 
 %ifarch x86_64
 
-BuildRequires:  python2
+BuildRequires:  python3
 
 %if 0%{?rhel} == 7
 BuildRequires:  systemd
