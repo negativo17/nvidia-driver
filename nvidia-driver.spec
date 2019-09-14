@@ -6,7 +6,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        430.40
+Version:        430.50
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -408,6 +408,9 @@ appstream-util validate-relax --nonet %{buildroot}/%{_metainfodir}/com.nvidia.dr
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Sat Sep 14 2019 Simone Caronni <negativo17@gmail.com> - 3:430.50-1
+- Update to 430.50.
+
 * Wed Jul 31 2019 Simone Caronni <negativo17@gmail.com> - 3:430.40-1
 - Update to 430.40.
 - Update AppData installation.
