@@ -7,7 +7,7 @@
 
 Name:           nvidia-driver
 Version:        435.21
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -31,11 +31,11 @@ Source99:       nvidia-generate-tarballs.sh
 
 BuildRequires:  python3
 
-%if 0%{?fedora} == 29 || 0%{?rhel} == 7
+%if 0%{?fedora} == 29 || 0%{?rhel} == 7 || 0%{?rhel} == 8
 BuildRequires:  systemd
 %endif
 
-%if 0%{?fedora} >= 30 || 0%{?rhel} >= 8
+%if 0%{?fedora} >= 30
 BuildRequires:  systemd-rpm-macros
 %endif
 
@@ -464,6 +464,9 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Tue Oct 01 2019 Simone Caronni <negativo17@gmail.com> - 3:435.21-2
+- Fix build dependency on CentOS/RHEL 8.
+
 * Mon Sep 02 2019 Simone Caronni <negativo17@gmail.com> - 3:435.21-1
 - Update to 435.21.
 
