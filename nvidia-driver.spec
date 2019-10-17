@@ -6,8 +6,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        435.21
-Release:        2%{?dist}
+Version:        440.26
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -426,6 +426,8 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
 %endif
+%{_libdir}/libnvidia-allocator.so.1
+%{_libdir}/libnvidia-allocator.so.%{version}
 %{_libdir}/libnvidia-eglcore.so.%{version}
 %{_libdir}/libnvidia-fatbinaryloader.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
@@ -464,6 +466,9 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Thu Oct 17 2019 Simone Caronni <negativo17@gmail.com> - 3:440.26-1
+- Update to 440.26.
+
 * Tue Oct 01 2019 Simone Caronni <negativo17@gmail.com> - 3:435.21-2
 - Fix build dependency on CentOS/RHEL 8.
 
