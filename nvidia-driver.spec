@@ -16,11 +16,12 @@ ExclusiveArch:  %{ix86} x86_64
 
 Source0:        %{name}-%{version}-i386.tar.xz
 Source1:        %{name}-%{version}-x86_64.tar.xz
-# For servers without OutputClass device options
-Source10:       99-nvidia-modules.conf
-Source11:       10-nvidia-driver.conf
-# For servers with OutputClass device options
-Source12:       10-nvidia.conf
+# For servers without OutputClass device options (el6)
+Source11:       10-nvidia.conf
+# For servers with OutputClass device options (el7+)
+Source12:       10-nvidia.conf.outputclass-device
+# For servers with OutputClass device options and GPU screens (fedora)
+Source13:       10-nvidia.conf.gpu-screens
 
 Source40:       com.nvidia.driver.metainfo.xml
 Source41:       parse-readme.py
@@ -259,12 +260,11 @@ fn=%{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
 %endif
 
 %if 0%{?rhel} == 6
-install -p -m 0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
-sed -i -e 's|@LIBDIR@|%{_libdir}|g' %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
-install -p -m 0644 %{SOURCE11} %{buildroot}%{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
-%else
+install -p -m 0644 %{SOURCE11} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
+%elif 0%{?rhel} >= 7
 install -p -m 0644 %{SOURCE12} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
-sed -i -e 's|@LIBDIR@|%{_libdir}|g' %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
+%else
+install -p -m 0644 %{SOURCE13} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %endif
 
 # X stuff
@@ -365,13 +365,6 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_unitdir}/nvidia-hibernate.service
 %{_unitdir}/nvidia-resume.service
 %{_unitdir}/nvidia-suspend.service
-%endif
-
-# X.org configuration files
-%if 0%{?rhel} == 6
-%config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
-%config(noreplace) %{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
-%else
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %endif
 
@@ -462,7 +455,7 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 
 %changelog
 * Sun Nov 10 2019 Simone Caronni <negativo17@gmail.com> - 3:440.31-2
-- RHEL/CentOS 7 can use OutputClass with Device Options.
+- Streamline configurations between the various distributions.
 
 * Sat Sep 14 2019 Simone Caronni <negativo17@gmail.com> - 3:430.50-1
 - Update to 430.50.
