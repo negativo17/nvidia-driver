@@ -50,14 +50,7 @@ BuildRequires:  python2
 Requires:       nvidia-driver-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
 Requires:       libva-vdpau-driver%{?_isa}
-
-%if 0%{?rhel} == 6
-# X.org "OutputClass"
-Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.16
-%else
-# Extended "OutputClass" with device options
-Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.19.0-3
-%endif
+Requires:       xorg-x11-server-Xorg%{?_isa}
 
 Conflicts:      catalyst-x11-drv
 Conflicts:      catalyst-x11-drv-legacy
@@ -261,9 +254,13 @@ fn=%{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
 
 %if 0%{?rhel} == 6
 install -p -m 0644 %{SOURCE11} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
-%elif 0%{?rhel} >= 7
+%endif
+
+%if 0%{?rhel} >= 7
 install -p -m 0644 %{SOURCE12} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
-%else
+%endif
+
+%if 0%{?fedora}
 install -p -m 0644 %{SOURCE13} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %endif
 
