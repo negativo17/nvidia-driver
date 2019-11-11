@@ -350,6 +350,7 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %license LICENSE
 %doc NVIDIA_Changelog README.txt html
 %dir %{_sysconfdir}/nvidia
+%config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %{_bindir}/nvidia-bug-report.sh
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %{_metainfodir}/com.nvidia.driver.metainfo.xml
@@ -362,7 +363,6 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_unitdir}/nvidia-hibernate.service
 %{_unitdir}/nvidia-resume.service
 %{_unitdir}/nvidia-suspend.service
-%config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %endif
 
 %files cuda
