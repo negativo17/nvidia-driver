@@ -7,7 +7,7 @@
 
 Name:           nvidia-driver
 Version:        440.31
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -29,9 +29,7 @@ Source99:       nvidia-generate-tarballs.sh
 
 %ifarch x86_64
 
-BuildRequires:  python3
-
-%if 0%{?fedora} == 29 || 0%{?rhel} == 7 || 0%{?rhel} == 8
+%if 0%{?fedora} == 29 || 0%{?rhel} >= 7
 BuildRequires:  systemd
 %endif
 
@@ -41,6 +39,9 @@ BuildRequires:  systemd-rpm-macros
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
 BuildRequires:  libappstream-glib
+BuildRequires:  python3
+%else
+BuildRequires:  python2
 %endif
 
 %endif
@@ -49,12 +50,10 @@ Requires:       nvidia-driver-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
 Requires:       libva-vdpau-driver%{?_isa}
 
-%if 0%{?rhel} == 6 || 0%{?rhel} == 7
+%if 0%{?rhel} == 6
 # X.org "OutputClass"
 Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.16
-%endif
-
-%if 0%{?fedora} || 0%{?rhel} >= 8
+%else
 # Extended "OutputClass" with device options
 Requires:       xorg-x11-server-Xorg%{?_isa} >= 1.19.0-3
 %endif
@@ -223,7 +222,6 @@ mkdir -p %{buildroot}%{_libdir}/vdpau/
 
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/nvidia/
-mkdir -p %{buildroot}%{_datadir}/vulkan/implicit_layer.d/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/extensions/
 mkdir -p %{buildroot}%{_mandir}/man1/
@@ -232,10 +230,11 @@ mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
 %if 0%{?fedora} || 0%{?rhel} >= 7
+mkdir -p %{buildroot}%{_datadir}/vulkan/implicit_layer.d/
 mkdir -p %{buildroot}%{_unitdir}/
 %endif
 
-%if 0%{?rhel} == 6 || 0%{?rhel} == 7
+%if 0%{?rhel} == 6
 mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
 %endif
 
@@ -259,13 +258,11 @@ fn=%{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
 %{SOURCE41} README.txt "NVIDIA GRID GPUS" | xargs appstream-util add-provide ${fn} modalias
 %endif
 
-%if 0%{?rhel} == 6 || 0%{?rhel} == 7
+%if 0%{?rhel} == 6
 install -p -m 0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
 sed -i -e 's|@LIBDIR@|%{_libdir}|g' %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
 install -p -m 0644 %{SOURCE11} %{buildroot}%{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
-%endif
-
-%if 0%{?fedora} || 0%{?rhel} >= 8
+%else
 install -p -m 0644 %{SOURCE12} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 sed -i -e 's|@LIBDIR@|%{_libdir}|g' %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %endif
@@ -371,12 +368,10 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %endif
 
 # X.org configuration files
-%if 0%{?rhel} == 6 || 0%{?rhel} == 7
+%if 0%{?rhel} == 6
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/99-nvidia-modules.conf
 %config(noreplace) %{_datadir}/X11/xorg.conf.d/10-nvidia-driver.conf
-%endif
-
-%if 0%{?fedora} || 0%{?rhel} >= 8
+%else
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %endif
 
@@ -466,6 +461,9 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Sun Nov 10 2019 Simone Caronni <negativo17@gmail.com> - 3:440.31-2
+- RHEL/CentOS 7 can use OutputClass with Device Options.
+
 * Sat Nov 09 2019 Simone Caronni <negativo17@gmail.com> - 3:440.31-1
 - Update to 440.31.
 
