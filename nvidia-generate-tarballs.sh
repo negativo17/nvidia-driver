@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-VERSION=${VERSION:-430.50}
+VERSION=${VERSION:-440.31}
 DL_SITE=${DL_SITE:-http://us.download.nvidia.com/XFree86}
 TEMP_UNPACK=${TEMP_UNPACK:-temp}
 
@@ -37,9 +37,6 @@ rm -f \
 
 # Useless with packages
 rm -f nvidia-installer* .manifest make* mk* tls_test*
-
-# useless on modern distributions
-rm -f libnvidia-wfb*
 
 # Add json files in both architectures
 cp -f *.json* 32/
