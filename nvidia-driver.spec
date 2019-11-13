@@ -7,7 +7,7 @@
 
 Name:           nvidia-driver
 Version:        440.31
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -451,6 +451,9 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Nov 13 2019 Simone Caronni <negativo17@gmail.com> - 3:440.31-3
+- RHEL/CentOS 6 does not work anymore with OutputClass configurations.
+
 * Sun Nov 10 2019 Simone Caronni <negativo17@gmail.com> - 3:440.31-2
 - Streamline configurations between the various distributions.
 
