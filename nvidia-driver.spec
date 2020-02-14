@@ -7,7 +7,7 @@
 
 Name:           nvidia-driver
 Version:        440.59
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -276,16 +276,18 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 
 %endif
 
+%ifarch x86_64
+
 %if 0%{?fedora} || 0%{?rhel} >= 7
 # Vulkan loader
-install -p -m 0644 nvidia_icd.json %{buildroot}%{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
+install -p -m 0644 nvidia_icd.json %{buildroot}%{_datadir}/vulkan/icd.d/
 %endif
 
-%ifarch x86_64
 %if 0%{?fedora} || 0%{?rhel} >= 8
 # Vulkan layer
 install -p -m 0644 nvidia_layers.json %{buildroot}%{_datadir}/vulkan/implicit_layer.d/
 %endif
+
 %endif
 
 # EGL loader
@@ -451,6 +453,9 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Tue Feb 14 2020 Jens Peters <jp7677@gmail.com> - 3:440.59-2
+- Ensure that only one Vulkan ICD manifest is present.
+
 * Tue Feb 04 2020 Simone Caronni <negativo17@gmail.com> - 3:440.59-1
 - Update to 440.59.
 
