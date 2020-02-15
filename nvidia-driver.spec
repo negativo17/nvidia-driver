@@ -389,10 +389,10 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_libdir}/libGLX_indirect.so.0
 %endif
 %{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
-%if 0%{?fedora} || 0%{?rhel} >= 7
-%{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
-%endif
 %ifarch x86_64
+%if 0%{?fedora} || 0%{?rhel} >= 7
+%{_datadir}/vulkan/icd.d/nvidia_icd.json
+%endif
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %{_datadir}/vulkan/implicit_layer.d/nvidia_layers.json
 %endif
