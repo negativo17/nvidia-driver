@@ -6,8 +6,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        440.59
-Release:        2%{?dist}
+Version:        440.64
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -453,6 +453,9 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Fri Feb 28 2020 Simone Caronni <negativo17@gmail.com> - 3:440.64-1
+- Update to 440.64.
+
 * Tue Feb 14 2020 Jens Peters <jp7677@gmail.com> - 3:440.59-2
 - Ensure that only one Vulkan ICD manifest is present.
 
