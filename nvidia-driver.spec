@@ -30,11 +30,11 @@ Source99:       nvidia-generate-tarballs.sh
 
 %ifarch x86_64
 
-%if 0%{?fedora} == 29 || 0%{?rhel} >= 7
+%if 0%{?rhel} >= 7
 BuildRequires:  systemd
 %endif
 
-%if 0%{?fedora} >= 30
+%if 0%{?fedora}
 BuildRequires:  systemd-rpm-macros
 %endif
 
