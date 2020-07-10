@@ -3,7 +3,6 @@ Section "OutputClass"
     MatchDriver "nvidia-drm"
     Driver "nvidia"
     Option "AllowEmptyInitialConfiguration"
-    Option "PrimaryGPU" "yes"
     Option "SLI" "Auto"
     Option "BaseMosaic" "on"
 EndSection

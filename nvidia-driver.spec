@@ -6,7 +6,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        440.100
+Version:        450.57
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -20,8 +20,6 @@ Source1:        %{name}-%{version}-x86_64.tar.xz
 Source11:       10-nvidia.conf
 # For servers with OutputClass device options (el7+)
 Source12:       10-nvidia.conf.outputclass-device
-# For servers with OutputClass device options and GPU screens (fedora)
-Source13:       10-nvidia.conf.gpu-screens
 
 Source40:       com.nvidia.driver.metainfo.xml
 Source41:       parse-readme.py
@@ -256,12 +254,8 @@ fn=%{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
 install -p -m 0644 %{SOURCE11} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %endif
 
-%if 0%{?rhel} >= 7
+%if 0%{?fedora} || 0%{?rhel} >= 7
 install -p -m 0644 %{SOURCE12} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
-%endif
-
-%if 0%{?fedora}
-install -p -m 0644 %{SOURCE13} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %endif
 
 # X stuff
@@ -350,7 +344,7 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 
 %files
 %license LICENSE
-%doc NVIDIA_Changelog README.txt html
+%doc NVIDIA_Changelog README.txt html supported-gpus.json
 %dir %{_sysconfdir}/nvidia
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %{_bindir}/nvidia-bug-report.sh
@@ -409,6 +403,8 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_libdir}/libnvidia-cbl.so.%{version}
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
+%{_libdir}/libnvidia-ngx.so.1
+%{_libdir}/libnvidia-ngx.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
@@ -416,7 +412,6 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_libdir}/libnvidia-allocator.so.1
 %{_libdir}/libnvidia-allocator.so.%{version}
 %{_libdir}/libnvidia-eglcore.so.%{version}
-%{_libdir}/libnvidia-fatbinaryloader.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
 %{_libdir}/libnvidia-glsi.so.%{version}
 %if 0%{?fedora} || 0%{?rhel} >= 7
@@ -453,6 +448,11 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Fri Jul 10 2020 Simone Caronni <negativo17@gmail.com> - 3:450.57-1
+- Update to 450.57.
+- Driver now autodetects GPU Screens and RandR PRIME Display Offload Sink
+  based on X.org version.
+
 * Thu Jun 25 2020 Simone Caronni <negativo17@gmail.com> - 3:440.100-1
 - Update to 440.100.
 
