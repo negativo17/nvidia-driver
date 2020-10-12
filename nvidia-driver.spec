@@ -6,7 +6,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        450.80.02
+Version:        455.28
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -234,7 +234,7 @@ mkdir -p %{buildroot}%{_datadir}/X11/xorg.conf.d/
 install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
 # Binaries
-install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-report.sh} %{buildroot}%{_bindir}
+install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-report.sh,ngx-updater} %{buildroot}%{_bindir}
 
 # Man pages
 install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1/
@@ -366,6 +366,7 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_bindir}/nvidia-cuda-mps-control
 %{_bindir}/nvidia-cuda-mps-server
 %{_bindir}/nvidia-debugdump
+%{_bindir}/nvidia-ngx-updater
 %{_bindir}/nvidia-smi
 %{_mandir}/man1/nvidia-cuda-mps-control.1.*
 %{_mandir}/man1/nvidia-smi.*
@@ -448,6 +449,9 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Mon Oct 12 2020 Simone Caronni <negativo17@gmail.com> - 3:455.28-1
+- Update to 455.28.
+
 * Tue Oct 06 2020 Simone Caronni <negativo17@gmail.com> - 3:450.80.02-1
 - Update to 450.80.02.
 
@@ -468,7 +472,7 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 * Fri Feb 28 2020 Simone Caronni <negativo17@gmail.com> - 3:440.64-1
 - Update to 440.64.
 
-* Tue Feb 14 2020 Jens Peters <jp7677@gmail.com> - 3:440.59-2
+* Fri Feb 14 2020 Jens Peters <jp7677@gmail.com> - 3:440.59-2
 - Ensure that only one Vulkan ICD manifest is present.
 
 * Tue Feb 04 2020 Simone Caronni <negativo17@gmail.com> - 3:440.59-1
