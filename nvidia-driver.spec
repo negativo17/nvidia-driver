@@ -468,7 +468,7 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 * Fri Feb 28 2020 Simone Caronni <negativo17@gmail.com> - 3:440.64-1
 - Update to 440.64.
 
-* Tue Feb 14 2020 Jens Peters <jp7677@gmail.com> - 3:440.59-2
+* Fri Feb 14 2020 Jens Peters <jp7677@gmail.com> - 3:440.59-2
 - Ensure that only one Vulkan ICD manifest is present.
 
 * Tue Feb 04 2020 Simone Caronni <negativo17@gmail.com> - 3:440.59-1
