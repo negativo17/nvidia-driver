@@ -3,7 +3,7 @@
 
 Name:           nvidia-driver
 Version:        455.45.01
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -399,6 +399,9 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Mon Dec 07 2020 Simone Caronni <negativo17@gmail.com> - 3:455.45.01-2
+- Drop support for CentOS/RHEL 6.
+
 * Wed Nov 18 2020 Simone Caronni <negativo17@gmail.com> - 3:455.45.01-1
 - Update to 455.45.01.
 
