@@ -2,8 +2,8 @@
 %global __strip /bin/true
 
 Name:           nvidia-driver
-Version:        455.45.01
-Release:        2%{?dist}
+Version:        460.27.04
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -216,7 +216,7 @@ mkdir -p %{buildroot}%{_unitdir}/
 install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 
 # Binaries
-install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-report.sh,ngx-updater} %{buildroot}%{_bindir}
+install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-report.sh,ngx-updater,powerd} %{buildroot}%{_bindir}
 
 # Man pages
 install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1/
@@ -226,7 +226,7 @@ install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1
 install -D -p -m 0644 %{SOURCE40} %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
 fn=%{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
 %{SOURCE41} README.txt "NVIDIA GEFORCE GPUS" | xargs appstream-util add-provide ${fn} modalias
-%{SOURCE41} README.txt "NVIDIA QUADRO GPUS" | xargs appstream-util add-provide ${fn} modalias
+%{SOURCE41} README.txt "NVIDIA RTX/QUADRO GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA NVS GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA TESLA GPUS" | xargs appstream-util add-provide ${fn} modalias
 %{SOURCE41} README.txt "NVIDIA GRID GPUS" | xargs appstream-util add-provide ${fn} modalias
@@ -304,7 +304,7 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 
 %files
 %license LICENSE
-%doc NVIDIA_Changelog README.txt html supported-gpus.json
+%doc NVIDIA_Changelog README.txt html supported-gpus/supported-gpus.json
 %dir %{_sysconfdir}/nvidia
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %{_bindir}/nvidia-bug-report.sh
@@ -325,6 +325,7 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_bindir}/nvidia-cuda-mps-server
 %{_bindir}/nvidia-debugdump
 %{_bindir}/nvidia-ngx-updater
+%{_bindir}/nvidia-powerd
 %{_bindir}/nvidia-smi
 %{_mandir}/man1/nvidia-cuda-mps-control.1.*
 %{_mandir}/man1/nvidia-smi.*
@@ -399,6 +400,10 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Sun Dec 20 2020 Simone Caronni <negativo17@gmail.com> - 3:460.27.04-1
+- Update to 460.27.04.
+- Trim changelog.
+
 * Mon Dec 07 2020 Simone Caronni <negativo17@gmail.com> - 3:455.45.01-2
 - Drop support for CentOS/RHEL 6.
 
@@ -514,96 +519,3 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 
 * Sat Jan 12 2019 Simone Caronni <negativo17@gmail.com> - 3:415.25-2
 - Update requirements.
-
-* Thu Dec 20 2018 Simone Caronni <negativo17@gmail.com> - 3:415.25-1
-- Update to 415.25.
-
-* Fri Dec 14 2018 Simone Caronni <negativo17@gmail.com> - 3:415.23-1
-- Update to 415.23.
-
-* Sun Dec 09 2018 Simone Caronni <negativo17@gmail.com> - 3:415.22-1
-- Update to 415.22.
-
-* Sat Dec 01 2018 Simone Caronni <negativo17@gmail.com> - 3:415.18-3
-- No more private GLVND libraries on RHEL 7.
-
-* Thu Nov 22 2018 Simone Caronni <negativo17@gmail.com> - 3:415.18-2
-- Update scripts to always perform updates/removal of boot options.
-
-* Thu Nov 22 2018 Simone Caronni <negativo17@gmail.com> - 3:415.18-1
-- Update to 415.18.
-
-* Thu Nov 22 2018 Simone Caronni <negativo17@gmail.com> - 3:410.78-2
-- Remove modesetting again on Fedora.
-
-* Mon Nov 19 2018 Simone Caronni <negativo17@gmail.com> - 3:410.78-1
-- Update to 410.78.
-
-* Tue Oct 30 2018 Simone Caronni <negativo17@gmail.com> - 3:410.73-4
-- Disable modesetting on Fedora < 29.
-
-* Sat Oct 27 2018 Simone Caronni <negativo17@gmail.com> - 3:410.73-3
-- Revert grubby invocation on RHEL/CentOS 6.
-
-* Fri Oct 26 2018 Simone Caronni <negativo17@gmail.com> - 3:410.73-2
-- Update post scriptlets to make sure new parameters are added correctly.
-
-* Fri Oct 26 2018 Simone Caronni <negativo17@gmail.com> - 3:410.73-1
-- Update to 410.73.
-- Enable modesetting and remove ignoreabi setting for Fedora.
-- Update conditionals for RHEL/CentOS.
-- Add additional conflicting packages.
-- Bump GLVND requirements.
-
-* Wed Oct 17 2018 Simone Caronni <negativo17@gmail.com> - 3:410.66-2
-- Do not enable Vulkan components on RHEL/CentOS 6.
-
-* Wed Oct 17 2018 Simone Caronni <negativo17@gmail.com> - 3:410.66-1
-- Update to 410.66.
-- Enable modeset for RHEL/CentOS 7 (7.6).
-
-* Sat Sep 22 2018 Simone Caronni <negativo17@gmail.com> - 3:410.57-1
-- Update to 410.57.
-
-* Tue Aug 28 2018 Simone Caronni <negativo17@gmail.com> - 3:396.54-2
-- Re-add devel subpackage to x86.
-- Remove nvml header requirements for devel subpackage (pulled in by CUDA
-  devel subpackage if needed).
-
-* Wed Aug 22 2018 Simone Caronni <negativo17@gmail.com> - 3:396.54-1
-- Update to 396.54.
-
-* Sun Aug 19 2018 Simone Caronni <negativo17@gmail.com> - 3:396.51-1
-- Update to 396.51.
-
-* Fri Jul 20 2018 Simone Caronni <negativo17@gmail.com> - 3:396.45-1
-- Update to 396.45.
-
-* Fri Jun 01 2018 Simone Caronni <negativo17@gmail.com> - 3:396.24-1
-- Update to 396.24, x86_64 only.
-- Fix Vulkan ownership of files.
-- Update conditionals for distributions.
-
-* Tue May 22 2018 Simone Caronni <negativo17@gmail.com> - 3:390.59-1
-- Update to 390.59.
-
-* Tue Apr 03 2018 Simone Caronni <negativo17@gmail.com> - 3:390.48-1
-- Update to 390.48.
-
-* Thu Mar 15 2018 Simone Caronni <negativo17@gmail.com> - 3:390.42-1
-- Update to 390.42.
-
-* Tue Feb 27 2018 Simone Caronni <negativo17@gmail.com> - 3:390.25-4
-- Update Epoch so packages do not overlap with RPMFusion.
-
-* Tue Feb 27 2018 Simone Caronni <negativo17@gmail.com> - 2:390.25-3
-- Require libnvidia-ml.so in nvidia-driver-devel package.
-
-* Fri Feb 02 2018 Simone Caronni <negativo17@gmail.com> - 2:390.25-2
-- Fix omitting drivers from the initrd.
-
-* Tue Jan 30 2018 Simone Caronni <negativo17@gmail.com> - 2:390.25-1
-- Update to 390.25.
-
-* Fri Jan 19 2018 Simone Caronni <negativo17@gmail.com> - 2:390.12-1
-- Update to 390.12.
