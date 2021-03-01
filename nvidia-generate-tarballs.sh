@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-VERSION=${VERSION:-460.39}
+VERSION=${VERSION:-460.56}
 DL_SITE=${DL_SITE:-http://us.download.nvidia.com/XFree86}
 TEMP_UNPACK=${TEMP_UNPACK:-temp}
 
