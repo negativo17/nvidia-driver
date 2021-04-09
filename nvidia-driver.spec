@@ -39,17 +39,10 @@ Requires:       libva-vdpau-driver%{?_isa}
 Requires:       xorg-x11-server-Xorg%{?_isa}
 
 Conflicts:      catalyst-x11-drv
-Conflicts:      catalyst-x11-drv-legacy
 Conflicts:      fglrx-x11-drv
 Conflicts:      nvidia-x11-drv
-Conflicts:      nvidia-x11-drv-173xx
-Conflicts:      nvidia-x11-drv-304xx
-Conflicts:      nvidia-x11-drv-340xx
 Conflicts:      nvidia-x11-drv-390xx
 Conflicts:      xorg-x11-drv-nvidia
-Conflicts:      xorg-x11-drv-nvidia-173xx
-Conflicts:      xorg-x11-drv-nvidia-304xx
-Conflicts:      xorg-x11-drv-nvidia-340xx
 Conflicts:      xorg-x11-drv-nvidia-390xx
 
 %description
@@ -81,23 +74,12 @@ Requires:       egl-wayland%{?_isa}
 %endif
 
 Conflicts:      nvidia-x11-drv-libs
-Conflicts:      nvidia-x11-drv-libs-96xx
-Conflicts:      nvidia-x11-drv-libs-173xx
-Conflicts:      nvidia-x11-drv-libs-304xx
-Conflicts:      nvidia-x11-drv-libs-340xx
 Conflicts:      nvidia-x11-drv-libs-390xx
 Conflicts:      xorg-x11-drv-nvidia-gl
 Conflicts:      xorg-x11-drv-nvidia-libs
-Conflicts:      xorg-x11-drv-nvidia-libs-173xx
-Conflicts:      xorg-x11-drv-nvidia-libs-304xx
-Conflicts:      xorg-x11-drv-nvidia-libs-340xx
 Conflicts:      xorg-x11-drv-nvidia-libs-390xx
 %ifarch %{ix86}
 Conflicts:      nvidia-x11-drv-32bit
-Conflicts:      nvidia-x11-drv-32bit-96xx
-Conflicts:      nvidia-x11-drv-32bit-173xx
-Conflicts:      nvidia-x11-drv-32bit-304xx
-Conflicts:      nvidia-x11-drv-32bit-340xx
 Conflicts:      nvidia-x11-drv-32bit-390xx
 %endif
 
@@ -136,9 +118,6 @@ to be a platform for building 3rd party applications.
 %package devel
 Summary:        Development files for %{name}
 Conflicts:      xorg-x11-drv-nvidia-devel
-Conflicts:      xorg-x11-drv-nvidia-devel-173xx
-Conflicts:      xorg-x11-drv-nvidia-devel-304xx
-Conflicts:      xorg-x11-drv-nvidia-devel-340xx
 Conflicts:      xorg-x11-drv-nvidia-devel-390xx
 Requires:       %{name}-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
