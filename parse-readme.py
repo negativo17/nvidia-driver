@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2016 Richard Hughes <richard@hughsie.com>
+# Copyright (C) 2021 Simone Caronni <negativo17@gmail.com>
 # Licensed under the GNU General Public License Version or later
 
 from __future__ import print_function
@@ -31,7 +32,7 @@ def main():
         line = line.replace('\n', '')
 
         # end of section
-        if len(line) > 0 and not line.startswith('    '):
+        if len(line) > 0 and not line.startswith(' '):
             in_section = False
             in_table = False
             continue
@@ -41,14 +42,14 @@ def main():
             continue
 
         # skip the header
-        if line.startswith('    ---'):
+        if line.startswith(' ---'):
             in_table = True
             continue
         if not in_table:
             continue
 
         # get name
-        pid = int(line[42:46], 16)
+        pid = int(line[50:54], 16)
         if not pid in pids:
             pids.append(pid)
 

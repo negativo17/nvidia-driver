@@ -2,7 +2,7 @@
 %global __strip /bin/true
 
 Name:           nvidia-driver
-Version:        460.67
+Version:        465.19.01
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -186,6 +186,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 mkdir -p %{buildroot}%{_datadir}/vulkan/implicit_layer.d/
 mkdir -p %{buildroot}%{_unitdir}/
+mkdir -p %{buildroot}%{_systemd_util_dir}/system-sleep/
 
 # OpenCL config
 install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
@@ -242,8 +243,9 @@ cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
 %ifarch x86_64
 
 # Systemd units and script for suspending/resuming
-install -p -m 0644 nvidia-hibernate.service nvidia-resume.service nvidia-suspend.service %{buildroot}%{_unitdir}
-install -p -m 0755 nvidia-sleep.sh %{buildroot}%{_bindir}
+install -p -m 0644 systemd/system/nvidia-hibernate.service systemd/system/nvidia-resume.service systemd/system/nvidia-suspend.service %{buildroot}%{_unitdir}/
+install -p -m 0755 systemd/nvidia-sleep.sh %{buildroot}%{_bindir}/
+install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/system-sleep/
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %check
@@ -290,6 +292,7 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
 %{_bindir}/nvidia-sleep.sh
+%{_systemd_util_dir}/system-sleep/nvidia
 %{_unitdir}/nvidia-hibernate.service
 %{_unitdir}/nvidia-resume.service
 %{_unitdir}/nvidia-suspend.service
@@ -374,6 +377,9 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.dri
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Fri Apr 09 2021 Simone Caronni <negativo17@gmail.com> - 3:465.19.01-1
+- Update to 465.19.01.
+
 * Fri Mar 19 2021 Simone Caronni <negativo17@gmail.com> - 3:460.67-1
 - Update to 460.67.
 
