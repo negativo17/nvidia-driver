@@ -22,17 +22,13 @@ Source99:       nvidia-generate-tarballs.sh
 
 %ifarch x86_64
 
-%if 0%{?fedora}
-BuildRequires:  systemd-rpm-macros
-%else
-BuildRequires:  systemd
-%endif
-
 %if 0%{?fedora} || 0%{?rhel} >= 8
 BuildRequires:  libappstream-glib
 BuildRequires:  python3
+BuildRequires:  systemd-rpm-macros
 %else
 BuildRequires:  python2
+BuildRequires:  systemd
 %endif
 
 %endif
