@@ -16,7 +16,7 @@ Source1:        %{name}-%{version}-x86_64.tar.xz
 Source10:       10-nvidia.conf.outputclass-device
 
 Source40:       com.nvidia.driver.metainfo.xml
-Source41:       parse-readme.py
+Source41:       nvidia-driver.py
 
 Source99:       nvidia-generate-tarballs.sh
 
@@ -200,12 +200,7 @@ install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1
 %if 0%{?fedora} || 0%{?rhel} >= 8
 # install AppData and add modalias provides
 install -D -p -m 0644 %{SOURCE40} %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
-fn=%{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
-%{SOURCE41} README.txt "NVIDIA GEFORCE GPUS" | xargs appstream-util add-provide ${fn} modalias
-%{SOURCE41} README.txt "NVIDIA RTX/QUADRO GPUS" | xargs appstream-util add-provide ${fn} modalias
-%{SOURCE41} README.txt "NVIDIA NVS GPUS" | xargs appstream-util add-provide ${fn} modalias
-%{SOURCE41} README.txt "NVIDIA TESLA GPUS" | xargs appstream-util add-provide ${fn} modalias
-%{SOURCE41} README.txt "NVIDIA GRID GPUS" | xargs appstream-util add-provide ${fn} modalias
+%{SOURCE41} README.txt | xargs appstream-util add-provide %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml modalias
 %endif
 
 # X stuff
@@ -249,7 +244,7 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %check
-appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
+appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
 %endif
 
 %endif
