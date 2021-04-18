@@ -2,7 +2,7 @@
 %global __strip /bin/true
 
 Name:           nvidia-driver
-Version:        465.19.01
+Version:        465.24.02
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -372,6 +372,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Sun Apr 18 2021 Simone Caronni <negativo17@gmail.com> - 3:465.24.02-1
+- Update to 465.24.02.
+
 * Fri Apr 09 2021 Simone Caronni <negativo17@gmail.com> - 3:465.19.01-1
 - Update to 465.19.01.
 
