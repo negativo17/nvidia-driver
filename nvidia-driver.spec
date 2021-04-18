@@ -1,6 +1,11 @@
 %global debug_package %{nil}
 %global __strip /bin/true
 
+# systemd 248+
+%if 0%{?fedora} == 32 || 0%{?rhel} == 7 || 0%{?rhel} == 8
+%global _systemd_util_dir %{_prefix}/lib/systemd
+%endif
+
 Name:           nvidia-driver
 Version:        465.24.02
 Release:        1%{?dist}
