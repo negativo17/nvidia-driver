@@ -7,7 +7,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        465.31
+Version:        470.42.01
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -32,7 +32,6 @@ BuildRequires:  libappstream-glib
 BuildRequires:  python3
 BuildRequires:  systemd-rpm-macros
 %else
-BuildRequires:  python2
 BuildRequires:  systemd
 %endif
 
@@ -179,10 +178,18 @@ mkdir -p %{buildroot}%{_datadir}/vulkan/icd.d/
 mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
 mkdir -p %{buildroot}%{_libdir}/vdpau/
 
+# EGL loader
+install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
+
+# Unique libraries
+cp -a lib*GL*_nvidia.so* libcuda.so* libnv*.so* %{buildroot}%{_libdir}/
+cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
+
 %ifarch x86_64
 
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/nvidia/
+mkdir -p %{buildroot}%{_libdir}/nvidia/wine/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/extensions/
 mkdir -p %{buildroot}%{_mandir}/man1/
@@ -202,12 +209,6 @@ install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-re
 # Man pages
 install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1/
 
-%if 0%{?fedora} || 0%{?rhel} >= 8
-# install AppData and add modalias provides
-install -D -p -m 0644 %{SOURCE40} %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
-%{SOURCE41} README.txt | xargs appstream-util add-provide %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml modalias
-%endif
-
 # X stuff
 install -p -m 0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 install -p -m 0755 nvidia_drv.so %{buildroot}%{_libdir}/xorg/modules/drivers/
@@ -219,28 +220,11 @@ install -p -m 0644 nvidia-application-profiles-%{version}-key-documentation \
 install -p -m 0644 nvidia-application-profiles-%{version}-rc \
     %{buildroot}%{_datadir}/nvidia/
 
-%endif
-
-%ifarch x86_64
-
 # Vulkan loader
 install -p -m 0644 nvidia_icd.json %{buildroot}%{_datadir}/vulkan/icd.d/
 
-%if 0%{?fedora} || 0%{?rhel} >= 8
-# Vulkan layer
-install -p -m 0644 nvidia_layers.json %{buildroot}%{_datadir}/vulkan/implicit_layer.d/
-%endif
-
-%endif
-
-# EGL loader
-install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
-
-# Unique libraries
-cp -a lib*GL*_nvidia.so* libcuda.so* libnv*.so* %{buildroot}%{_libdir}/
-cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
-
-%ifarch x86_64
+# NGX Proton/Wine library
+cp -a *.dll %{buildroot}%{_libdir}/nvidia/wine/
 
 # Systemd units and script for suspending/resuming
 install -p -m 0644 systemd/system/nvidia-hibernate.service systemd/system/nvidia-resume.service systemd/system/nvidia-suspend.service %{buildroot}%{_unitdir}/
@@ -248,6 +232,14 @@ install -p -m 0755 systemd/nvidia-sleep.sh %{buildroot}%{_bindir}/
 install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/system-sleep/
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
+
+# Vulkan layer
+install -p -m 0644 nvidia_layers.json %{buildroot}%{_datadir}/vulkan/implicit_layer.d/
+
+# install AppData and add modalias provides
+install -D -p -m 0644 %{SOURCE40} %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
+%{SOURCE41} README.txt | xargs appstream-util add-provide %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml modalias
+
 %check
 appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
 %endif
@@ -316,12 +308,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 
 %files libs
 %{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
-%ifarch x86_64
-%{_datadir}/vulkan/icd.d/nvidia_icd.json
-%if 0%{?fedora} || 0%{?rhel} >= 8
-%{_datadir}/vulkan/implicit_layer.d/nvidia_layers.json
-%endif
-%endif
 %{_libdir}/libEGL_nvidia.so.0
 %{_libdir}/libEGL_nvidia.so.%{version}
 %{_libdir}/libGLESv1_CM_nvidia.so.1
@@ -330,16 +316,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libGLESv2_nvidia.so.%{version}
 %{_libdir}/libGLX_nvidia.so.0
 %{_libdir}/libGLX_nvidia.so.%{version}
-%ifarch x86_64
-%{_libdir}/libnvidia-cbl.so.%{version}
-%{_libdir}/libnvidia-cfg.so.1
-%{_libdir}/libnvidia-cfg.so.%{version}
-%{_libdir}/libnvidia-ngx.so.1
-%{_libdir}/libnvidia-ngx.so.%{version}
-%{_libdir}/libnvidia-rtcore.so.%{version}
-%{_libdir}/libnvoptix.so.1
-%{_libdir}/libnvoptix.so.%{version}
-%endif
 %{_libdir}/libnvidia-allocator.so.1
 %{_libdir}/libnvidia-allocator.so.%{version}
 %{_libdir}/libnvidia-eglcore.so.%{version}
@@ -349,6 +325,25 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-tls.so.%{version}
 %{_libdir}/vdpau/libvdpau_nvidia.so.1
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
+
+%ifarch x86_64
+
+%{_datadir}/vulkan/icd.d/nvidia_icd.json
+%if 0%{?fedora} || 0%{?rhel} >= 8
+%{_datadir}/vulkan/implicit_layer.d/nvidia_layers.json
+%endif
+%{_libdir}/libnvidia-cbl.so.%{version}
+%{_libdir}/libnvidia-cfg.so.1
+%{_libdir}/libnvidia-cfg.so.%{version}
+%{_libdir}/libnvidia-ngx.so.1
+%{_libdir}/libnvidia-ngx.so.%{version}
+%{_libdir}/libnvidia-rtcore.so.%{version}
+%{_libdir}/libnvoptix.so.1
+%{_libdir}/libnvoptix.so.%{version}
+# Wine libraries
+%{_libdir}/nvidia/
+
+%endif
 
 %files cuda-libs
 %{_libdir}/libcuda.so
@@ -365,6 +360,10 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-opticalflow.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
+%ifarch x86_64
+%{_libdir}/libnvidia-nvvm.so.4.0.0
+%{_libdir}/libnvvm.so.4
+%endif
 
 %files NvFBCOpenGL
 %{_libdir}/libnvidia-fbc.so.1
@@ -377,6 +376,11 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Jun 30 2021 Simone Caronni <negativo17@gmail.com> - 3:470.42.01-1
+- Update to 470.42.01.
+- Reorganize SPEC file.
+- Trim changelog.
+
 * Wed May 26 2021 Simone Caronni <negativo17@gmail.com> - 3:465.31-1
 - Update to 465.31.
 
@@ -442,81 +446,3 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 
 * Tue Feb 04 2020 Simone Caronni <negativo17@gmail.com> - 3:440.59-1
 - Update to 440.59.
-
-* Sat Dec 14 2019 Simone Caronni <negativo17@gmail.com> - 3:440.44-1
-- Update to 440.44.
-
-* Sat Nov 30 2019 Simone Caronni <negativo17@gmail.com> - 3:440.36-1
-- Update to 440.36.
-
-* Wed Nov 13 2019 Simone Caronni <negativo17@gmail.com> - 3:440.31-3
-- RHEL/CentOS 6 does not work anymore with OutputClass configurations.
-
-* Sun Nov 10 2019 Simone Caronni <negativo17@gmail.com> - 3:440.31-2
-- Streamline configurations between the various distributions.
-
-* Sat Nov 09 2019 Simone Caronni <negativo17@gmail.com> - 3:440.31-1
-- Update to 440.31.
-
-* Thu Oct 17 2019 Simone Caronni <negativo17@gmail.com> - 3:440.26-1
-- Update to 440.26.
-
-* Tue Oct 01 2019 Simone Caronni <negativo17@gmail.com> - 3:435.21-2
-- Fix build dependency on CentOS/RHEL 8.
-
-* Mon Sep 02 2019 Simone Caronni <negativo17@gmail.com> - 3:435.21-1
-- Update to 435.21.
-
-* Thu Aug 22 2019 Simone Caronni <negativo17@gmail.com> - 3:435.17-1
-- Update to 435.17.
-- Add hibernate/resume/suspend systemd hooks.
-- Add Vulkan layer file and default powermanagement.
-
-* Wed Jul 31 2019 Simone Caronni <negativo17@gmail.com> - 3:430.40-1
-- Update to 430.40.
-- Update AppData installation.
-
-* Fri Jul 12 2019 Simone Caronni <negativo17@gmail.com> - 3:430.34-1
-- Update to 430.34.
-
-* Wed Jun 12 2019 Simone Caronni <negativo17@gmail.com> - 3:430.26-1
-- Update to 430.26.
-
-* Sat May 18 2019 Simone Caronni <negativo17@gmail.com> - 3:430.14-1
-- Update to 430.14.
-
-* Thu May 09 2019 Simone Caronni <negativo17@gmail.com> - 3:418.74-1
-- Update to 418.74.
-
-* Sun Mar 24 2019 Simone Caronni <negativo17@gmail.com> - 3:418.56-1
-- Update to 418.56.
-
-* Thu Feb 28 2019 Simone Caronni <negativo17@gmail.com> - 3:418.43-2
-- Do not require egl-wayland on EPEL 32 bit.
-
-* Fri Feb 22 2019 Simone Caronni <negativo17@gmail.com> - 3:418.43-1
-- Update to 418.43.
-- Trim changelog.
-
-* Wed Feb 06 2019 Simone Caronni <negativo17@gmail.com> - 3:418.30-1
-- Update to 418.30.
-
-* Mon Feb 04 2019 Simone Caronni <negativo17@gmail.com> - 3:415.27-5
-- Move fatbinaryloader in main libraries subpackage.
-
-* Sun Feb 03 2019 Simone Caronni <negativo17@gmail.com> - 3:415.27-4
-- Split out all kernel related interactions into the nvidia-kmod-common package.
-- Require nvidia-kmod-common in both nvidia-driver and nvidia-driver-cuda as
-  they can now be installed separately.
-
-* Sun Feb 03 2019 Simone Caronni <negativo17@gmail.com> - 3:415.27-3
-- Remove CUDA provides/requires, move them to separate package.
-
-* Sat Feb 02 2019 Simone Caronni <negativo17@gmail.com> - 3:415.27-2
-- Add nvidia-drivers and cuda-drivers virtual provides as requested by Red Hat.
-
-* Thu Jan 17 2019 Simone Caronni <negativo17@gmail.com> - 3:415.27-1
-- Update to 415.27.
-
-* Sat Jan 12 2019 Simone Caronni <negativo17@gmail.com> - 3:415.25-2
-- Update requirements.
