@@ -1,5 +1,6 @@
 %global debug_package %{nil}
 %global __strip /bin/true
+%global __brp_ldconfig %{nil}
 
 # systemd 248+
 %if 0%{?fedora} == 32 || 0%{?rhel} == 7 || 0%{?rhel} == 8
@@ -8,7 +9,7 @@
 
 Name:           nvidia-driver
 Version:        470.57.02
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -158,6 +159,8 @@ This package provides the CUDA integration components for %{name}.
 # Create symlinks for shared objects
 ldconfig -vn .
 
+# Wrong SONAME?
+rm -f libnvvm.so.4
 # Required for building gstreamer 1.0 NVENC plugins
 ln -sf libnvidia-encode.so.%{version} libnvidia-encode.so
 # Required for building ffmpeg 3.1 Nvidia CUVID
@@ -362,7 +365,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
 %ifarch x86_64
 %{_libdir}/libnvidia-nvvm.so.4.0.0
-%{_libdir}/libnvvm.so.4
 %endif
 
 %files NvFBCOpenGL
@@ -376,6 +378,11 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Thu Jul 22 2021 Simone Caronni <negativo17@gmail.com> - 3:470.57.02-2
+- Remove libnvvm.so.4 symlink. Based on the ld.so.conf.d files in the upstream
+  CUDA packages, the libnvvm.so.4 library will always be loaded from the CUDA
+  packages.
+
 * Tue Jul 20 2021 Simone Caronni <negativo17@gmail.com> - 3:470.57.02-1
 - Update to 470.57.02.
 - Reorganize SPEC file.
