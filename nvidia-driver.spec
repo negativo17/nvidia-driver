@@ -8,8 +8,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        470.57.02
-Release:        2%{?dist}
+Version:        470.63.01
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -341,6 +341,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ngx.so.1
 %{_libdir}/libnvidia-ngx.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
+%{_libdir}/libnvidia-vulkan-producer.so.%{version}
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
 # Wine libraries
@@ -378,6 +379,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Aug 11 2021 Simone Caronni <negativo17@gmail.com> - 3:470.63.01-1
+- Update to 470.63.01.
+
 * Thu Jul 22 2021 Simone Caronni <negativo17@gmail.com> - 3:470.57.02-2
 - Remove libnvvm.so.4 symlink. Based on the ld.so.conf.d files in the upstream
   CUDA packages, the libnvvm.so.4 library will always be loaded from the CUDA
