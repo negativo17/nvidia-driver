@@ -9,7 +9,7 @@
 
 Name:           nvidia-driver
 Version:        470.63.01
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -18,6 +18,7 @@ ExclusiveArch:  %{ix86} x86_64
 
 Source0:        %{name}-%{version}-i386.tar.xz
 Source1:        %{name}-%{version}-x86_64.tar.xz
+Source9:        70-nvidia.preset
 # For servers with OutputClass device options (el7+)
 Source10:       10-nvidia.conf.outputclass-device
 
@@ -201,6 +202,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
 mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
 mkdir -p %{buildroot}%{_datadir}/vulkan/implicit_layer.d/
 mkdir -p %{buildroot}%{_unitdir}/
+mkdir -p %{buildroot}%{_systemd_util_dir}/system-preset/
 mkdir -p %{buildroot}%{_systemd_util_dir}/system-sleep/
 
 # OpenCL config
@@ -230,6 +232,7 @@ install -p -m 0644 nvidia_icd.json %{buildroot}%{_datadir}/vulkan/icd.d/
 cp -a *.dll %{buildroot}%{_libdir}/nvidia/wine/
 
 # Systemd units and script for suspending/resuming
+install -p -m 0644 %{SOURCE9} %{buildroot}%{_systemd_util_dir}/system-preset/
 install -p -m 0644 systemd/system/nvidia-hibernate.service systemd/system/nvidia-resume.service systemd/system/nvidia-suspend.service %{buildroot}%{_unitdir}/
 install -p -m 0755 systemd/nvidia-sleep.sh %{buildroot}%{_bindir}/
 install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/system-sleep/
@@ -287,6 +290,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
 %{_bindir}/nvidia-sleep.sh
+%{_systemd_util_dir}/system-preset/70-nvidia.preset
 %{_systemd_util_dir}/system-sleep/nvidia
 %{_unitdir}/nvidia-hibernate.service
 %{_unitdir}/nvidia-resume.service
@@ -379,6 +383,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Fri Aug 20 2021 Simone Caronni <negativo17@gmail.com> - 3:470.63.01-2
+- Enable power management services by default.
+
 * Wed Aug 11 2021 Simone Caronni <negativo17@gmail.com> - 3:470.63.01-1
 - Update to 470.63.01.
 
