@@ -3,7 +3,7 @@
 %global __brp_ldconfig %{nil}
 
 # systemd 248+
-%if 0%{?fedora} == 32 || 0%{?rhel} == 7 || 0%{?rhel} == 8
+%if 0%{?rhel} == 7 || 0%{?rhel} == 8
 %global _systemd_util_dir %{_prefix}/lib/systemd
 %endif
 
