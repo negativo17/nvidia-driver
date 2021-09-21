@@ -160,8 +160,6 @@ This package provides the CUDA integration components for %{name}.
 # Create symlinks for shared objects
 ldconfig -vn .
 
-# Wrong SONAME?
-rm -f libnvvm.so.4
 # Required for building gstreamer 1.0 NVENC plugins
 ln -sf libnvidia-encode.so.%{version} libnvidia-encode.so
 # Required for building ffmpeg 3.1 Nvidia CUVID
@@ -369,6 +367,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
 %ifarch x86_64
+%{_libdir}/libnvidia-nvvm.so.4
 %{_libdir}/libnvidia-nvvm.so.4.0.0
 %endif
 
@@ -385,6 +384,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %changelog
 * Tue Sep 21 2021 Simone Caronni <negativo17@gmail.com> - 3:470.74-1
 - Update to 470.74.
+- Remove workaround for wrong soname in libnvidia-nvvm.
 
 * Fri Aug 20 2021 Simone Caronni <negativo17@gmail.com> - 3:470.63.01-2
 - Enable power management services by default.
