@@ -8,8 +8,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        470.63.01
-Release:        2%{?dist}
+Version:        470.74
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -383,6 +383,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Tue Sep 21 2021 Simone Caronni <negativo17@gmail.com> - 3:470.74-1
+- Update to 470.74.
+
 * Fri Aug 20 2021 Simone Caronni <negativo17@gmail.com> - 3:470.63.01-2
 - Enable power management services by default.
 
