@@ -8,7 +8,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        470.82.00
+Version:        495.44
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -48,8 +48,10 @@ Conflicts:      catalyst-x11-drv
 Conflicts:      fglrx-x11-drv
 Conflicts:      nvidia-x11-drv
 Conflicts:      nvidia-x11-drv-390xx
+Conflicts:      nvidia-x11-drv-470xx
 Conflicts:      xorg-x11-drv-nvidia
 Conflicts:      xorg-x11-drv-nvidia-390xx
+Conflicts:      xorg-x11-drv-nvidia-470xx
 
 %description
 This package provides the most recent NVIDIA display driver which allows for
@@ -105,9 +107,9 @@ Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{rele
 
 %description NvFBCOpenGL
 This library provides a high performance, low latency interface to capture and
-optionally encode the composited framebuffer of an X screen. NvFBC and NvIFR are
-private APIs that are only available to NVIDIA approved partners for use in
-remote graphics scenarios.
+optionally encode the composited framebuffer of an X screen. NvFBC are private
+APIs that are only available to NVIDIA approved partners for use in remote
+graphics scenarios.
 
 %package NVML
 Summary:        NVIDIA Management Library (NVML)
@@ -191,6 +193,7 @@ cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
 
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_datadir}/nvidia/
+mkdir -p %{buildroot}%{_libdir}/gbm/
 mkdir -p %{buildroot}%{_libdir}/nvidia/wine/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
 mkdir -p %{buildroot}%{_libdir}/xorg/modules/extensions/
@@ -240,9 +243,12 @@ install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/
 # Vulkan layer
 install -p -m 0644 nvidia_layers.json %{buildroot}%{_datadir}/vulkan/implicit_layer.d/
 
+# GBM loader
+ln -sf ../libnvidia-allocator.so.%{version} %{buildroot}%{_libdir}/gbm/nvidia-drm_gbm.so
+
 # install AppData and add modalias provides
 install -D -p -m 0644 %{SOURCE40} %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
-%{SOURCE41} README.txt | xargs appstream-util add-provide %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml modalias
+%{SOURCE41} supported-gpus/supported-gpus.json | xargs appstream-util add-provide %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml modalias
 
 %check
 appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
@@ -336,10 +342,12 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_datadir}/vulkan/icd.d/nvidia_icd.json
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %{_datadir}/vulkan/implicit_layer.d/nvidia_layers.json
+%{_libdir}/gbm/nvidia-drm_gbm.so
 %endif
-%{_libdir}/libnvidia-cbl.so.%{version}
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
+%{_libdir}/libnvidia-egl-gbm.so.1
+%{_libdir}/libnvidia-egl-gbm.so.1.1.0
 %{_libdir}/libnvidia-ngx.so.1
 %{_libdir}/libnvidia-ngx.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
@@ -374,14 +382,17 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %files NvFBCOpenGL
 %{_libdir}/libnvidia-fbc.so.1
 %{_libdir}/libnvidia-fbc.so.%{version}
-%{_libdir}/libnvidia-ifr.so.1
-%{_libdir}/libnvidia-ifr.so.%{version}
 
 %files NVML
 %{_libdir}/libnvidia-ml.so.1
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Tue Nov 02 2021 Simone Caronni <negativo17@gmail.com> - 3:495.44-1
+- Update to 495.44.
+- Use supported-gpu.json file to get list of supported chipsets instead of
+  parsing README.txt.
+
 * Tue Nov 02 2021 Simone Caronni <negativo17@gmail.com> - 3:470.82.00-1
 - Update to 470.82.00.
 
