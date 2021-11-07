@@ -23,7 +23,7 @@ Source9:        70-nvidia.preset
 Source10:       10-nvidia.conf.outputclass-device
 
 Source40:       com.nvidia.driver.metainfo.xml
-Source41:       nvidia-driver.py
+Source41:       parse-supported-gpus.py
 
 Source99:       nvidia-generate-tarballs.sh
 
