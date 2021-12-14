@@ -8,7 +8,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        495.44
+Version:        495.46
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -388,6 +388,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Tue Dec 14 2021 Simone Caronni <negativo17@gmail.com> - 3:495.46-1
+- Update to 495.46.
+
 * Tue Nov 02 2021 Simone Caronni <negativo17@gmail.com> - 3:495.44-1
 - Update to 495.44.
 - Use supported-gpu.json file to get list of supported chipsets instead of
