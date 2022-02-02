@@ -6,3 +6,8 @@ enable nvidia-hibernate.service
 
 # Resume is triggered by nvidia-sleep.sh:
 disable nvidia-resume.service
+
+# Enable Dynamic Boost. From:
+# file:///usr/share/doc/nvidia-driver/html/dynamicboost.html
+
+enable nvidia-powerd.service
