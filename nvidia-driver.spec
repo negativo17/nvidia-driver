@@ -8,13 +8,13 @@
 %endif
 
 Name:           nvidia-driver
-Version:        495.46
+Version:        510.47.03
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
 URL:            http://www.nvidia.com/object/unix.html
-ExclusiveArch:  %{ix86} x86_64
+ExclusiveArch:  %{ix86} x86_64 ppc64le aarch64
 
 Source0:        %{name}-%{version}-i386.tar.xz
 Source1:        %{name}-%{version}-x86_64.tar.xz
@@ -47,9 +47,11 @@ Requires:       xorg-x11-server-Xorg%{?_isa}
 Conflicts:      catalyst-x11-drv
 Conflicts:      fglrx-x11-drv
 Conflicts:      nvidia-x11-drv
+Conflicts:      nvidia-x11-drv-340xx
 Conflicts:      nvidia-x11-drv-390xx
 Conflicts:      nvidia-x11-drv-470xx
 Conflicts:      xorg-x11-drv-nvidia
+Conflicts:      xorg-x11-drv-nvidia-340xx
 Conflicts:      xorg-x11-drv-nvidia-390xx
 Conflicts:      xorg-x11-drv-nvidia-470xx
 
@@ -69,27 +71,28 @@ Requires:       libglvnd-gles%{?_isa} >= 1.0
 Requires:       libglvnd-glx%{?_isa} >= 1.0
 Requires:       libglvnd-opengl%{?_isa} >= 1.0
 
-%if 0%{?fedora} || 0%{?rhel} >= 8
-Requires:       egl-wayland%{?_isa}
-Requires:       vulkan-loader
+%ifnarch %{ix86}
+Requires:       egl-wayland%{?_isa} >= 1.1.9
+%if 0%{?fedora} >= 35 || 0%{?rhel} >= 9
+Requires:       egl-gbm%{?_isa} >= 1.1.0
+%endif
 %endif
 
-%if 0%{?rhel} == 7
+%if 0%{?fedora} || 0%{?rhel} >= 8
+Requires:       vulkan-loader
+%else
 Requires:       vulkan-filesystem
-%ifarch x86_64
-Requires:       egl-wayland%{?_isa}
-%endif
 %endif
 
 Conflicts:      nvidia-x11-drv-libs
+Conflicts:      nvidia-x11-drv-libs-340xx
 Conflicts:      nvidia-x11-drv-libs-390xx
+Conflicts:      nvidia-x11-drv-libs-470xx
 Conflicts:      xorg-x11-drv-nvidia-gl
 Conflicts:      xorg-x11-drv-nvidia-libs
+Conflicts:      xorg-x11-drv-nvidia-libs-340xx
 Conflicts:      xorg-x11-drv-nvidia-libs-390xx
-%ifarch %{ix86}
-Conflicts:      nvidia-x11-drv-32bit
-Conflicts:      nvidia-x11-drv-32bit-390xx
-%endif
+Conflicts:      xorg-x11-drv-nvidia-libs-470xx
 
 %description libs
 This package provides the shared libraries for %{name}.
@@ -177,77 +180,69 @@ ln -sf libGLX_nvidia.so.%{version} libGLX_indirect.so.0
 
 %install
 
-mkdir -p %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
-mkdir -p %{buildroot}%{_datadir}/vulkan/icd.d/
-mkdir -p %{buildroot}%{_includedir}/nvidia/GL/
-mkdir -p %{buildroot}%{_libdir}/vdpau/
-
 # EGL loader
-install -p -m 0644 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
+install -p -m 0644 -D 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
 
 # Unique libraries
+mkdir -p %{buildroot}%{_libdir}/vdpau/
 cp -a lib*GL*_nvidia.so* libcuda.so* libnv*.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
 
 %ifarch x86_64
 
-mkdir -p %{buildroot}%{_bindir}
-mkdir -p %{buildroot}%{_datadir}/nvidia/
-mkdir -p %{buildroot}%{_libdir}/gbm/
-mkdir -p %{buildroot}%{_libdir}/nvidia/wine/
-mkdir -p %{buildroot}%{_libdir}/xorg/modules/drivers/
-mkdir -p %{buildroot}%{_libdir}/xorg/modules/extensions/
-mkdir -p %{buildroot}%{_mandir}/man1/
-mkdir -p %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/
+# Empty?
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
-mkdir -p %{buildroot}%{_sysconfdir}/OpenCL/vendors/
-mkdir -p %{buildroot}%{_datadir}/vulkan/implicit_layer.d/
-mkdir -p %{buildroot}%{_unitdir}/
-mkdir -p %{buildroot}%{_systemd_util_dir}/system-preset/
-mkdir -p %{buildroot}%{_systemd_util_dir}/system-sleep/
 
 # OpenCL config
-install -p -m 0755 nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/
+install -p -m 0755 -D nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/nvidia.icd
 
 # Binaries
-install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-report.sh,ngx-updater} %{buildroot}%{_bindir}
+mkdir -p %{buildroot}%{_bindir}
+install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-report.sh,ngx-updater,powerd} %{buildroot}%{_bindir}
 
 # Man pages
+mkdir -p %{buildroot}%{_mandir}/man1/
 install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1/
 
 # X stuff
-install -p -m 0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
-install -p -m 0755 nvidia_drv.so %{buildroot}%{_libdir}/xorg/modules/drivers/
-install -p -m 0755 libglxserver_nvidia.so.%{version} %{buildroot}%{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
+install -p -m 0644 -D %{SOURCE10} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
+install -p -m 0755 -D nvidia_drv.so %{buildroot}%{_libdir}/xorg/modules/drivers/nvidia_drv.so
+install -p -m 0755 -D libglxserver_nvidia.so.%{version} %{buildroot}%{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
 
 # NVIDIA specific configuration files
+mkdir -p %{buildroot}%{_datadir}/nvidia/
 install -p -m 0644 nvidia-application-profiles-%{version}-key-documentation \
     %{buildroot}%{_datadir}/nvidia/
 install -p -m 0644 nvidia-application-profiles-%{version}-rc \
     %{buildroot}%{_datadir}/nvidia/
 
 # Vulkan loader
-install -p -m 0644 nvidia_icd.json %{buildroot}%{_datadir}/vulkan/icd.d/
+install -p -m 0644 -D nvidia_icd.json %{buildroot}%{_datadir}/vulkan/icd.d/nvidia_icd.json
 
 # NGX Proton/Wine library
+mkdir -p %{buildroot}%{_libdir}/nvidia/wine/
 cp -a *.dll %{buildroot}%{_libdir}/nvidia/wine/
 
 # Systemd units and script for suspending/resuming
-install -p -m 0644 %{SOURCE9} %{buildroot}%{_systemd_util_dir}/system-preset/
-install -p -m 0644 systemd/system/nvidia-hibernate.service systemd/system/nvidia-resume.service systemd/system/nvidia-suspend.service %{buildroot}%{_unitdir}/
+install -p -m 0644 -D %{SOURCE9} %{buildroot}%{_systemd_util_dir}/system-preset/70-nvidia.preset
+mkdir -p %{buildroot}%{_unitdir}/
+install -p -m 0644 systemd/system/*.service %{buildroot}%{_unitdir}/
 install -p -m 0755 systemd/nvidia-sleep.sh %{buildroot}%{_bindir}/
-install -p -m 0755 systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/system-sleep/
+install -p -m 0755 -D systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/system-sleep/nvidia
+install -p -m 0644 -D nvidia-dbus.conf %{buildroot}%{_datadir}/dbus-1/system.d/nvidia-dbus.conf
+
+%if 0%{?fedora} || 0%{?rhel} >= 9
+# GBM loader
+mkdir -p %{buildroot}%{_libdir}/gbm/
+ln -sf ../libnvidia-allocator.so.%{version} %{buildroot}%{_libdir}/gbm/nvidia-drm_gbm.so
+%endif
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
-
 # Vulkan layer
-install -p -m 0644 nvidia_layers.json %{buildroot}%{_datadir}/vulkan/implicit_layer.d/
-
-# GBM loader
-ln -sf ../libnvidia-allocator.so.%{version} %{buildroot}%{_libdir}/gbm/nvidia-drm_gbm.so
+install -p -m 0644 -D nvidia_layers.json %{buildroot}%{_datadir}/vulkan/implicit_layer.d/nvidia_layers.json
 
 # install AppData and add modalias provides
-install -D -p -m 0644 %{SOURCE40} %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
+install -p -m 0644 -D %{SOURCE40} %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
 %{SOURCE41} supported-gpus/supported-gpus.json | xargs appstream-util add-provide %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml modalias
 
 %check
@@ -268,16 +263,19 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 
 %post
 %systemd_post nvidia-hibernate.service
+%systemd_post nvidia-powerd.service
 %systemd_post nvidia-resume.service
 %systemd_post nvidia-suspend.service
 
 %preun
 %systemd_preun nvidia-hibernate.service
+%systemd_preun nvidia-powerd.service
 %systemd_preun nvidia-resume.service
 %systemd_preun nvidia-suspend.service
 
 %postun
 %systemd_postun nvidia-hibernate.service
+%systemd_postun nvidia-powerd.service
 %systemd_postun nvidia-resume.service
 %systemd_postun nvidia-suspend.service
 
@@ -287,9 +285,11 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %dir %{_sysconfdir}/nvidia
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %{_bindir}/nvidia-bug-report.sh
+%{_bindir}/nvidia-powerd
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %{_metainfodir}/com.nvidia.driver.metainfo.xml
 %endif
+%{_datadir}/dbus-1/system.d/nvidia-dbus.conf
 %{_datadir}/nvidia
 %{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
@@ -297,6 +297,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_systemd_util_dir}/system-preset/70-nvidia.preset
 %{_systemd_util_dir}/system-sleep/nvidia
 %{_unitdir}/nvidia-hibernate.service
+%{_unitdir}/nvidia-powerd.service
 %{_unitdir}/nvidia-resume.service
 %{_unitdir}/nvidia-suspend.service
 
@@ -313,7 +314,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %endif
 
 %files devel
-%{_includedir}/nvidia/
 %{_libdir}/libnvcuvid.so
 %{_libdir}/libnvidia-encode.so
 
@@ -342,12 +342,12 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_datadir}/vulkan/icd.d/nvidia_icd.json
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %{_datadir}/vulkan/implicit_layer.d/nvidia_layers.json
+%endif
+%if 0%{?fedora} || 0%{?rhel} >= 8
 %{_libdir}/gbm/nvidia-drm_gbm.so
 %endif
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
-%{_libdir}/libnvidia-egl-gbm.so.1
-%{_libdir}/libnvidia-egl-gbm.so.1.1.0
 %{_libdir}/libnvidia-ngx.so.1
 %{_libdir}/libnvidia-ngx.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
@@ -366,6 +366,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
 %{_libdir}/libnvidia-compiler.so.%{version}
+%{_libdir}/libnvidia-compiler-next.so.%{version}
 %{_libdir}/libnvidia-encode.so.1
 %{_libdir}/libnvidia-encode.so.%{version}
 %{_libdir}/libnvidia-opencl.so.1
@@ -388,6 +389,13 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Feb 02 2022 Simone Caronni <negativo17@gmail.com> - 3:510.47.03-1
+- Update to 510.47.03.
+- Use external GBM library.
+- Install GBM only on CentOS/RHEL 9+ and Fedora 35. It's also supported in
+  CentOS Stream 8 (8.6+/Mesa 21.2), but there's no easy way to check for Stream
+  in the SPEC file.
+
 * Tue Dec 14 2021 Simone Caronni <negativo17@gmail.com> - 3:495.46-1
 - Update to 495.46.
 
