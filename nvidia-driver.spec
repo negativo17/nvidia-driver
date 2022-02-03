@@ -343,7 +343,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %{_datadir}/vulkan/implicit_layer.d/nvidia_layers.json
 %endif
-%if 0%{?fedora} || 0%{?rhel} >= 8
+%if 0%{?fedora} || 0%{?rhel} >= 9
 %{_libdir}/gbm/nvidia-drm_gbm.so
 %endif
 %{_libdir}/libnvidia-cfg.so.1
@@ -366,7 +366,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
 %{_libdir}/libnvidia-compiler.so.%{version}
-%{_libdir}/libnvidia-compiler-next.so.%{version}
 %{_libdir}/libnvidia-encode.so.1
 %{_libdir}/libnvidia-encode.so.%{version}
 %{_libdir}/libnvidia-opencl.so.1
@@ -376,6 +375,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
 %ifarch x86_64
+%{_libdir}/libnvidia-compiler-next.so.%{version}
 %{_libdir}/libnvidia-nvvm.so.4
 %{_libdir}/libnvidia-nvvm.so.4.0.0
 %endif
