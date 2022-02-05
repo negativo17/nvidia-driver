@@ -9,7 +9,7 @@
 
 Name:           nvidia-driver
 Version:        510.47.03
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -71,11 +71,8 @@ Requires:       libglvnd-gles%{?_isa} >= 1.0
 Requires:       libglvnd-glx%{?_isa} >= 1.0
 Requires:       libglvnd-opengl%{?_isa} >= 1.0
 
-%ifnarch %{ix86}
-Requires:       egl-wayland%{?_isa} >= 1.1.9
 %if 0%{?fedora} >= 35 || 0%{?rhel} >= 9
 Requires:       egl-gbm%{?_isa} >= 1.1.0
-%endif
 %endif
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
@@ -389,6 +386,10 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Sat Feb 05 2022 Simone Caronni <negativo17@gmail.com> - 3:510.47.03-2
+- Drop explicit dependency on egl-wayland, it's auto generated and not needed on
+  i686 libs. Minimum version 1.1.7 required.
+
 * Wed Feb 02 2022 Simone Caronni <negativo17@gmail.com> - 3:510.47.03-1
 - Update to 510.47.03.
 - Use external GBM library.
