@@ -9,7 +9,7 @@
 
 Name:           nvidia-driver
 Version:        510.47.03
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -41,7 +41,6 @@ BuildRequires:  systemd
 
 Requires:       nvidia-driver-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
-Requires:       libva-vdpau-driver%{?_isa}
 Requires:       xorg-x11-server-Xorg%{?_isa}
 
 Conflicts:      catalyst-x11-drv
@@ -388,6 +387,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Sat Feb 12 2022 Simone Caronni <negativo17@gmail.com> - 3:510.47.03-4
+- Drop libva-vdpau-driver hard dependency.
+
 * Mon Feb 07 2022 Simone Caronni <negativo17@gmail.com> - 3:510.47.03-3
 - Fix GBM condition.
 
