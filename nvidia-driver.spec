@@ -8,8 +8,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        510.47.03
-Release:        4%{?dist}
+Version:        510.54
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -387,6 +387,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Mon Feb 14 2022 Simone Caronni <negativo17@gmail.com> - 3:510.54-1
+- Update to 510.54.
+
 * Sat Feb 12 2022 Simone Caronni <negativo17@gmail.com> - 3:510.47.03-4
 - Drop libva-vdpau-driver hard dependency.
 
