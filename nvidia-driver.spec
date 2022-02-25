@@ -9,7 +9,7 @@
 
 Name:           nvidia-driver
 Version:        510.54
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -142,6 +142,7 @@ Summary:        CUDA integration for %{name}
 Conflicts:      xorg-x11-drv-nvidia-cuda
 Requires:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       %{name}-NVML%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       nvidia-persistenced = %{?epoch:%{epoch}:}%{version}
 Requires:       opencl-filesystem
 Requires:       ocl-icd
@@ -387,6 +388,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Fri Feb 25 2022 Simone Caronni <negativo17@gmail.com> - 3:510.54-2
+- nvidia-smi dlopens NVML, add explicit dependency to cuda subpackage.
+
 * Mon Feb 14 2022 Simone Caronni <negativo17@gmail.com> - 3:510.54-1
 - Update to 510.54.
 
