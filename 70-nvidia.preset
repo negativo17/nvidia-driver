@@ -1,11 +1,9 @@
 # Enable complete power management. From:
 # file:///usr/share/doc/nvidia-driver/html/powermanagement.html
 
-enable nvidia-suspend.service
 enable nvidia-hibernate.service
-
-# Resume is triggered by nvidia-sleep.sh:
-disable nvidia-resume.service
+enable nvidia-resume.service
+enable nvidia-suspend.service
 
 # Enable Dynamic Boost. From:
 # file:///usr/share/doc/nvidia-driver/html/dynamicboost.html
