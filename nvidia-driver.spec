@@ -9,7 +9,7 @@
 
 Name:           nvidia-driver
 Version:        510.54
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -388,6 +388,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Thu Mar 03 2022 Simone Caronni <negativo17@gmail.com> - 3:510.54-3
+- nvidia-resume is no longer triggered by nvidia-sleep.sh.
+
 * Fri Feb 25 2022 Simone Caronni <negativo17@gmail.com> - 3:510.54-2
 - nvidia-smi dlopens NVML, add explicit dependency to cuda subpackage.
 
