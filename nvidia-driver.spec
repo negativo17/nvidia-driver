@@ -8,8 +8,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        510.54
-Release:        3%{?dist}
+Version:        510.60.02
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -388,6 +388,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Mon Mar 28 2022 Simone Caronni <negativo17@gmail.com> - 3:510.60.02-1
+- Update to 510.60.02.
+
 * Thu Mar 03 2022 Simone Caronni <negativo17@gmail.com> - 3:510.54-3
 - nvidia-resume is no longer triggered by nvidia-sleep.sh.
 
