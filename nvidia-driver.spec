@@ -9,7 +9,7 @@
 
 Name:           nvidia-driver
 Version:        515.43.04
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -173,6 +173,12 @@ ln -sf libnvcuvid.so.%{version} libnvcuvid.so
 ln -sf libcuda.so.%{version} libcuda.so
 # libglvnd indirect entry point
 ln -sf libGLX_nvidia.so.%{version} libGLX_indirect.so.0
+
+%ifarch x86_64
+# Required by Vulkan on Wayland. Wrongly named library:
+# strings libnvidia-eglcore.so.515.43.04 libnvidia-glcore.so.515.43.04 | grep vulkan-producer
+mv libnvidia-vulkan-producer.so.%{version} libnvidia-vulkan-producer.so
+%endif
 
 %build
 # Nothing to build
@@ -350,7 +356,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ngx.so.1
 %{_libdir}/libnvidia-ngx.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
-%{_libdir}/libnvidia-vulkan-producer.so.%{version}
+%{_libdir}/libnvidia-vulkan-producer.so
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
 # Wine libraries
@@ -385,6 +391,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Sun May 15 2022 Simone Caronni <negativo17@gmail.com> - 3:515.43.04-2
+- Rename libnvidia-vulkan-producer.so versioned library (#128).
+
 * Thu May 12 2022 Simone Caronni <negativo17@gmail.com> - 3:515.43.04-1
 - Update to 515.43.04.
 
