@@ -8,8 +8,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        515.43.04
-Release:        2%{?dist}
+Version:        515.48.07
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -391,6 +391,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Jun 01 2022 Simone Caronni <negativo17@gmail.com> - 3:515.48.07-1
+- Update to 515.48.07.
+
 * Sun May 15 2022 Simone Caronni <negativo17@gmail.com> - 3:515.43.04-2
 - Rename libnvidia-vulkan-producer.so versioned library (#128).
 
