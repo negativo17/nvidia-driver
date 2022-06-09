@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-VERSION=${VERSION:-510.73.05}
+VERSION=${VERSION:-515.48.07}
 DL_SITE=${DL_SITE:-http://us.download.nvidia.com/XFree86}
 TEMP_UNPACK=${TEMP_UNPACK:-temp}
 
@@ -19,11 +19,12 @@ printf "Cleaning up binaries... "
 cd ${TEMP_UNPACK}
 
 # Compiled from source
-rm -f \
+rm -fr \
+    kernel-open \
     nvidia-xconfig* \
     nvidia-persistenced* \
     nvidia-modprobe* \
-    libnvidia-gtk* nvidia-settings* \
+    libnvidia-gtk* libnvidia-wayland-client* nvidia-settings* \
     libGLESv1_CM.so.* libGLESv2.so.* libGLdispatch.so.* libOpenGL.so.* libGLX.so.* libGL.so.1* libEGL.so.1* \
     libnvidia-egl-wayland.so.* libnvidia-egl-gbm.so.* \
     libOpenCL.so.1* \
@@ -36,7 +37,7 @@ rm -f \
     32/libGL.so.${VERSION} 32/libEGL.so.${VERSION}
 
 # Useless with packages
-rm -f nvidia-installer* .manifest make* mk* tls_test*
+rm -fr nvidia-installer* .manifest make* mk* tls_test* libglvnd_install_checker
 
 # Add json files in both architectures
 cp -f *.json* 32/

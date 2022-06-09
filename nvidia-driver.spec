@@ -8,7 +8,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        510.73.05
+Version:        515.48.07
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -71,7 +71,7 @@ Requires:       libglvnd-glx%{?_isa} >= 1.0
 Requires:       libglvnd-opengl%{?_isa} >= 1.0
 
 %ifnarch %{ix86}
-%if 0%{?fedora} >= 35 || 0%{?rhel} >= 9
+%if 0%{?fedora} || 0%{?rhel} >= 9
 Requires:       egl-gbm%{?_isa} >= 1.1.0
 %endif
 %endif
@@ -173,6 +173,12 @@ ln -sf libnvcuvid.so.%{version} libnvcuvid.so
 ln -sf libcuda.so.%{version} libcuda.so
 # libglvnd indirect entry point
 ln -sf libGLX_nvidia.so.%{version} libGLX_indirect.so.0
+
+%ifarch x86_64
+# Required by Vulkan on Wayland. Wrongly named library:
+# strings libnvidia-eglcore.so.515.43.04 libnvidia-glcore.so.515.43.04 | grep vulkan-producer
+mv libnvidia-vulkan-producer.so.%{version} libnvidia-vulkan-producer.so
+%endif
 
 %build
 # Nothing to build
@@ -350,7 +356,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ngx.so.1
 %{_libdir}/libnvidia-ngx.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
-%{_libdir}/libnvidia-vulkan-producer.so.%{version}
+%{_libdir}/libnvidia-vulkan-producer.so
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
 # Wine libraries
@@ -367,17 +373,14 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-compiler.so.%{version}
 %{_libdir}/libnvidia-encode.so.1
 %{_libdir}/libnvidia-encode.so.%{version}
+%{_libdir}/libnvidia-nvvm.so.4
+%{_libdir}/libnvidia-nvvm.so.%{version}
 %{_libdir}/libnvidia-opencl.so.1
 %{_libdir}/libnvidia-opencl.so.%{version}
 %{_libdir}/libnvidia-opticalflow.so.1
 %{_libdir}/libnvidia-opticalflow.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
-%ifarch x86_64
-%{_libdir}/libnvidia-compiler-next.so.%{version}
-%{_libdir}/libnvidia-nvvm.so.4
-%{_libdir}/libnvidia-nvvm.so.4.0.0
-%endif
 
 %files NvFBCOpenGL
 %{_libdir}/libnvidia-fbc.so.1
@@ -388,6 +391,10 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Jun 01 2022 Simone Caronni <negativo17@gmail.com> - 3:515.48.07-1
+- Update to 515.48.07.
+- Rename libnvidia-vulkan-producer.so versioned library (#128).
+
 * Tue May 31 2022 Simone Caronni <negativo17@gmail.com> - 3:510.73.05-1
 - Update to 510.73.05.
 
