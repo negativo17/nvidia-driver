@@ -71,7 +71,7 @@ Requires:       libglvnd-glx%{?_isa} >= 1.0
 Requires:       libglvnd-opengl%{?_isa} >= 1.0
 
 %ifnarch %{ix86}
-%if 0%{?fedora} >= 35 || 0%{?rhel} >= 9
+%if 0%{?fedora} || 0%{?rhel} >= 9
 Requires:       egl-gbm%{?_isa} >= 1.1.0
 %endif
 %endif
