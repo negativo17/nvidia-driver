@@ -8,7 +8,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        515.65.01
+Version:        515.76
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -391,6 +391,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Sep 21 2022 Simone Caronni <negativo17@gmail.com> - 3:515.76-1
+- Update to 515.76.
+
 * Mon Aug 08 2022 Simone Caronni <negativo17@gmail.com> - 3:515.65.01-1
 - Update to 515.65.01.
 
