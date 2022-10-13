@@ -8,7 +8,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        515.76
+Version:        520.56.06
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -190,7 +190,7 @@ install -p -m 0644 -D 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 
 # Unique libraries
 mkdir -p %{buildroot}%{_libdir}/vdpau/
-cp -a lib*GL*_nvidia.so* libcuda.so* libnv*.so* %{buildroot}%{_libdir}/
+cp -a lib*GL*_nvidia.so* libcuda*.so* libnv*.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
 
 %ifarch x86_64
@@ -368,6 +368,10 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libcuda.so
 %{_libdir}/libcuda.so.1
 %{_libdir}/libcuda.so.%{version}
+%ifarch x86_64
+%{_libdir}/libcudadebugger.so.1
+%{_libdir}/libcudadebugger.so.%{version}
+%endif
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
 %{_libdir}/libnvidia-compiler.so.%{version}
@@ -391,6 +395,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Thu Oct 13 2022 Simone Caronni <negativo17@gmail.com> - 3:520.56.06-1
+- Update to 520.56.06.
+
 * Wed Sep 21 2022 Simone Caronni <negativo17@gmail.com> - 3:515.76-1
 - Update to 515.76.
 
