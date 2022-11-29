@@ -8,7 +8,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        520.56.06
+Version:        525.60.11
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -351,6 +351,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %if 0%{?fedora} || 0%{?rhel} >= 9
 %{_libdir}/gbm/nvidia-drm_gbm.so
 %endif
+%{_libdir}/libnvidia-api.so.1
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
 %{_libdir}/libnvidia-ngx.so.1
@@ -395,6 +396,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Tue Nov 29 2022 Simone Caronni <negativo17@gmail.com> - 3:525.60.11-1
+- Update to 525.60.11.
+
 * Thu Oct 13 2022 Simone Caronni <negativo17@gmail.com> - 3:520.56.06-1
 - Update to 520.56.06.
 
