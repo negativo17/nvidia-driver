@@ -9,7 +9,7 @@
 
 Name:           nvidia-driver
 Version:        525.60.11
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -97,6 +97,8 @@ This package provides the shared libraries for %{name}.
 
 %package cuda-libs
 Summary:        Libraries for %{name}-cuda
+Provides:       %{name}-devel%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Obsoletes:      %{name}-devel < %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description cuda-libs
 This package provides the CUDA libraries for %{name}-cuda.
@@ -123,17 +125,6 @@ nvidia-smi. The run-time version of NVML ships with the NVIDIA display driver,
 and the SDK provides the appropriate header, stub libraries and sample
 applications. Each new version of NVML is backwards compatible and is intended
 to be a platform for building 3rd party applications.
-
-%package devel
-Summary:        Development files for %{name}
-Conflicts:      xorg-x11-drv-nvidia-devel
-Conflicts:      xorg-x11-drv-nvidia-devel-390xx
-Requires:       %{name}-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-
-%description devel
-This package provides the development files of the %{name} package.
 
 %ifarch x86_64
 
@@ -318,10 +309,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 
 %endif
 
-%files devel
-%{_libdir}/libnvcuvid.so
-%{_libdir}/libnvidia-encode.so
-
 %files libs
 %{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
 %{_libdir}/libEGL_nvidia.so.0
@@ -373,9 +360,11 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libcudadebugger.so.1
 %{_libdir}/libcudadebugger.so.%{version}
 %endif
+%{_libdir}/libnvcuvid.so
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
 %{_libdir}/libnvidia-compiler.so.%{version}
+%{_libdir}/libnvidia-encode.so
 %{_libdir}/libnvidia-encode.so.1
 %{_libdir}/libnvidia-encode.so.%{version}
 %{_libdir}/libnvidia-nvvm.so.4
@@ -396,6 +385,10 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Tue Dec 13 2022 Simone Caronni <negativo17@gmail.com> - 3:525.60.11-2
+- Drop nvidia-driver-devel subpackage.
+- Trim changelog.
+
 * Tue Nov 29 2022 Simone Caronni <negativo17@gmail.com> - 3:525.60.11-1
 - Update to 525.60.11.
 
@@ -449,165 +442,3 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 - Install GBM only on CentOS/RHEL 9+ and Fedora 35. It's also supported in
   CentOS Stream 8 (8.6+/Mesa 21.2), but there's no easy way to check for Stream
   in the SPEC file.
-
-* Tue Dec 14 2021 Simone Caronni <negativo17@gmail.com> - 3:495.46-1
-- Update to 495.46.
-
-* Tue Nov 02 2021 Simone Caronni <negativo17@gmail.com> - 3:495.44-1
-- Update to 495.44.
-- Use supported-gpu.json file to get list of supported chipsets instead of
-  parsing README.txt.
-
-* Tue Nov 02 2021 Simone Caronni <negativo17@gmail.com> - 3:470.82.00-1
-- Update to 470.82.00.
-
-* Tue Sep 21 2021 Simone Caronni <negativo17@gmail.com> - 3:470.74-1
-- Update to 470.74.
-- Remove workaround for wrong soname in libnvidia-nvvm.
-
-* Fri Aug 20 2021 Simone Caronni <negativo17@gmail.com> - 3:470.63.01-2
-- Enable power management services by default.
-
-* Wed Aug 11 2021 Simone Caronni <negativo17@gmail.com> - 3:470.63.01-1
-- Update to 470.63.01.
-
-* Thu Jul 22 2021 Simone Caronni <negativo17@gmail.com> - 3:470.57.02-2
-- Remove libnvvm.so.4 symlink. Based on the ld.so.conf.d files in the upstream
-  CUDA packages, the libnvvm.so.4 library will always be loaded from the CUDA
-  packages.
-
-* Tue Jul 20 2021 Simone Caronni <negativo17@gmail.com> - 3:470.57.02-1
-- Update to 470.57.02.
-- Reorganize SPEC file.
-
-* Mon Jun 07 2021 Simone Caronni <negativo17@gmail.com> - 3:460.84-1
-- Update to 460.84.
-
-* Wed May 12 2021 Simone Caronni <negativo17@gmail.com> - 3:460.80-1
-- Update to 460.80.
-
-* Sun Apr 18 2021 Simone Caronni <negativo17@gmail.com> - 3:460.73.01-1
-- Update to 460.73.01.
-
-* Fri Mar 19 2021 Simone Caronni <negativo17@gmail.com> - 3:460.67-1
-- Update to 460.67.
-
-* Mon Mar 01 2021 Simone Caronni <negativo17@gmail.com> - 3:460.56-1
-- Update to 460.56.
-
-* Wed Jan 27 2021 Simone Caronni <negativo17@gmail.com> - 3:460.39-1
-- Update to 460.39.
-
-* Thu Jan  7 2021 Simone Caronni <negativo17@gmail.com> - 3:460.32.03-1
-- Update to 460.32.03.
-
-* Sun Dec 20 2020 Simone Caronni <negativo17@gmail.com> - 3:460.27.04-1
-- Update to 460.27.04.
-- Trim changelog.
-
-* Mon Dec 07 2020 Simone Caronni <negativo17@gmail.com> - 3:450.80.02-2
-- Drop support for CentOS/RHEL 6.
-
-* Tue Oct 06 2020 Simone Caronni <negativo17@gmail.com> - 3:450.80.02-1
-- Update to 450.80.02.
-
-* Thu Aug 20 2020 Simone Caronni <negativo17@gmail.com> - 3:450.66-1
-- Update to 450.66.
-
-* Fri Jul 10 2020 Simone Caronni <negativo17@gmail.com> - 3:450.57-1
-- Update to 450.57.
-- Driver now autodetects GPU Screens and RandR PRIME Display Offload Sink
-  based on X.org version.
-
-* Thu Jun 25 2020 Simone Caronni <negativo17@gmail.com> - 3:440.100-1
-- Update to 440.100.
-
-* Thu Apr 09 2020 Simone Caronni <negativo17@gmail.com> - 3:440.82-1
-- Update to 440.82.
-
-* Fri Feb 28 2020 Simone Caronni <negativo17@gmail.com> - 3:440.64-1
-- Update to 440.64.
-
-* Fri Feb 14 2020 Jens Peters <jp7677@gmail.com> - 3:440.59-2
-- Ensure that only one Vulkan ICD manifest is present.
-
-* Tue Feb 04 2020 Simone Caronni <negativo17@gmail.com> - 3:440.59-1
-- Update to 440.59.
-
-* Sat Dec 14 2019 Simone Caronni <negativo17@gmail.com> - 3:440.44-1
-- Update to 440.44.
-
-* Sat Nov 30 2019 Simone Caronni <negativo17@gmail.com> - 3:440.36-1
-- Update to 440.36.
-
-* Wed Nov 13 2019 Simone Caronni <negativo17@gmail.com> - 3:440.31-3
-- RHEL/CentOS 6 does not work anymore with OutputClass configurations.
-
-* Sun Nov 10 2019 Simone Caronni <negativo17@gmail.com> - 3:440.31-2
-- Streamline configurations between the various distributions.
-
-* Sat Nov 09 2019 Simone Caronni <negativo17@gmail.com> - 3:440.31-1
-- Update to 440.31.
-
-* Thu Oct 17 2019 Simone Caronni <negativo17@gmail.com> - 3:440.26-1
-- Update to 440.26.
-
-* Tue Oct 01 2019 Simone Caronni <negativo17@gmail.com> - 3:435.21-2
-- Fix build dependency on CentOS/RHEL 8.
-
-* Mon Sep 02 2019 Simone Caronni <negativo17@gmail.com> - 3:435.21-1
-- Update to 435.21.
-
-* Thu Aug 22 2019 Simone Caronni <negativo17@gmail.com> - 3:435.17-1
-- Update to 435.17.
-- Add hibernate/resume/suspend systemd hooks.
-- Add Vulkan layer file and default powermanagement.
-
-* Wed Jul 31 2019 Simone Caronni <negativo17@gmail.com> - 3:430.40-1
-- Update to 430.40.
-- Update AppData installation.
-
-* Fri Jul 12 2019 Simone Caronni <negativo17@gmail.com> - 3:430.34-1
-- Update to 430.34.
-
-* Wed Jun 12 2019 Simone Caronni <negativo17@gmail.com> - 3:430.26-1
-- Update to 430.26.
-
-* Sat May 18 2019 Simone Caronni <negativo17@gmail.com> - 3:430.14-1
-- Update to 430.14.
-
-* Thu May 09 2019 Simone Caronni <negativo17@gmail.com> - 3:418.74-1
-- Update to 418.74.
-
-* Sun Mar 24 2019 Simone Caronni <negativo17@gmail.com> - 3:418.56-1
-- Update to 418.56.
-
-* Thu Feb 28 2019 Simone Caronni <negativo17@gmail.com> - 3:418.43-2
-- Do not require egl-wayland on EPEL 32 bit.
-
-* Fri Feb 22 2019 Simone Caronni <negativo17@gmail.com> - 3:418.43-1
-- Update to 418.43.
-- Trim changelog.
-
-* Wed Feb 06 2019 Simone Caronni <negativo17@gmail.com> - 3:418.30-1
-- Update to 418.30.
-
-* Mon Feb 04 2019 Simone Caronni <negativo17@gmail.com> - 3:415.27-5
-- Move fatbinaryloader in main libraries subpackage.
-
-* Sun Feb 03 2019 Simone Caronni <negativo17@gmail.com> - 3:415.27-4
-- Split out all kernel related interactions into the nvidia-kmod-common package.
-- Require nvidia-kmod-common in both nvidia-driver and nvidia-driver-cuda as
-  they can now be installed separately.
-
-* Sun Feb 03 2019 Simone Caronni <negativo17@gmail.com> - 3:415.27-3
-- Remove CUDA provides/requires, move them to separate package.
-
-* Sat Feb 02 2019 Simone Caronni <negativo17@gmail.com> - 3:415.27-2
-- Add nvidia-drivers and cuda-drivers virtual provides as requested by Red Hat.
-
-* Thu Jan 17 2019 Simone Caronni <negativo17@gmail.com> - 3:415.27-1
-- Update to 415.27.
-
-* Sat Jan 12 2019 Simone Caronni <negativo17@gmail.com> - 3:415.25-2
-- Update requirements.
