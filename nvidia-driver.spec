@@ -9,7 +9,7 @@
 
 Name:           nvidia-driver
 Version:        525.60.11
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -97,6 +97,8 @@ This package provides the shared libraries for %{name}.
 
 %package cuda-libs
 Summary:        Libraries for %{name}-cuda
+Provides:       %{name}-devel%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Obsoletes:      %{name}-devel < %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description cuda-libs
 This package provides the CUDA libraries for %{name}-cuda.
@@ -123,17 +125,6 @@ nvidia-smi. The run-time version of NVML ships with the NVIDIA display driver,
 and the SDK provides the appropriate header, stub libraries and sample
 applications. Each new version of NVML is backwards compatible and is intended
 to be a platform for building 3rd party applications.
-
-%package devel
-Summary:        Development files for %{name}
-Conflicts:      xorg-x11-drv-nvidia-devel
-Conflicts:      xorg-x11-drv-nvidia-devel-390xx
-Requires:       %{name}-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires:       %{name}-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-
-%description devel
-This package provides the development files of the %{name} package.
 
 %ifarch x86_64
 
@@ -318,10 +309,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 
 %endif
 
-%files devel
-%{_libdir}/libnvcuvid.so
-%{_libdir}/libnvidia-encode.so
-
 %files libs
 %{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
 %{_libdir}/libEGL_nvidia.so.0
@@ -373,9 +360,11 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libcudadebugger.so.1
 %{_libdir}/libcudadebugger.so.%{version}
 %endif
+%{_libdir}/libnvcuvid.so
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
 %{_libdir}/libnvidia-compiler.so.%{version}
+%{_libdir}/libnvidia-encode.so
 %{_libdir}/libnvidia-encode.so.1
 %{_libdir}/libnvidia-encode.so.%{version}
 %{_libdir}/libnvidia-nvvm.so.4
@@ -396,6 +385,10 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Tue Dec 13 2022 Simone Caronni <negativo17@gmail.com> - 3:525.60.11-2
+- Drop nvidia-driver-devel subpackage.
+- Trim changelog.
+
 * Tue Nov 29 2022 Simone Caronni <negativo17@gmail.com> - 3:525.60.11-1
 - Update to 525.60.11.
 
@@ -449,103 +442,3 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 - Install GBM only on CentOS/RHEL 9+ and Fedora 35. It's also supported in
   CentOS Stream 8 (8.6+/Mesa 21.2), but there's no easy way to check for Stream
   in the SPEC file.
-
-* Tue Dec 14 2021 Simone Caronni <negativo17@gmail.com> - 3:495.46-1
-- Update to 495.46.
-
-* Tue Nov 02 2021 Simone Caronni <negativo17@gmail.com> - 3:495.44-1
-- Update to 495.44.
-- Use supported-gpu.json file to get list of supported chipsets instead of
-  parsing README.txt.
-
-* Tue Nov 02 2021 Simone Caronni <negativo17@gmail.com> - 3:470.82.00-1
-- Update to 470.82.00.
-
-* Tue Sep 21 2021 Simone Caronni <negativo17@gmail.com> - 3:470.74-1
-- Update to 470.74.
-- Remove workaround for wrong soname in libnvidia-nvvm.
-
-* Fri Aug 20 2021 Simone Caronni <negativo17@gmail.com> - 3:470.63.01-2
-- Enable power management services by default.
-
-* Wed Aug 11 2021 Simone Caronni <negativo17@gmail.com> - 3:470.63.01-1
-- Update to 470.63.01.
-
-* Thu Jul 22 2021 Simone Caronni <negativo17@gmail.com> - 3:470.57.02-2
-- Remove libnvvm.so.4 symlink. Based on the ld.so.conf.d files in the upstream
-  CUDA packages, the libnvvm.so.4 library will always be loaded from the CUDA
-  packages.
-
-* Tue Jul 20 2021 Simone Caronni <negativo17@gmail.com> - 3:470.57.02-1
-- Update to 470.57.02.
-
-* Wed Jun 30 2021 Simone Caronni <negativo17@gmail.com> - 3:470.42.01-1
-- Update to 470.42.01.
-- Reorganize SPEC file.
-- Trim changelog.
-
-* Wed May 26 2021 Simone Caronni <negativo17@gmail.com> - 3:465.31-1
-- Update to 465.31.
-
-* Sat May 01 2021 Simone Caronni <negativo17@gmail.com> - 3:465.27-1
-- Update to 465.27.
-
-* Sun Apr 18 2021 Simone Caronni <negativo17@gmail.com> - 3:465.24.02-1
-- Update to 465.24.02.
-
-* Fri Apr 09 2021 Simone Caronni <negativo17@gmail.com> - 3:465.19.01-1
-- Update to 465.19.01.
-
-* Fri Mar 19 2021 Simone Caronni <negativo17@gmail.com> - 3:460.67-1
-- Update to 460.67.
-
-* Mon Mar 01 2021 Simone Caronni <negativo17@gmail.com> - 3:460.56-1
-- Update to 460.56.
-
-* Wed Jan 27 2021 Simone Caronni <negativo17@gmail.com> - 3:460.39-1
-- Update to 460.39.
-
-* Thu Jan  7 2021 Simone Caronni <negativo17@gmail.com> - 3:460.32.03-1
-- Update to 460.32.03.
-
-* Sun Dec 20 2020 Simone Caronni <negativo17@gmail.com> - 3:460.27.04-1
-- Update to 460.27.04.
-- Trim changelog.
-
-* Mon Dec 07 2020 Simone Caronni <negativo17@gmail.com> - 3:455.45.01-2
-- Drop support for CentOS/RHEL 6.
-
-* Wed Nov 18 2020 Simone Caronni <negativo17@gmail.com> - 3:455.45.01-1
-- Update to 455.45.01.
-
-* Mon Nov 02 2020 Simone Caronni <negativo17@gmail.com> - 3:455.38-1
-- Update to 455.38.
-
-* Mon Oct 12 2020 Simone Caronni <negativo17@gmail.com> - 3:455.28-1
-- Update to 455.28.
-
-* Tue Oct 06 2020 Simone Caronni <negativo17@gmail.com> - 3:450.80.02-1
-- Update to 450.80.02.
-
-* Thu Aug 20 2020 Simone Caronni <negativo17@gmail.com> - 3:450.66-1
-- Update to 450.66.
-
-* Fri Jul 10 2020 Simone Caronni <negativo17@gmail.com> - 3:450.57-1
-- Update to 450.57.
-- Driver now autodetects GPU Screens and RandR PRIME Display Offload Sink
-  based on X.org version.
-
-* Thu Jun 25 2020 Simone Caronni <negativo17@gmail.com> - 3:440.100-1
-- Update to 440.100.
-
-* Thu Apr 09 2020 Simone Caronni <negativo17@gmail.com> - 3:440.82-1
-- Update to 440.82.
-
-* Fri Feb 28 2020 Simone Caronni <negativo17@gmail.com> - 3:440.64-1
-- Update to 440.64.
-
-* Fri Feb 14 2020 Jens Peters <jp7677@gmail.com> - 3:440.59-2
-- Ensure that only one Vulkan ICD manifest is present.
-
-* Tue Feb 04 2020 Simone Caronni <negativo17@gmail.com> - 3:440.59-1
-- Update to 440.59.
