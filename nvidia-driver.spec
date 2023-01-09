@@ -8,8 +8,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        525.60.11
-Release:        2%{?dist}
+Version:        525.78.01
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -385,6 +385,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Mon Jan 09 2023 Simone Caronni <negativo17@gmail.com> - 3:525.78.01-1
+- Update to 525.78.01.
+
 * Tue Dec 13 2022 Simone Caronni <negativo17@gmail.com> - 3:525.60.11-2
 - Drop nvidia-driver-devel subpackage.
 - Trim changelog.
