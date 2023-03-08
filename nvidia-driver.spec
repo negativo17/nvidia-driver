@@ -169,6 +169,8 @@ ln -sf libGLX_nvidia.so.%{version} libGLX_indirect.so.0
 # Required by Vulkan on Wayland. Wrongly named library:
 # strings libnvidia-eglcore.so.515.43.04 libnvidia-glcore.so.515.43.04 | grep vulkan-producer
 mv libnvidia-vulkan-producer.so.%{version} libnvidia-vulkan-producer.so
+# Fedora 38+'s ldconfig creates spurious symlinks:
+rm -f libnvidia-vulkan-producer.so.*
 %endif
 
 %build
