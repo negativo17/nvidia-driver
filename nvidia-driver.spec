@@ -8,7 +8,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        525.116.04
+Version:        535.54.03
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -152,6 +152,12 @@ This package provides the CUDA integration components for %{name}.
 %setup -q -T -b 1 -n %{name}-%{version}-x86_64
 %endif
 
+%if 0%{?rhel} == 7 || 0%{?rhel} == 8
+rm -f libnvidia-pkcs11-openssl3.so.%{version}
+%else
+rm -f libnvidia-pkcs11.so.%{version}
+%endif
+
 # Create symlinks for shared objects
 ldconfig -vn .
 
@@ -166,9 +172,14 @@ ln -sf libcuda.so.%{version} libcuda.so
 ln -sf libGLX_nvidia.so.%{version} libGLX_indirect.so.0
 
 %ifarch x86_64
-# Required by Vulkan on Wayland. Wrongly named library:
+# Required by Vulkan on Wayland. Wrongly named library / missing SONAME so
+# ldconfig does not create the appropriate symlinks.
 # strings libnvidia-eglcore.so.515.43.04 libnvidia-glcore.so.515.43.04 | grep vulkan-producer
 mv libnvidia-vulkan-producer.so.%{version} libnvidia-vulkan-producer.so
+%if 0%{?fedora} >= 38
+# Fedora 38+'s ldconfig creates spurious symlinks:
+rm -f libnvidia-vulkan-producer.so.*
+%endif
 %endif
 
 %build
@@ -218,6 +229,9 @@ install -p -m 0644 -D nvidia_icd.json %{buildroot}%{_datadir}/vulkan/icd.d/nvidi
 # NGX Proton/Wine library
 mkdir -p %{buildroot}%{_libdir}/nvidia/wine/
 cp -a *.dll %{buildroot}%{_libdir}/nvidia/wine/
+
+# OptiX
+install -p -m 0644 nvoptix.bin %{buildroot}%{_datadir}/nvidia/
 
 # Systemd units and script for suspending/resuming
 install -p -m 0644 -D %{SOURCE9} %{buildroot}%{_systemd_util_dir}/system-preset/70-nvidia.preset
@@ -356,14 +370,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libcuda.so
 %{_libdir}/libcuda.so.1
 %{_libdir}/libcuda.so.%{version}
-%ifarch x86_64
-%{_libdir}/libcudadebugger.so.1
-%{_libdir}/libcudadebugger.so.%{version}
-%endif
 %{_libdir}/libnvcuvid.so
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
-%{_libdir}/libnvidia-compiler.so.%{version}
 %{_libdir}/libnvidia-encode.so
 %{_libdir}/libnvidia-encode.so.1
 %{_libdir}/libnvidia-encode.so.%{version}
@@ -375,6 +384,15 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-opticalflow.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
+%ifarch x86_64
+%{_libdir}/libcudadebugger.so.1
+%{_libdir}/libcudadebugger.so.%{version}
+%if 0%{?rhel} ==7 || 0%{?rhel} == 8
+%{_libdir}/libnvidia-pkcs11.so.%{version}
+%else
+%{_libdir}/libnvidia-pkcs11-openssl3.so.%{version}
+%endif
+%endif
 
 %files NvFBCOpenGL
 %{_libdir}/libnvidia-fbc.so.1
@@ -385,6 +403,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Thu Jun 15 2023 Simone Caronni <negativo17@gmail.com> - 3:535.54.03-1
+- Update to 535.54.03.
+
 * Fri May 12 2023 Simone Caronni <negativo17@gmail.com> - 3:525.116.04-1
 - Update to 525.116.04.
 
