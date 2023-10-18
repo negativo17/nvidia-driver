@@ -8,7 +8,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        535.113.01
+Version:        545.23.06
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -171,13 +171,6 @@ ln -sf libcuda.so.%{version} libcuda.so
 # libglvnd indirect entry point
 ln -sf libGLX_nvidia.so.%{version} libGLX_indirect.so.0
 
-%ifarch x86_64
-# Required by Vulkan on Wayland. Wrongly named library / missing SONAME so
-# ldconfig does not create the appropriate symlinks.
-# strings libnvidia-eglcore.so.515.43.04 libnvidia-glcore.so.515.43.04 | grep vulkan-producer
-mv libnvidia-vulkan-producer.so.%{version} libnvidia-vulkan-producer.so
-%endif
-
 %build
 # Nothing to build
 
@@ -335,6 +328,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-glcore.so.%{version}
 %{_libdir}/libnvidia-glsi.so.%{version}
 %{_libdir}/libnvidia-glvkspirv.so.%{version}
+%{_libdir}/libnvidia-gpucomp.so.%{version}
 %{_libdir}/libnvidia-tls.so.%{version}
 %{_libdir}/vdpau/libvdpau_nvidia.so.1
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
@@ -354,7 +348,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ngx.so.1
 %{_libdir}/libnvidia-ngx.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
-%{_libdir}/libnvidia-vulkan-producer.so
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
 # Wine libraries
@@ -399,6 +392,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Oct 18 2023 Simone Caronni <negativo17@gmail.com> - 3:545.23.06-1
+- Update to 545.23.06.
+
 * Fri Sep 22 2023 Simone Caronni <negativo17@gmail.com> - 3:535.113.01-1
 - Update to 535.113.01.
 
