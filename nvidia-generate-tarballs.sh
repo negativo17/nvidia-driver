@@ -20,7 +20,6 @@ cd ${TEMP_UNPACK}
 
 # Compiled from source
 rm -fr \
-    kernel-open \
     nvidia-xconfig* \
     nvidia-persistenced* \
     nvidia-modprobe* \
@@ -50,7 +49,7 @@ USR_64=nvidia-driver-${VERSION}-x86_64
 USR_32=nvidia-driver-${VERSION}-i386
 
 mkdir ${KMOD} ${KMOD_COMMON} ${USR_64} ${USR_32}
-mv ${TEMP_UNPACK}/kernel ${KMOD}/
+mv ${TEMP_UNPACK}/kernel* ${KMOD}/
 mv ${TEMP_UNPACK}/firmware ${KMOD_COMMON}/
 mv ${TEMP_UNPACK}/32/* ${USR_32}/
 rm -fr ${TEMP_UNPACK}/32
