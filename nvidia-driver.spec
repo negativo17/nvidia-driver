@@ -8,8 +8,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        545.29.02
-Release:        2%{?dist}
+Version:        545.29.06
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -392,6 +392,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Fri Dec 01 2023 Simone Caronni <negativo17@gmail.com> - 3:545.29.06-1
+- Update to 545.29.06.
+
 * Mon Nov 13 2023 Simone Caronni <negativo17@gmail.com> - 3:545.29.02-2
 - Create kernel module tarball with proprietary and open source modules.
 
