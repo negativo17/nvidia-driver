@@ -244,6 +244,23 @@ install -p -m 0644 -D nvidia_layers.json %{buildroot}%{_datadir}/vulkan/implicit
 install -p -m 0644 -D %{SOURCE40} %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
 %{SOURCE41} supported-gpus/supported-gpus.json | xargs appstream-util add-provide %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml modalias
 
+# workaround for nvidia-powerd service failing if DynamicBoost not detected
+cat <<EOF > %{buildroot}%{_bindir}/nvidia-powerd-start
+#!/bin/bash
+
+# gracefully exits if DynamicBoost is not detected by nvidia-powerd
+{ # try
+    /usr/bin/nvidia-powerd
+} || { # catch
+    echo "DynamicBoost not detected. nvidia-powerd not supported."
+    systemctl stop nvidia-powerd
+    exit 0
+}
+EOF
+
+chmod 755 %{buildroot}%{_bindir}/nvidia-powerd-start
+sed -i 's|ExecStart=.*|ExecStart=nvidia-powerd-start|g' %{buildroot}%{_unitdir}/nvidia-powerd.service
+
 %check
 appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
 %endif
@@ -285,6 +302,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %{_bindir}/nvidia-bug-report.sh
 %{_bindir}/nvidia-powerd
+%{_bindir}/nvidia-powerd-start
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %{_metainfodir}/com.nvidia.driver.metainfo.xml
 %endif
