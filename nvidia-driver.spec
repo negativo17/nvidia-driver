@@ -8,8 +8,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        545.29.06
-Release:        3%{?dist}
+Version:        550.40.07
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -397,6 +397,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Tue Feb 22 2024 Simone Caronni <negativo17@gmail.com> - 3:550.40.07-1
+- Update to 550.40.07.
+
 * Fri Feb 16 2024 Simone Caronni <negativo17@gmail.com> - 3:545.29.06-3
 - Re-add explicit egl-wayland dependency (reverts
   cd6f2b9044d90f71f94fa91be1cc0cad343a1560).
