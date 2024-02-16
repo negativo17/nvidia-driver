@@ -9,7 +9,7 @@
 
 Name:           nvidia-driver
 Version:        545.29.06
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -72,6 +72,7 @@ Requires:       libglvnd-opengl%{?_isa} >= 1.0
 
 %ifnarch %{ix86}
 %if 0%{?fedora} || 0%{?rhel} >= 9
+Requires:       egl-wayland%{?_isa} >= 1.1.13
 Requires:       egl-gbm%{?_isa} >= 1.1.0
 %endif
 %endif
@@ -396,6 +397,10 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Fri Feb 16 2024 Simone Caronni <negativo17@gmail.com> - 3:545.29.06-3
+- Re-add explicit egl-wayland dependency (reverts
+  cd6f2b9044d90f71f94fa91be1cc0cad343a1560).
+
 * Mon Dec 18 2023 Simone Caronni <negativo17@gmail.com> - 3:545.29.06-2
 - Do not mark nvidia-powerd unit as failed if the binary exits.
 
