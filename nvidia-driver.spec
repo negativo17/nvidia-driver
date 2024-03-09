@@ -9,15 +9,16 @@
 
 Name:           nvidia-driver
 Version:        550.54.14
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
 URL:            http://www.nvidia.com/object/unix.html
-ExclusiveArch:  %{ix86} x86_64 ppc64le aarch64
+ExclusiveArch:  %{ix86} x86_64 aarch64
 
 Source0:        %{name}-%{version}-i386.tar.xz
 Source1:        %{name}-%{version}-x86_64.tar.xz
+Source2:        %{name}-%{version}-aarch64.tar.xz
 Source9:        70-nvidia.preset
 # For servers with OutputClass device options (el7+)
 Source10:       10-nvidia.conf.outputclass-device
@@ -27,7 +28,7 @@ Source41:       parse-supported-gpus.py
 
 Source99:       nvidia-generate-tarballs.sh
 
-%ifarch x86_64
+%ifarch x86_64 aarch64
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
 BuildRequires:  libappstream-glib
@@ -127,7 +128,7 @@ and the SDK provides the appropriate header, stub libraries and sample
 applications. Each new version of NVML is backwards compatible and is intended
 to be a platform for building 3rd party applications.
 
-%ifarch x86_64
+%ifarch x86_64 aarch64
 
 %package cuda
 Summary:        CUDA integration for %{name}
@@ -153,6 +154,10 @@ This package provides the CUDA integration components for %{name}.
 %setup -q -T -b 1 -n %{name}-%{version}-x86_64
 %endif
 
+%ifarch aarch64
+%setup -q -T -b 2 -n %{name}-%{version}-aarch64
+%endif
+
 %if 0%{?rhel} == 7 || 0%{?rhel} == 8
 rm -f libnvidia-pkcs11-openssl3.so.%{version}
 %else
@@ -169,8 +174,6 @@ ln -sf libnvcuvid.so.%{version} libnvcuvid.so
 
 # Required for building against CUDA
 ln -sf libcuda.so.%{version} libcuda.so
-# libglvnd indirect entry point
-ln -sf libGLX_nvidia.so.%{version} libGLX_indirect.so.0
 
 %build
 # Nothing to build
@@ -186,6 +189,14 @@ cp -a lib*GL*_nvidia.so* libcuda*.so* libnv*.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
 
 %ifarch x86_64
+
+# NGX Proton/Wine library
+mkdir -p %{buildroot}%{_libdir}/nvidia/wine/
+cp -a *.dll %{buildroot}%{_libdir}/nvidia/wine/
+
+%endif
+
+%ifarch x86_64 aarch64
 
 # Empty?
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
@@ -215,10 +226,6 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 
 # Vulkan loader
 install -p -m 0644 -D nvidia_icd.json %{buildroot}%{_datadir}/vulkan/icd.d/nvidia_icd.json
-
-# NGX Proton/Wine library
-mkdir -p %{buildroot}%{_libdir}/nvidia/wine/
-cp -a *.dll %{buildroot}%{_libdir}/nvidia/wine/
 
 # OptiX
 install -p -m 0644 nvoptix.bin %{buildroot}%{_datadir}/nvidia/
@@ -263,7 +270,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 
 %ldconfig_scriptlets NVML
 
-%ifarch x86_64
+%ifarch x86_64 aarch64
 
 %post
 %systemd_post nvidia-hibernate.service
@@ -337,9 +344,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-tls.so.%{version}
 %{_libdir}/vdpau/libvdpau_nvidia.so.1
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
-
-%ifarch x86_64
-
+%ifarch x86_64 aarch64
 %{_datadir}/vulkan/icd.d/nvidia_icd.json
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %{_datadir}/vulkan/implicit_layer.d/nvidia_layers.json
@@ -355,9 +360,11 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-rtcore.so.%{version}
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
-# Wine libraries
-%{_libdir}/nvidia/
-
+%endif
+%ifarch x86_64
+%dir %{_libdir}/nvidia
+%dir %{_libdir}/nvidia/wine
+%{_libdir}/nvidia/wine/*.dll
 %endif
 
 %files cuda-libs
@@ -378,9 +385,11 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-opticalflow.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
-%ifarch x86_64
+%ifarch x86_64 aarch64
 %{_libdir}/libcudadebugger.so.1
 %{_libdir}/libcudadebugger.so.%{version}
+%endif
+%ifarch x86_64
 %if 0%{?rhel} ==7 || 0%{?rhel} == 8
 %{_libdir}/libnvidia-pkcs11.so.%{version}
 %else
@@ -397,10 +406,14 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Fri Mar 08 2024 Simone Caronni <negativo17@gmail.com> - 3:550.54.14-2
+- Add support for aarch64.
+- Clean up SPEC file.
+
 * Sun Mar 03 2024 Simone Caronni <negativo17@gmail.com> - 3:550.54.14-1
 - Update to 550.54.14.
 
-* Tue Feb 22 2024 Simone Caronni <negativo17@gmail.com> - 3:550.40.07-1
+* Thu Feb 22 2024 Simone Caronni <negativo17@gmail.com> - 3:550.40.07-1
 - Update to 550.40.07.
 
 * Fri Feb 16 2024 Simone Caronni <negativo17@gmail.com> - 3:545.29.06-3
