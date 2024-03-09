@@ -1,70 +1,102 @@
 #!/bin/sh
 set -e
 
-VERSION=${VERSION:-550.54.14}
-DL_SITE=${DL_SITE:-http://us.download.nvidia.com/XFree86}
-TEMP_UNPACK=${TEMP_UNPACK:-temp}
+set_vars() {
+   export VERSION=${VERSION:-550.54.14}
+   export DL_SITE=${DL_SITE:-http://download.nvidia.com/XFree86}
+   export TEMP_UNPACK=${ARCH}
+   export PLATFORM=Linux-${ARCH}
+   export RUN_FILE=NVIDIA-${PLATFORM}-${VERSION}.run
+}
 
-PLATFORM=Linux-x86_64
-RUN_FILE=NVIDIA-${PLATFORM}-${VERSION}.run
+run_file_get() {
+    printf "Downloading installer ${RUN_FILE}... "
+    [[ -f $RUN_FILE ]] || wget -c -q ${DL_SITE}/${PLATFORM}/${VERSION}/$RUN_FILE
+    printf "OK\n"
+}
 
-printf "Downloading installer ${RUN_FILE}... "
-[[ -f $RUN_FILE ]] || wget -c -q ${DL_SITE}/${PLATFORM}/${VERSION}/$RUN_FILE
-printf "OK\n"
+run_file_extract() {
+    rm -fr ${TEMP_UNPACK}
+    sh ${RUN_FILE} --extract-only --target ${TEMP_UNPACK}
+}
 
-sh ${RUN_FILE} --extract-only --target ${TEMP_UNPACK}
+cleanup_folder() {
 
-printf "Cleaning up binaries... "
+    printf "Cleaning up binaries... "
 
-cd ${TEMP_UNPACK}
+    cd ${TEMP_UNPACK}
 
-# Compiled from source
-rm -fr \
-    nvidia-xconfig* \
-    nvidia-persistenced* \
-    nvidia-modprobe* \
-    libnvidia-gtk* libnvidia-wayland-client* nvidia-settings* \
-    libGLESv1_CM.so.* libGLESv2.so.* libGLdispatch.so.* libOpenGL.so.* libGLX.so.* libGL.so.1* libEGL.so.1* \
-    libnvidia-egl-wayland.so.* libnvidia-egl-gbm.so.* \
-    libOpenCL.so.1* \
-    32/libGLESv1_CM.so.* 32/libGLESv2.so.* 32/libGLdispatch.so.* 32/libOpenGL.so.* 32/libGLX.so.* 32/libGL.so.1* 32/libEGL.so.1* \
-    32/libOpenCL.so.1*
+    # Compiled from source, files not needed with packages, non GLVND GL libraries
+    rm -fr \
+        nvidia-xconfig* \
+        nvidia-persistenced* \
+        nvidia-modprobe* \
+        libnvidia-gtk* libnvidia-wayland-client* nvidia-settings* \
+        libGLESv1_CM.so.* libGLESv2.so.* libGLdispatch.so.* libOpenGL.so.* libGLX.so.* libGL.so.1* libEGL.so.1* \
+        libnvidia-egl-wayland.so.* libnvidia-egl-gbm.so.* \
+        libOpenCL.so.1* \
+        libGL.so.${VERSION} libEGL.so.${VERSION} \
+        nvidia-installer* .manifest make* mk* tls_test* libglvnd_install_checker
 
-# Non GLVND libraries
-rm -f \
-    libGL.so.${VERSION} libEGL.so.${VERSION} \
-    32/libGL.so.${VERSION} 32/libEGL.so.${VERSION}
+    if [ "${ARCH}" == x86_64 ]; then
+        rm -fr \
+          32/libGLESv1_CM.so.* 32/libGLESv2.so.* 32/libGLdispatch.so.* 32/libOpenGL.so.* 32/libGLX.so.* 32/libGL.so.1* 32/libEGL.so.1* \
+          32/libOpenCL.so.1* \
+          32/libGL.so.${VERSION} 32/libEGL.so.${VERSION}
 
-# Useless with packages
-rm -fr nvidia-installer* .manifest make* mk* tls_test* libglvnd_install_checker
+        cp -f *.json* 32/
+    fi
 
-# Add json files in both architectures
-cp -f *.json* 32/
-
-cd ..
-
-KMOD=nvidia-kmod-${VERSION}-x86_64
-KMOD_COMMON=nvidia-kmod-common-${VERSION}
-USR_64=nvidia-driver-${VERSION}-x86_64
-USR_32=nvidia-driver-${VERSION}-i386
-
-mkdir ${KMOD} ${KMOD_COMMON} ${USR_64} ${USR_32}
-mv ${TEMP_UNPACK}/kernel* ${KMOD}/
-mv ${TEMP_UNPACK}/firmware ${KMOD_COMMON}/
-mv ${TEMP_UNPACK}/32/* ${USR_32}/
-rm -fr ${TEMP_UNPACK}/32
-mv ${TEMP_UNPACK}/* ${USR_64}/
-
-rm -fr ${TEMP_UNPACK}
-
-printf "OK\n"
-
-for tarball in ${KMOD} ${KMOD_COMMON} ${USR_32} ${USR_64}; do
-
-    printf "Creating tarball $tarball... "
-
-    tar --remove-files -cJf $tarball.tar.xz $tarball
+    cd ..
 
     printf "OK\n"
+}
 
-done
+create_tarball() {
+
+    KMOD=nvidia-kmod-${VERSION}-${ARCH}
+    KMOD_COMMON=nvidia-kmod-common-${VERSION}
+    USR_64=nvidia-driver-${VERSION}-${ARCH}
+
+    mkdir ${KMOD} ${KMOD_COMMON} ${USR_64}
+    mv ${TEMP_UNPACK}/kernel* ${KMOD}/
+    mv ${TEMP_UNPACK}/firmware ${KMOD_COMMON}/
+
+    if [ "$ARCH" == x86_64 ]; then
+
+        USR_32=nvidia-driver-${VERSION}-i386
+
+        mkdir ${USR_32} 
+        mv ${TEMP_UNPACK}/32/* ${USR_32}/
+        rm -fr ${TEMP_UNPACK}/32
+
+    fi
+
+    mv ${TEMP_UNPACK}/* ${USR_64}/
+
+    rm -fr ${TEMP_UNPACK}
+
+    for tarball in ${KMOD} ${KMOD_COMMON} ${USR_64} ${USR_32}; do
+
+        printf "Creating tarball $tarball... "
+
+        tar --remove-files -cJf $tarball.tar.xz $tarball
+
+        printf "OK\n"
+
+    done
+}
+
+ARCH=aarch64
+set_vars
+run_file_get
+run_file_extract
+cleanup_folder
+create_tarball
+
+ARCH=x86_64
+set_vars
+run_file_get
+run_file_extract
+cleanup_folder
+create_tarball
