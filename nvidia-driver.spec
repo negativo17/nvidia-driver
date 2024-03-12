@@ -44,15 +44,9 @@ Requires:       nvidia-driver-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
 Requires:       xorg-x11-server-Xorg%{?_isa}
 
-Conflicts:      catalyst-x11-drv
-Conflicts:      fglrx-x11-drv
 Conflicts:      nvidia-x11-drv
-Conflicts:      nvidia-x11-drv-340xx
-Conflicts:      nvidia-x11-drv-390xx
 Conflicts:      nvidia-x11-drv-470xx
 Conflicts:      xorg-x11-drv-nvidia
-Conflicts:      xorg-x11-drv-nvidia-340xx
-Conflicts:      xorg-x11-drv-nvidia-390xx
 Conflicts:      xorg-x11-drv-nvidia-470xx
 
 %description
@@ -85,14 +79,9 @@ Requires:       vulkan-filesystem
 %endif
 
 Conflicts:      nvidia-x11-drv-libs
-Conflicts:      nvidia-x11-drv-libs-340xx
-Conflicts:      nvidia-x11-drv-libs-390xx
-Conflicts:      nvidia-x11-drv-libs-470xx
-Conflicts:      xorg-x11-drv-nvidia-gl
+Conflicts:      nvidia-x11-drv-470xx-libs
 Conflicts:      xorg-x11-drv-nvidia-libs
-Conflicts:      xorg-x11-drv-nvidia-libs-340xx
-Conflicts:      xorg-x11-drv-nvidia-libs-390xx
-Conflicts:      xorg-x11-drv-nvidia-libs-470xx
+Conflicts:      xorg-x11-drv-nvidia-470xx-libs
 
 %description libs
 This package provides the shared libraries for %{name}.
@@ -101,6 +90,9 @@ This package provides the shared libraries for %{name}.
 Summary:        Libraries for %{name}-cuda
 Provides:       %{name}-devel%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Obsoletes:      %{name}-devel < %{?epoch:%{epoch}:}%{version}-%{release}
+
+Conflicts:      xorg-x11-drv-nvidia-cuda-libs
+Conflicts:      xorg-x11-drv-nvidia-470xx-cuda-libs
 
 %description cuda-libs
 This package provides the CUDA libraries for %{name}-cuda.
@@ -132,13 +124,15 @@ to be a platform for building 3rd party applications.
 
 %package cuda
 Summary:        CUDA integration for %{name}
-Conflicts:      xorg-x11-drv-nvidia-cuda
 Requires:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       %{name}-NVML%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       nvidia-persistenced = %{?epoch:%{epoch}:}%{version}
 Requires:       opencl-filesystem
 Requires:       ocl-icd
+
+Conflicts:      xorg-x11-drv-nvidia-cuda
+Conflicts:      xorg-x11-drv-nvidia-470xx-cuda
 
 %description cuda
 This package provides the CUDA integration components for %{name}.
