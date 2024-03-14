@@ -9,7 +9,7 @@
 
 Name:           nvidia-driver
 Version:        550.54.14
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -20,8 +20,8 @@ Source0:        %{name}-%{version}-i386.tar.xz
 Source1:        %{name}-%{version}-x86_64.tar.xz
 Source2:        %{name}-%{version}-aarch64.tar.xz
 Source9:        70-nvidia.preset
-# For servers with OutputClass device options (el7+)
-Source10:       10-nvidia.conf.outputclass-device
+Source10:       10-nvidia.conf
+Source13:       alternate-install-present
 
 Source40:       com.nvidia.driver.metainfo.xml
 Source41:       parse-supported-gpus.py
@@ -67,9 +67,10 @@ Requires:       libglvnd-opengl%{?_isa} >= 1.0
 
 %ifnarch %{ix86}
 %if 0%{?fedora} || 0%{?rhel} >= 9
-Requires:       egl-wayland%{?_isa} >= 1.1.13
 Requires:       egl-gbm%{?_isa} >= 1.1.0
+Requires:       egl-gbm%{?_isa} >= 1.1.1
 %endif
+Requires:       egl-wayland%{?_isa} >= 1.1.13
 %endif
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
@@ -124,9 +125,9 @@ to be a platform for building 3rd party applications.
 
 %package cuda
 Summary:        CUDA integration for %{name}
-Requires:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       %{name}-NVML%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-persistenced = %{?epoch:%{epoch}:}%{version}
 Requires:       opencl-filesystem
 Requires:       ocl-icd
@@ -152,10 +153,12 @@ This package provides the CUDA integration components for %{name}.
 %setup -q -T -b 2 -n %{name}-%{version}-aarch64
 %endif
 
+%ifarch x86_64
 %if 0%{?rhel} == 7 || 0%{?rhel} == 8
 rm -f libnvidia-pkcs11-openssl3.so.%{version}
 %else
 rm -f libnvidia-pkcs11.so.%{version}
+%endif
 %endif
 
 # Create symlinks for shared objects
@@ -163,6 +166,7 @@ ldconfig -vn .
 
 # Required for building gstreamer 1.0 NVENC plugins
 ln -sf libnvidia-encode.so.%{version} libnvidia-encode.so
+
 # Required for building ffmpeg 3.1 Nvidia CUVID
 ln -sf libnvcuvid.so.%{version} libnvcuvid.so
 
@@ -170,9 +174,14 @@ ln -sf libnvcuvid.so.%{version} libnvcuvid.so
 ln -sf libcuda.so.%{version} libcuda.so
 
 %build
-# Nothing to build
 
 %install
+
+# alternate-install-present file triggers runfile warning
+%ifnarch %{ix86}
+install -m 0755 -d %{buildroot}/usr/lib/nvidia/
+install -p -m 0644 %{SOURCE13} %{buildroot}/usr/lib/nvidia/
+%endif
 
 # EGL loader
 install -p -m 0644 -D 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
@@ -284,6 +293,10 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %systemd_postun nvidia-resume.service
 %systemd_postun nvidia-suspend.service
 
+%endif
+
+%ifnarch %{ix86}
+
 %files
 %license LICENSE
 %doc NVIDIA_Changelog README.txt html supported-gpus/supported-gpus.json
@@ -291,14 +304,15 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %{_bindir}/nvidia-bug-report.sh
 %{_bindir}/nvidia-powerd
+%{_bindir}/nvidia-sleep.sh
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %{_metainfodir}/com.nvidia.driver.metainfo.xml
 %endif
 %{_datadir}/dbus-1/system.d/nvidia-dbus.conf
-%{_datadir}/nvidia
+%{_datadir}/nvidia/nvidia-application-profiles*
 %{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
-%{_bindir}/nvidia-sleep.sh
+%{_prefix}/lib/nvidia/alternate-install-present
 %{_systemd_util_dir}/system-preset/70-nvidia.preset
 %{_systemd_util_dir}/system-sleep/nvidia
 %{_unitdir}/nvidia-hibernate.service
@@ -354,6 +368,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-rtcore.so.%{version}
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
+%{_datadir}/nvidia/nvoptix.bin
 %endif
 %ifarch x86_64
 %dir %{_libdir}/nvidia
@@ -400,6 +415,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Thu Mar 14 2024 Simone Caronni <negativo17@gmail.com> - 3:550.54.14-3
+- Clean up SPEC file.
+
 * Fri Mar 08 2024 Simone Caronni <negativo17@gmail.com> - 3:550.54.14-2
 - Add support for aarch64.
 - Clean up SPEC file.
