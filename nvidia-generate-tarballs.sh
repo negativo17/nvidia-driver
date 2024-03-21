@@ -26,7 +26,11 @@ cleanup_folder() {
 
     cd ${TEMP_UNPACK}
 
-    # Compiled from source, files not needed with packages, non GLVND GL libraries
+    # Stuff not needed for packages:
+    #   - Compiled from source
+    #   - Interactive installer files
+    #   - GLVND GL libraries
+    #   - Internal development only libraries
     rm -fr \
         nvidia-xconfig* \
         nvidia-persistenced* \
@@ -36,7 +40,8 @@ cleanup_folder() {
         libnvidia-egl-wayland.so.* libnvidia-egl-gbm.so.* \
         libOpenCL.so.1* \
         libGL.so.${VERSION} libEGL.so.${VERSION} \
-        nvidia-installer* .manifest make* mk* tls_test* libglvnd_install_checker
+        nvidia-installer* .manifest make* mk* tls_test* libglvnd_install_checker \
+        libnvidia-llvmnvgpu.so.*
 
     if [ "${ARCH}" == x86_64 ]; then
         rm -fr \
