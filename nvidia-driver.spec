@@ -9,7 +9,7 @@
 
 Name:           nvidia-driver
 Version:        550.67
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -67,10 +67,13 @@ Requires:       libglvnd-opengl%{?_isa} >= 1.0
 
 %ifnarch %{ix86}
 %if 0%{?fedora} || 0%{?rhel} >= 9
-Requires:       egl-gbm%{?_isa} >= 1.1.0
 Requires:       egl-gbm%{?_isa} >= 1.1.1
-%endif
 Requires:       egl-wayland%{?_isa} >= 1.1.13
+%elif 0%{?rhel} == 8
+Requires:       egl-wayland%{?_isa} >= 1.1.13
+%else
+Requires:       egl-wayland%{?_isa} >= 1.1.7
+%endif
 %endif
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
@@ -415,6 +418,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Mon Apr 15 2024 Simone Caronni <negativo17@gmail.com> - 3:550.67-2
+- Fix egl requirements.
+
 * Sun Mar 24 2024 Simone Caronni <negativo17@gmail.com> - 3:550.67-1
 - Update to 550.67.
 
