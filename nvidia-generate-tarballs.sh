@@ -2,7 +2,7 @@
 set -e
 
 set_vars() {
-   export VERSION=${VERSION:-550.67}
+   export VERSION=${VERSION:-550.76}
    export DL_SITE=${DL_SITE:-http://download.nvidia.com/XFree86}
    export TEMP_UNPACK=${ARCH}
    export PLATFORM=Linux-${ARCH}

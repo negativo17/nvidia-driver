@@ -8,8 +8,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        550.67
-Release:        2%{?dist}
+Version:        550.76
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -418,6 +418,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Thu Apr 18 2024 Simone Caronni <negativo17@gmail.com> - 3:550.76-1
+- Update to 550.76.
+
 * Mon Apr 15 2024 Simone Caronni <negativo17@gmail.com> - 3:550.67-2
 - Fix egl requirements.
 
