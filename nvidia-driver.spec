@@ -8,8 +8,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        550.76
-Release:        2%{?dist}
+Version:        550.78
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -417,6 +417,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Fri Apr 26 2024 Simone Caronni <negativo17@gmail.com> - 3:550.78-1
+- Update to 550.78.
+
 * Fri Apr 26 2024 Simone Caronni <negativo17@gmail.com> - 3:550.76-2
 - Install Vulkan loader in a more similar way to Mesa packages.
 
