@@ -9,7 +9,7 @@
 
 Name:           nvidia-driver
 Version:        550.76
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -65,7 +65,6 @@ Requires:       libglvnd-gles%{?_isa} >= 1.0
 Requires:       libglvnd-glx%{?_isa} >= 1.0
 Requires:       libglvnd-opengl%{?_isa} >= 1.0
 
-%ifnarch %{ix86}
 %if 0%{?fedora} || 0%{?rhel} >= 9
 Requires:       egl-gbm%{?_isa} >= 1.1.1
 Requires:       egl-wayland%{?_isa} >= 1.1.13
@@ -73,7 +72,6 @@ Requires:       egl-wayland%{?_isa} >= 1.1.13
 Requires:       egl-wayland%{?_isa} >= 1.1.13
 %else
 Requires:       egl-wayland%{?_isa} >= 1.1.7
-%endif
 %endif
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
@@ -189,6 +187,10 @@ install -p -m 0644 %{SOURCE13} %{buildroot}/usr/lib/nvidia/
 # EGL loader
 install -p -m 0644 -D 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
 
+# Vulkan loader
+install -p -m 0644 -D nvidia_icd.json %{buildroot}%{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
+sed -i -e 's|libGLX_nvidia|%{_libdir}/libGLX_nvidia|g' %{buildroot}%{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
+
 # Unique libraries
 mkdir -p %{buildroot}%{_libdir}/vdpau/
 cp -a lib*GL*_nvidia.so* libcuda*.so* libnv*.so* %{buildroot}%{_libdir}/
@@ -229,9 +231,6 @@ install -p -m 0644 nvidia-application-profiles-%{version}-key-documentation \
     %{buildroot}%{_datadir}/nvidia/
 install -p -m 0644 nvidia-application-profiles-%{version}-rc \
     %{buildroot}%{_datadir}/nvidia/
-
-# Vulkan loader
-install -p -m 0644 -D nvidia_icd.json %{buildroot}%{_datadir}/vulkan/icd.d/nvidia_icd.json
 
 # OptiX
 install -p -m 0644 nvoptix.bin %{buildroot}%{_datadir}/nvidia/
@@ -337,6 +336,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 
 %files libs
 %{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
+%{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
 %{_libdir}/libEGL_nvidia.so.0
 %{_libdir}/libEGL_nvidia.so.%{version}
 %{_libdir}/libGLESv1_CM_nvidia.so.1
@@ -356,7 +356,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/vdpau/libvdpau_nvidia.so.1
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
 %ifarch x86_64 aarch64
-%{_datadir}/vulkan/icd.d/nvidia_icd.json
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %{_datadir}/vulkan/implicit_layer.d/nvidia_layers.json
 %endif
@@ -418,6 +417,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Fri Apr 26 2024 Simone Caronni <negativo17@gmail.com> - 3:550.76-2
+- Install Vulkan loader in a more similar way to Mesa packages.
+
 * Thu Apr 18 2024 Simone Caronni <negativo17@gmail.com> - 3:550.76-1
 - Update to 550.76.
 
