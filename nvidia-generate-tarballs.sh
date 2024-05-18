@@ -86,7 +86,7 @@ create_tarball() {
 
         printf "Creating tarball $tarball... "
 
-        XZ_OPT='-T0 -9' tar --remove-files -cJf $tarball.tar.xz $tarball
+        XZ_OPT='-T0' tar --remove-files -cJf $tarball.tar.xz $tarball
 
         printf "OK\n"
 
