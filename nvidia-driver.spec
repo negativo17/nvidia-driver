@@ -9,7 +9,7 @@
 
 Name:           nvidia-driver
 Version:        550.78
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -177,13 +177,6 @@ ln -sf libcuda.so.%{version} libcuda.so
 %build
 
 %install
-
-# alternate-install-present file triggers runfile warning
-%ifnarch %{ix86}
-install -m 0755 -d %{buildroot}/usr/lib/nvidia/
-install -p -m 0644 %{SOURCE13} %{buildroot}/usr/lib/nvidia/
-%endif
-
 # EGL loader
 install -p -m 0644 -D 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
 
@@ -196,6 +189,12 @@ mkdir -p %{buildroot}%{_libdir}/vdpau/
 cp -a lib*GL*_nvidia.so* libcuda*.so* libnv*.so* %{buildroot}%{_libdir}/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
 
+%if 0%{?fedora} || 0%{?rhel} >= 9
+# GBM loader
+mkdir -p %{buildroot}%{_libdir}/gbm/
+ln -sf ../libnvidia-allocator.so.%{version} %{buildroot}%{_libdir}/gbm/nvidia-drm_gbm.so
+%endif
+
 %ifarch x86_64
 
 # NGX Proton/Wine library
@@ -205,6 +204,10 @@ cp -a *.dll %{buildroot}%{_libdir}/nvidia/wine/
 %endif
 
 %ifarch x86_64 aarch64
+
+# alternate-install-present file triggers runfile warning
+install -m 0755 -d %{buildroot}/usr/lib/nvidia/
+install -p -m 0644 %{SOURCE13} %{buildroot}/usr/lib/nvidia/
 
 # Empty?
 mkdir -p %{buildroot}%{_sysconfdir}/nvidia/
@@ -246,12 +249,6 @@ install -p -m 0644 -D nvidia-dbus.conf %{buildroot}%{_datadir}/dbus-1/system.d/n
 # Ignore powerd binary exiting if hardware is not present
 # We should check for information in the DMI table
 sed -i -e 's/ExecStart=/ExecStart=-/g' %{buildroot}%{_unitdir}/nvidia-powerd.service
-
-%if 0%{?fedora} || 0%{?rhel} >= 9
-# GBM loader
-mkdir -p %{buildroot}%{_libdir}/gbm/
-ln -sf ../libnvidia-allocator.so.%{version} %{buildroot}%{_libdir}/gbm/nvidia-drm_gbm.so
-%endif
 
 %if 0%{?fedora} || 0%{?rhel} >= 8
 # Vulkan layer
@@ -337,6 +334,10 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %files libs
 %{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
 %{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
+%if 0%{?fedora} || 0%{?rhel} >= 9
+%dir %{_libdir}/gbm
+%{_libdir}/gbm/nvidia-drm_gbm.so
+%endif
 %{_libdir}/libEGL_nvidia.so.0
 %{_libdir}/libEGL_nvidia.so.%{version}
 %{_libdir}/libGLESv1_CM_nvidia.so.1
@@ -358,9 +359,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %ifarch x86_64 aarch64
 %if 0%{?fedora} || 0%{?rhel} >= 8
 %{_datadir}/vulkan/implicit_layer.d/nvidia_layers.json
-%endif
-%if 0%{?fedora} || 0%{?rhel} >= 9
-%{_libdir}/gbm/nvidia-drm_gbm.so
 %endif
 %{_libdir}/libnvidia-api.so.1
 %{_libdir}/libnvidia-cfg.so.1
@@ -417,6 +415,10 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Mon May 27 2024 Simone Caronni <negativo17@gmail.com> - 3:550.78-2
+- Add GBM loader library symlink also for i686 libraries (#156).
+- Also own the %%_libdir/gbm directory.
+
 * Fri Apr 26 2024 Simone Caronni <negativo17@gmail.com> - 3:550.78-1
 - Update to 550.78.
 
