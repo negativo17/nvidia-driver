@@ -9,7 +9,7 @@
 
 Name:           nvidia-driver
 Version:        555.42.02
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -173,6 +173,9 @@ ln -sf libnvcuvid.so.%{version} libnvcuvid.so
 
 # Required for building against CUDA
 ln -sf libcuda.so.%{version} libcuda.so
+
+# Fix file format specification for Vulkan layers
+sed -i -e 's/"file_format_version" : "1.0.0"/"file_format_version" : "1.0.1"/g' nvidia_layers.json
 
 %build
 
@@ -415,6 +418,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Fri May 31 2024 Simone Caronni <negativo17@gmail.com> - 3:555.42.02-3
+- Fix file format specification for Vulkan layers.
+
 * Mon May 27 2024 Simone Caronni <negativo17@gmail.com> - 3:555.42.02-2
 - Add GBM loader library symlink also for i686 libraries (#156).
 - Also own the %%_libdir/gbm directory.
