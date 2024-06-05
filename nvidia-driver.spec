@@ -3,7 +3,7 @@
 %global __brp_ldconfig %{nil}
 
 # systemd 248+
-%if 0%{?rhel} == 7 || 0%{?rhel} == 8
+%if 0%{?rhel} == 8
 %global _systemd_util_dir %{_prefix}/lib/systemd
 %endif
 
@@ -29,15 +29,9 @@ Source41:       parse-supported-gpus.py
 Source99:       nvidia-generate-tarballs.sh
 
 %ifarch x86_64 aarch64
-
-%if 0%{?fedora} || 0%{?rhel} >= 8
 BuildRequires:  libappstream-glib
 BuildRequires:  python3
 BuildRequires:  systemd-rpm-macros
-%else
-BuildRequires:  systemd
-%endif
-
 %endif
 
 Requires:       nvidia-driver-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
@@ -64,20 +58,13 @@ Requires:       libglvnd-egl%{?_isa} >= 1.0
 Requires:       libglvnd-gles%{?_isa} >= 1.0
 Requires:       libglvnd-glx%{?_isa} >= 1.0
 Requires:       libglvnd-opengl%{?_isa} >= 1.0
+Requires:       vulkan-loader
 
 %if 0%{?fedora} || 0%{?rhel} >= 9
 Requires:       egl-gbm%{?_isa} >= 1.1.1
 Requires:       egl-wayland%{?_isa} >= 1.1.13
-%elif 0%{?rhel} == 8
+%else
 Requires:       egl-wayland%{?_isa} >= 1.1.13
-%else
-Requires:       egl-wayland%{?_isa} >= 1.1.7
-%endif
-
-%if 0%{?fedora} || 0%{?rhel} >= 8
-Requires:       vulkan-loader
-%else
-Requires:       vulkan-filesystem
 %endif
 
 Conflicts:      nvidia-x11-drv-libs
@@ -155,7 +142,7 @@ This package provides the CUDA integration components for %{name}.
 %endif
 
 %ifarch x86_64
-%if 0%{?rhel} == 7 || 0%{?rhel} == 8
+%if 0%{?rhel} == 8
 rm -f libnvidia-pkcs11-openssl3.so.%{version}
 %else
 rm -f libnvidia-pkcs11.so.%{version}
@@ -253,7 +240,6 @@ install -p -m 0644 -D nvidia-dbus.conf %{buildroot}%{_datadir}/dbus-1/system.d/n
 # We should check for information in the DMI table
 sed -i -e 's/ExecStart=/ExecStart=-/g' %{buildroot}%{_unitdir}/nvidia-powerd.service
 
-%if 0%{?fedora} || 0%{?rhel} >= 8
 # Vulkan layer
 install -p -m 0644 -D nvidia_layers.json %{buildroot}%{_datadir}/vulkan/implicit_layer.d/nvidia_layers.json
 
@@ -263,17 +249,8 @@ install -p -m 0644 -D %{SOURCE40} %{buildroot}%{_metainfodir}/com.nvidia.driver.
 
 %check
 appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
-%endif
 
 %endif
-
-%ldconfig_scriptlets libs
-
-%ldconfig_scriptlets cuda-libs
-
-%ldconfig_scriptlets NvFBCOpenGL
-
-%ldconfig_scriptlets NVML
 
 %ifarch x86_64 aarch64
 
@@ -307,9 +284,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_bindir}/nvidia-bug-report.sh
 %{_bindir}/nvidia-powerd
 %{_bindir}/nvidia-sleep.sh
-%if 0%{?fedora} || 0%{?rhel} >= 8
 %{_metainfodir}/com.nvidia.driver.metainfo.xml
-%endif
 %{_datadir}/dbus-1/system.d/nvidia-dbus.conf
 %{_datadir}/nvidia/nvidia-application-profiles*
 %{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
@@ -360,9 +335,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/vdpau/libvdpau_nvidia.so.1
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
 %ifarch x86_64 aarch64
-%if 0%{?fedora} || 0%{?rhel} >= 8
 %{_datadir}/vulkan/implicit_layer.d/nvidia_layers.json
-%endif
 %{_libdir}/libnvidia-api.so.1
 %{_libdir}/libnvidia-cfg.so.1
 %{_libdir}/libnvidia-cfg.so.%{version}
@@ -402,7 +375,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libcudadebugger.so.%{version}
 %endif
 %ifarch x86_64
-%if 0%{?rhel} ==7 || 0%{?rhel} == 8
+%if 0%{?rhel} == 8
 %{_libdir}/libnvidia-pkcs11.so.%{version}
 %else
 %{_libdir}/libnvidia-pkcs11-openssl3.so.%{version}
