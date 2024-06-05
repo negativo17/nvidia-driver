@@ -8,8 +8,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        550.78
-Release:        3%{?dist}
+Version:        550.90.07
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -418,6 +418,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Jun 05 2024 Simone Caronni <negativo17@gmail.com> - 3:550.90.07-1
+- Update to 550.90.07.
+
 * Fri May 31 2024 Simone Caronni <negativo17@gmail.com> - 3:550.78-3
 - Fix file format specification for Vulkan layers.
 
