@@ -9,7 +9,7 @@
 
 Name:           nvidia-driver
 Version:        555.52.04
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -391,6 +391,10 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Jun 26 2024 Simone Caronni <negativo17@gmail.com> - 3:555.52.04-2
+- Update AppData metadata, add new custom key entry:
+  https://gitlab.gnome.org/GNOME/gnome-software/-/merge_requests/2034
+
 * Thu Jun 06 2024 Simone Caronni <negativo17@gmail.com>
 - Update to 555.52.04.
 
