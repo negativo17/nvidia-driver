@@ -5,9 +5,11 @@
     <id>nvidia-settings.desktop</id>
   </suggests>
   <name>NVIDIA Graphics Driver</name>
-  <icon type="remote" width="128" height="128">https://negativo17.org/appstream/logo-nvidia.png</icon>
+  <icon type="local">/usr/share/pixmaps/logo-nvidia.png</icon>
   <summary>NVIDIA Accelerated Graphics Driver</summary>
-  <developer_name>NVIDIA Corporation</developer_name>
+  <developer id="com.nvidia">
+    <name>NVIDIA Corporation</name>
+  </developer>
   <description>
     <p>The NVIDIA Accelerated Linux Graphics Driver brings accelerated 2D functionality and high-performance OpenGL support to Linux with the use of NVIDIA graphics processing units.</p>
     <p>These drivers provide optimized hardware acceleration for OpenGL and X applications and support nearly all recent NVIDIA GPU products. The NVIDIA graphics driver uses a Unified Driver Architecture: the single graphics driver supports all modern NVIDIA GPUs.</p>
@@ -36,7 +38,7 @@
   </keywords>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>LicenseRef-proprietary:NVIDIA</project_license>
-  <url type="homepage">http://www.nvidia.com/</url>
+  <url type="homepage">https://www.nvidia.com/</url>
   <update_contact>negativo17@gmail.com</update_contact>
   <custom>
     <value key="GnomeSoftware::requires-akmods-key">True</value>
