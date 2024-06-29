@@ -5,7 +5,7 @@
     <id>nvidia-settings.desktop</id>
   </suggests>
   <name>NVIDIA Graphics Driver</name>
-  <icon type="local">/usr/share/pixmaps/logo-nvidia.png</icon>
+  <icon type="local">/usr/share/pixmaps/nvidia-driver.png</icon>
   <summary>NVIDIA Accelerated Graphics Driver</summary>
   <developer id="com.nvidia">
     <name>NVIDIA Corporation</name>
