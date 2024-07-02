@@ -8,8 +8,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        555.58
-Release:        4%{?dist}
+Version:        555.58.02
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -422,6 +422,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Tue Jul 02 2024 Simone Caronni <negativo17@gmail.com> - 3:555.58.02-1
+- Update to 555.58.02.
+
 * Sat Jun 29 2024 Simone Caronni <negativo17@gmail.com> - 3:555.58-4
 - Adjust Appstream icon path.
 
