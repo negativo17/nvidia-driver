@@ -59,6 +59,7 @@ Requires:       libglvnd-egl%{?_isa} >= 1.0
 Requires:       libglvnd-gles%{?_isa} >= 1.0
 Requires:       libglvnd-glx%{?_isa} >= 1.0
 Requires:       libglvnd-opengl%{?_isa} >= 1.0
+Requires:       libnvidia-ml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       vulkan-loader
 
 %if 0%{?fedora} || 0%{?rhel} >= 9
@@ -80,6 +81,8 @@ This package provides the shared libraries for %{name}.
 Summary:        Libraries for %{name}-cuda
 Provides:       %{name}-devel%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Obsoletes:      %{name}-devel < %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       libnvidia-cfg%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       libnvidia-ml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 Conflicts:      xorg-x11-drv-nvidia-cuda-libs
 Conflicts:      xorg-x11-drv-nvidia-470xx-cuda-libs
@@ -87,22 +90,26 @@ Conflicts:      xorg-x11-drv-nvidia-470xx-cuda-libs
 %description cuda-libs
 This package provides the CUDA libraries for %{name}-cuda.
 
-%package NvFBCOpenGL
+%package -n libnvidia-fbc
 Summary:        NVIDIA OpenGL-based Framebuffer Capture libraries
+Provides:       nvidia-driver-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Obsoletes:      nvidia-driver-NvFBCOpenGL < %{?epoch:%{epoch}:}%{version}-%{release}
 # Loads libnvidia-encode.so at runtime
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
-%description NvFBCOpenGL
+%description -n libnvidia-fbc
 This library provides a high performance, low latency interface to capture and
 optionally encode the composited framebuffer of an X screen. NvFBC are private
 APIs that are only available to NVIDIA approved partners for use in remote
 graphics scenarios.
 
-%package NVML
+%package -n libnvidia-ml
 Summary:        NVIDIA Management Library (NVML)
 Provides:       cuda-nvml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Provides:       nvidia-driver-NVML%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Obsoletes:      nvidia-driver-NVML < %{?epoch:%{epoch}:}%{version}-%{release}
 
-%description NVML
+%description -n libnvidia-ml
 A C-based API for monitoring and managing various states of the NVIDIA GPU
 devices. It provides a direct access to the queries and commands exposed via
 nvidia-smi. The run-time version of NVML ships with the NVIDIA display driver,
@@ -112,10 +119,16 @@ to be a platform for building 3rd party applications.
 
 %ifarch x86_64 aarch64
 
+%package -n libnvidia-cfg
+Summary:        NVIDIA Config public interface (nvcfg)
+
+%description -n libnvidia-cfg
+This package contains the private libnvidia-cfg runtime library which is used by
+other driver components.
+
 %package cuda
 Summary:        CUDA integration for %{name}
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
-Requires:       %{name}-NVML%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-persistenced = %{?epoch:%{epoch}:}%{version}
 Requires:       opencl-filesystem
@@ -277,7 +290,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 
 %endif
 
-%ifnarch %{ix86}
+%ifarch x86_64 aarch64
 
 %files
 %license LICENSE
@@ -285,6 +298,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %dir %{_sysconfdir}/nvidia
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %{_bindir}/nvidia-bug-report.sh
+%{_bindir}/nvidia-ngx-updater
 %{_bindir}/nvidia-powerd
 %{_bindir}/nvidia-sleep.sh
 %{_metainfodir}/com.nvidia.driver.metainfo.xml
@@ -301,12 +315,15 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_unitdir}/nvidia-resume.service
 %{_unitdir}/nvidia-suspend.service
 
+%files -n libnvidia-cfg
+%{_libdir}/libnvidia-cfg.so.1
+%{_libdir}/libnvidia-cfg.so.%{version}
+
 %files cuda
 %{_sysconfdir}/OpenCL/vendors/*
 %{_bindir}/nvidia-cuda-mps-control
 %{_bindir}/nvidia-cuda-mps-server
 %{_bindir}/nvidia-debugdump
-%{_bindir}/nvidia-ngx-updater
 %{_bindir}/nvidia-smi
 %{_mandir}/man1/nvidia-cuda-mps-control.1.*
 %{_mandir}/man1/nvidia-smi.*
@@ -339,16 +356,14 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/vdpau/libvdpau_nvidia.so.1
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
 %ifarch x86_64 aarch64
+%{_datadir}/nvidia/nvoptix.bin
 %{_datadir}/vulkan/implicit_layer.d/nvidia_layers.json
 %{_libdir}/libnvidia-api.so.1
-%{_libdir}/libnvidia-cfg.so.1
-%{_libdir}/libnvidia-cfg.so.%{version}
 %{_libdir}/libnvidia-ngx.so.1
 %{_libdir}/libnvidia-ngx.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
-%{_datadir}/nvidia/nvoptix.bin
 %endif
 %ifarch x86_64
 %dir %{_libdir}/nvidia
@@ -386,17 +401,18 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %endif
 %endif
 
-%files NvFBCOpenGL
+%files -n libnvidia-fbc
 %{_libdir}/libnvidia-fbc.so.1
 %{_libdir}/libnvidia-fbc.so.%{version}
 
-%files NVML
+%files -n libnvidia-ml
 %{_libdir}/libnvidia-ml.so.1
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
 * Tue Jul 02 2024 Simone Caronni <negativo17@gmail.com> - 3:555.58.02-1
 - Update to 555.58.02.
+- Reorganize some libraries that get dynamically opened by other components.
 
 * Sat Jun 29 2024 Simone Caronni <negativo17@gmail.com> - 3:555.58-4
 - Adjust Appstream icon path.
