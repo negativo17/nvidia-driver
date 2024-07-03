@@ -175,9 +175,6 @@ ln -sf libnvcuvid.so.%{version} libnvcuvid.so
 # Required for building against CUDA
 ln -sf libcuda.so.%{version} libcuda.so
 
-# Fix file format specification for Vulkan layers
-sed -i -e 's/"file_format_version" : "1.0.0"/"file_format_version" : "1.0.1"/g' nvidia_layers.json
-
 %build
 
 %install
