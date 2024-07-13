@@ -9,7 +9,7 @@
 
 Name:           nvidia-driver
 Version:        555.58.02
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -79,10 +79,13 @@ This package provides the shared libraries for %{name}.
 
 %package cuda-libs
 Summary:        Libraries for %{name}-cuda
-Provides:       %{name}-devel%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Provides:       %{name}-devel = %{?epoch:%{epoch}:}%{version}-%{release}
 Obsoletes:      %{name}-devel < %{?epoch:%{epoch}:}%{version}-%{release}
-Requires:       libnvidia-cfg%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires:       libnvidia-ml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       libnvidia-ml = %{?epoch:%{epoch}:}%{version}-%{release}
+
+%ifarch x86_64 aarch64
+Requires:       libnvidia-cfg = %{?epoch:%{epoch}:}%{version}-%{release}
+%endif
 
 Conflicts:      xorg-x11-drv-nvidia-cuda-libs
 Conflicts:      xorg-x11-drv-nvidia-470xx-cuda-libs
@@ -92,7 +95,7 @@ This package provides the CUDA libraries for %{name}-cuda.
 
 %package -n libnvidia-fbc
 Summary:        NVIDIA OpenGL-based Framebuffer Capture libraries
-Provides:       nvidia-driver-NvFBCOpenGL%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Provides:       nvidia-driver-NvFBCOpenGL = %{?epoch:%{epoch}:}%{version}-%{release}
 Obsoletes:      nvidia-driver-NvFBCOpenGL < %{?epoch:%{epoch}:}%{version}-%{release}
 # Loads libnvidia-encode.so at runtime
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
@@ -105,8 +108,8 @@ graphics scenarios.
 
 %package -n libnvidia-ml
 Summary:        NVIDIA Management Library (NVML)
-Provides:       cuda-nvml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-Provides:       nvidia-driver-NVML%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Provides:       cuda-nvml = %{?epoch:%{epoch}:}%{version}-%{release}
+Provides:       nvidia-driver-NVML = %{?epoch:%{epoch}:}%{version}-%{release}
 Obsoletes:      nvidia-driver-NVML < %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description -n libnvidia-ml
@@ -407,6 +410,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Sat Jul 13 2024 Simone Caronni <negativo17@gmail.com> - 3:555.58.02-2
+- Remove isa Provides/Requires.
+
 * Tue Jul 02 2024 Simone Caronni <negativo17@gmail.com> - 3:555.58.02-1
 - Update to 555.58.02.
 - Reorganize some libraries that get dynamically opened by other components.
