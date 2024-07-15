@@ -1,6 +1,7 @@
 %global debug_package %{nil}
 %global __strip /bin/true
 %global __brp_ldconfig %{nil}
+%define _build_id_links none
 
 # systemd 248+
 %if 0%{?rhel} == 8
@@ -9,7 +10,7 @@
 
 Name:           nvidia-driver
 Version:        555.58.02
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -108,7 +109,7 @@ graphics scenarios.
 
 %package -n libnvidia-ml
 Summary:        NVIDIA Management Library (NVML)
-Provides:       cuda-nvml = %{?epoch:%{epoch}:}%{version}-%{release}
+Provides:       cuda-nvml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Provides:       nvidia-driver-NVML = %{?epoch:%{epoch}:}%{version}-%{release}
 Obsoletes:      nvidia-driver-NVML < %{?epoch:%{epoch}:}%{version}-%{release}
 
@@ -410,6 +411,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Mon Jul 15 2024 Simone Caronni <negativo17@gmail.com> - 3:555.58.02-3
+- Provider of cuda-nvml still needs _isa.
+
 * Sat Jul 13 2024 Simone Caronni <negativo17@gmail.com> - 3:555.58.02-2
 - Remove isa Provides/Requires.
 
