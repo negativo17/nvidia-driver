@@ -9,8 +9,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        555.58.02
-Release:        3%{?dist}
+Version:        560.28.03
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -185,9 +185,20 @@ ln -sf libcuda.so.%{version} libcuda.so
 # EGL loader
 install -p -m 0644 -D 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
 
+# EGL external platform
+install -p -m 0644 -D 20_nvidia_xcb.json %{buildroot}%{_datadir}/egl/egl_external_platform.d/20_nvidia_xcb.json
+install -p -m 0644 -D 20_nvidia_xlib.json %{buildroot}%{_datadir}/egl/egl_external_platform.d/20_nvidia_xlib.json
+
 # Vulkan loader
 install -p -m 0644 -D nvidia_icd.json %{buildroot}%{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
 sed -i -e 's|libGLX_nvidia|%{_libdir}/libGLX_nvidia|g' %{buildroot}%{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
+
+%ifarch x86_64
+# Vulkan SC loader and compiler
+install -p -m 0644 -D nvidia_icd_vksc.json %{buildroot}%{_datadir}/vulkansc/icd.d/nvidia_icd.%{_target_cpu}.json
+sed -i -e 's|libnvidia-vksc-core|%{_libdir}/libnvidia-vksc-core|g' %{buildroot}%{_datadir}/vulkansc/icd.d/nvidia_icd.%{_target_cpu}.json
+install -p -m 0755 -D nvidia-pcc %{buildroot}%{_bindir}/nvidia-pcc
+%endif
 
 # Unique libraries
 mkdir -p %{buildroot}%{_libdir}/vdpau/
@@ -300,6 +311,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %{_bindir}/nvidia-bug-report.sh
 %{_bindir}/nvidia-ngx-updater
+%ifarch x86_64
+%{_bindir}/nvidia-pcc
+%endif
 %{_bindir}/nvidia-powerd
 %{_bindir}/nvidia-sleep.sh
 %{_metainfodir}/com.nvidia.driver.metainfo.xml
@@ -332,6 +346,8 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %endif
 
 %files libs
+%{_datadir}/egl/egl_external_platform.d/20_nvidia_xcb.json
+%{_datadir}/egl/egl_external_platform.d/20_nvidia_xlib.json
 %{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
 %{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
 %if 0%{?fedora} || 0%{?rhel} >= 9
@@ -350,6 +366,8 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-allocator.so.%{version}
 %{_libdir}/libnvidia-eglcore.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
+%{_libdir}/libnvidia-egl-xcb.so.1
+%{_libdir}/libnvidia-egl-xlib.so.1
 %{_libdir}/libnvidia-glsi.so.%{version}
 %{_libdir}/libnvidia-glvkspirv.so.%{version}
 %{_libdir}/libnvidia-gpucomp.so.%{version}
@@ -367,6 +385,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvoptix.so.%{version}
 %endif
 %ifarch x86_64
+%{_datadir}/vulkansc/icd.d/nvidia_icd.%{_target_cpu}.json
+%{_libdir}/libnvidia-vksc-core.so.1
+%{_libdir}/libnvidia-vksc-core.so.%{version}
 %dir %{_libdir}/nvidia
 %dir %{_libdir}/nvidia/wine
 %{_libdir}/nvidia/wine/*.dll
@@ -411,6 +432,11 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Mon Aug 05 2024 Simone Caronni <negativo17@gmail.com> - 3:560.28.03-1
+- Update to 560.28.03.
+- Add Vulkan Safety Critical library and offline Pipeline Cache Compiler.
+- Temporarily add new EGL libraries.
+
 * Mon Jul 15 2024 Simone Caronni <negativo17@gmail.com> - 3:555.58.02-3
 - Provider of cuda-nvml still needs _isa.
 
