@@ -54,6 +54,8 @@ version %{version}.
 
 %package libs
 Summary:        Libraries for %{name}
+Requires:       egl-gbm%{?_isa} >= 2:1.1.1-5
+Requires:       egl-wayland%{?_isa} >= 1.1.13.1
 Requires:       libvdpau%{?_isa} >= 0.5
 Requires:       libglvnd%{?_isa} >= 1.0
 Requires:       libglvnd-egl%{?_isa} >= 1.0
@@ -62,13 +64,6 @@ Requires:       libglvnd-glx%{?_isa} >= 1.0
 Requires:       libglvnd-opengl%{?_isa} >= 1.0
 Requires:       libnvidia-ml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       vulkan-loader
-
-%if 0%{?fedora} || 0%{?rhel} >= 9
-Requires:       egl-gbm%{?_isa} >= 1.1.1
-Requires:       egl-wayland%{?_isa} >= 1.1.13
-%else
-Requires:       egl-wayland%{?_isa} >= 1.1.13
-%endif
 
 Conflicts:      nvidia-x11-drv-libs
 Conflicts:      nvidia-x11-drv-470xx-libs
@@ -434,6 +429,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %changelog
 * Tue Aug 06 2024 Simone Caronni <negativo17@gmail.com> - 3:560.31.02-1
 - Update to 560.31.02.
+- Update EGL requirements.
 
 * Mon Aug 05 2024 Simone Caronni <negativo17@gmail.com> - 3:560.28.03-1
 - Update to 560.28.03.
