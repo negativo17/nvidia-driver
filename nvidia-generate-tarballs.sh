@@ -40,8 +40,7 @@ cleanup_folder() {
         libnvidia-egl-wayland.so.* libnvidia-egl-gbm.so.* \
         libOpenCL.so.1* \
         libGL.so.${VERSION} libEGL.so.${VERSION} \
-        nvidia-installer* .manifest make* mk* tls_test* libglvnd_install_checker \
-        libnvidia-llvmnvgpu.so.*
+        nvidia-installer* .manifest make* mk* tls_test* libglvnd_install_checker
 
     if [ "${ARCH}" == x86_64 ]; then
         rm -fr \
