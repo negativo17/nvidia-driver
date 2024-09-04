@@ -10,7 +10,7 @@
 
 Name:           nvidia-driver
 Version:        560.35.03
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -55,6 +55,7 @@ version %{version}.
 Summary:        Libraries for %{name}
 Requires:       egl-gbm%{?_isa} >= 2:1.1.2
 Requires:       egl-wayland%{?_isa} >= 1.1.13.1
+Requires:       egl-x11%{?_isa}
 Requires:       libvdpau%{?_isa} >= 0.5
 Requires:       libglvnd%{?_isa} >= 1.0
 Requires:       libglvnd-egl%{?_isa} >= 1.0
@@ -190,10 +191,6 @@ ln -sf libcuda.so.%{version} libcuda.so
 %install
 # EGL loader
 install -p -m 0644 -D 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
-
-# EGL external platform
-install -p -m 0644 -D 20_nvidia_xcb.json %{buildroot}%{_datadir}/egl/egl_external_platform.d/20_nvidia_xcb.json
-install -p -m 0644 -D 20_nvidia_xlib.json %{buildroot}%{_datadir}/egl/egl_external_platform.d/20_nvidia_xlib.json
 
 # Vulkan loader
 install -p -m 0644 -D nvidia_icd.json %{buildroot}%{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
@@ -354,8 +351,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %endif
 
 %files libs
-%{_datadir}/egl/egl_external_platform.d/20_nvidia_xcb.json
-%{_datadir}/egl/egl_external_platform.d/20_nvidia_xlib.json
 %{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
 %{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
 %if 0%{?fedora} || 0%{?rhel} >= 9
@@ -374,8 +369,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-allocator.so.%{version}
 %{_libdir}/libnvidia-eglcore.so.%{version}
 %{_libdir}/libnvidia-glcore.so.%{version}
-%{_libdir}/libnvidia-egl-xcb.so.1
-%{_libdir}/libnvidia-egl-xlib.so.1
 %{_libdir}/libnvidia-glsi.so.%{version}
 %{_libdir}/libnvidia-glvkspirv.so.%{version}
 %{_libdir}/libnvidia-gpucomp.so.%{version}
@@ -440,6 +433,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Sep 04 2024 Simone Caronni <negativo17@gmail.com> - 3:560.35.03-3
+- Unbundle nvidia-egl-platform-base.
+
 * Fri Aug 30 2024 Simone Caronni <negativo17@gmail.com> - 3:560.35.03-2
 - Split out X.org components.
 
