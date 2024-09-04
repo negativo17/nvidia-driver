@@ -9,8 +9,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        555.58.02
-Release:        3%{?dist}
+Version:        560.35.03
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -38,7 +38,6 @@ BuildRequires:  systemd-rpm-macros
 
 Requires:       nvidia-driver-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
-Requires:       xorg-x11-server-Xorg%{?_isa}
 
 Conflicts:      nvidia-x11-drv
 Conflicts:      nvidia-x11-drv-470xx
@@ -54,6 +53,9 @@ version %{version}.
 
 %package libs
 Summary:        Libraries for %{name}
+Requires:       egl-gbm%{?_isa} >= 2:1.1.2
+Requires:       egl-wayland%{?_isa} >= 1.1.13.1
+Requires:       egl-x11%{?_isa}
 Requires:       libvdpau%{?_isa} >= 0.5
 Requires:       libglvnd%{?_isa} >= 1.0
 Requires:       libglvnd-egl%{?_isa} >= 1.0
@@ -62,13 +64,6 @@ Requires:       libglvnd-glx%{?_isa} >= 1.0
 Requires:       libglvnd-opengl%{?_isa} >= 1.0
 Requires:       libnvidia-ml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       vulkan-loader
-
-%if 0%{?fedora} || 0%{?rhel} >= 9
-Requires:       egl-gbm%{?_isa} >= 1.1.1
-Requires:       egl-wayland%{?_isa} >= 1.1.13
-%else
-Requires:       egl-wayland%{?_isa} >= 1.1.13
-%endif
 
 Conflicts:      nvidia-x11-drv-libs
 Conflicts:      nvidia-x11-drv-470xx-libs
@@ -144,6 +139,18 @@ Conflicts:      xorg-x11-drv-nvidia-470xx-cuda
 %description cuda
 This package provides the CUDA integration components for %{name}.
 
+%package -n xorg-x11-nvidia
+Summary:        X.org X11 NVIDIA driver and extensions
+Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}
+Requires:       xorg-x11-server-Xorg%{?_isa}
+Supplements:    (nvidia-driver and xorg-x11-server-Xorg)
+
+Conflicts:      xorg-x11-drv-nvidia
+Conflicts:      xorg-x11-drv-nvidia-470xx
+
+%description -n xorg-x11-nvidia
+The NVIDIA X.org X11 driver and associated components.
+
 %endif
  
 %prep
@@ -188,6 +195,13 @@ install -p -m 0644 -D 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 # Vulkan loader
 install -p -m 0644 -D nvidia_icd.json %{buildroot}%{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
 sed -i -e 's|libGLX_nvidia|%{_libdir}/libGLX_nvidia|g' %{buildroot}%{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
+
+%ifarch x86_64
+# Vulkan SC loader and compiler
+install -p -m 0644 -D nvidia_icd_vksc.json %{buildroot}%{_datadir}/vulkansc/icd.d/nvidia_icd.%{_target_cpu}.json
+sed -i -e 's|libnvidia-vksc-core|%{_libdir}/libnvidia-vksc-core|g' %{buildroot}%{_datadir}/vulkansc/icd.d/nvidia_icd.%{_target_cpu}.json
+install -p -m 0755 -D nvidia-pcc %{buildroot}%{_bindir}/nvidia-pcc
+%endif
 
 # Unique libraries
 mkdir -p %{buildroot}%{_libdir}/vdpau/
@@ -297,17 +311,17 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %license LICENSE
 %doc NVIDIA_Changelog README.txt html supported-gpus/supported-gpus.json
 %dir %{_sysconfdir}/nvidia
-%config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %{_bindir}/nvidia-bug-report.sh
 %{_bindir}/nvidia-ngx-updater
+%ifarch x86_64
+%{_bindir}/nvidia-pcc
+%endif
 %{_bindir}/nvidia-powerd
 %{_bindir}/nvidia-sleep.sh
 %{_metainfodir}/com.nvidia.driver.metainfo.xml
 %{_datadir}/dbus-1/system.d/nvidia-dbus.conf
 %{_datadir}/nvidia/nvidia-application-profiles*
 %{_datadir}/pixmaps/%{name}.png
-%{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
-%{_libdir}/xorg/modules/drivers/nvidia_drv.so
 %{_prefix}/lib/nvidia/alternate-install-present
 %{_systemd_util_dir}/system-preset/70-nvidia.preset
 %{_systemd_util_dir}/system-sleep/nvidia
@@ -315,6 +329,11 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_unitdir}/nvidia-powerd.service
 %{_unitdir}/nvidia-resume.service
 %{_unitdir}/nvidia-suspend.service
+
+%files -n xorg-x11-nvidia
+%config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
+%{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
+%{_libdir}/xorg/modules/drivers/nvidia_drv.so
 
 %files -n libnvidia-cfg
 %{_libdir}/libnvidia-cfg.so.1
@@ -367,6 +386,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvoptix.so.%{version}
 %endif
 %ifarch x86_64
+%{_datadir}/vulkansc/icd.d/nvidia_icd.%{_target_cpu}.json
+%{_libdir}/libnvidia-vksc-core.so.1
+%{_libdir}/libnvidia-vksc-core.so.%{version}
 %dir %{_libdir}/nvidia
 %dir %{_libdir}/nvidia/wine
 %{_libdir}/nvidia/wine/*.dll
@@ -411,6 +433,12 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Sep 04 2024 Simone Caronni <negativo17@gmail.com> - 3:560.35.03-1
+- Update to 560.35.03.
+- Update EGL requirements (egl-gbm, egl-wayland and egl-x11).
+- Add Vulkan Safety Critical library and offline Pipeline Cache Compiler.
+- Split out X.org components.
+
 * Mon Jul 15 2024 Simone Caronni <negativo17@gmail.com> - 3:555.58.02-3
 - Provider of cuda-nvml still needs _isa.
 
