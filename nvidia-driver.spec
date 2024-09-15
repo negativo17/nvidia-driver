@@ -10,7 +10,7 @@
 
 Name:           nvidia-driver
 Version:        560.35.03
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -433,6 +433,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Sun Sep 15 2024 Simone Caronni <negativo17@gmail.com> - 3:560.35.03-2
+- Bump release to override CUDA's packaged driver.
+
 * Wed Sep 04 2024 Simone Caronni <negativo17@gmail.com> - 3:560.35.03-1
 - Update to 560.35.03.
 - Update EGL requirements (egl-gbm, egl-wayland and egl-x11).
