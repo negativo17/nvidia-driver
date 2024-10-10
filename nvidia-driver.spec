@@ -10,7 +10,7 @@
 
 Name:           nvidia-driver
 Version:        560.35.03
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -20,7 +20,8 @@ ExclusiveArch:  %{ix86} x86_64 aarch64
 Source0:        %{name}-%{version}-i386.tar.xz
 Source1:        %{name}-%{version}-x86_64.tar.xz
 Source2:        %{name}-%{version}-aarch64.tar.xz
-Source9:        70-nvidia.preset
+Source8:        70-nvidia-driver.preset
+Source9:        70-nvidia-driver-cuda.preset
 Source10:       10-nvidia.conf
 Source13:       alternate-install-present
 
@@ -258,7 +259,8 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 install -p -m 0644 nvoptix.bin %{buildroot}%{_datadir}/nvidia/
 
 # Systemd units and script for suspending/resuming
-install -p -m 0644 -D %{SOURCE9} %{buildroot}%{_systemd_util_dir}/system-preset/70-nvidia.preset
+mkdir -p %{buildroot}%{_systemd_util_dir}/system-preset/
+install -p -m 0644 %{SOURCE8} %{SOURCE9} %{buildroot}%{_systemd_util_dir}/system-preset/
 mkdir -p %{buildroot}%{_unitdir}/
 install -p -m 0644 systemd/system/*.service %{buildroot}%{_unitdir}/
 install -p -m 0755 systemd/nvidia-sleep.sh %{buildroot}%{_bindir}/
@@ -322,8 +324,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_datadir}/dbus-1/system.d/nvidia-dbus.conf
 %{_datadir}/nvidia/nvidia-application-profiles*
 %{_datadir}/pixmaps/%{name}.png
-%{_prefix}/lib/nvidia/alternate-install-present
-%{_systemd_util_dir}/system-preset/70-nvidia.preset
+%{_systemd_util_dir}/system-preset/70-nvidia-driver.preset
 %{_systemd_util_dir}/system-sleep/nvidia
 %{_unitdir}/nvidia-hibernate.service
 %{_unitdir}/nvidia-powerd.service
@@ -347,6 +348,8 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_bindir}/nvidia-smi
 %{_mandir}/man1/nvidia-cuda-mps-control.1.*
 %{_mandir}/man1/nvidia-smi.*
+%{_prefix}/lib/nvidia/alternate-install-present
+%{_systemd_util_dir}/system-preset/70-nvidia-driver-cuda.preset
 
 %endif
 
@@ -433,6 +436,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Thu Oct 10 2024 Simone Caronni <negativo17@gmail.com> - 3:560.35.03-4
+- Enable nvidia-persistenced by default if installed through a systemd preset.
+
 * Wed Sep 04 2024 Simone Caronni <negativo17@gmail.com> - 3:560.35.03-3
 - Unbundle nvidia-egl-platform-base.
 
