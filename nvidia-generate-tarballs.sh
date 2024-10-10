@@ -39,7 +39,7 @@ cleanup_folder() {
         libGLESv1_CM.so.* libGLESv2.so.* libGLdispatch.so.* libOpenGL.so.* libGLX.so.* libGL.so.1* libEGL.so.1* \
         libnvidia-egl-wayland.so.* libnvidia-egl-gbm.so.* libnvidia-egl-xcb.so.* libnvidia-egl-xlib.so.* \
         libOpenCL.so.1* \
-        libGL.so.${VERSION} libEGL.so.${VERSION} \
+        libEGL.so.${VERSION} \
         nvidia-installer* .manifest make* mk* tls_test* libglvnd_install_checker
 
     if [ "${ARCH}" == x86_64 ]; then
