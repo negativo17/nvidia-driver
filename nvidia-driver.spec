@@ -9,8 +9,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        560.35.03
-Release:        3%{?dist}
+Version:        565.57.01
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -425,6 +425,8 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %else
 %{_libdir}/libnvidia-pkcs11-openssl3.so.%{version}
 %endif
+%{_libdir}/libnvidia-sandboxutils.so.1
+%{_libdir}/libnvidia-sandboxutils.so.%{version}
 %endif
 
 %files -n libnvidia-fbc
@@ -436,6 +438,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Oct 23 2024 Simone Caronni <negativo17@gmail.com> - 3:565.57.01-1
+- Update to 565.57.01.
+
 * Thu Oct 10 2024 Simone Caronni <negativo17@gmail.com> - 3:560.35.03-4
 - Enable nvidia-persistenced by default if installed through a systemd preset.
 
