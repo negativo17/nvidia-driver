@@ -10,7 +10,7 @@
 
 Name:           nvidia-driver
 Version:        565.57.01
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -27,7 +27,6 @@ Source13:       alternate-install-present
 
 Source40:       com.nvidia.driver.metainfo.xml
 Source41:       parse-supported-gpus.py
-Source42:       %{name}.png
 
 Source99:       nvidia-generate-tarballs.sh
 
@@ -290,8 +289,6 @@ install -p -m 0644 -D nvidia_layers.json %{buildroot}%{_datadir}/vulkan/implicit
 # install AppData and add modalias provides
 install -p -m 0644 -D %{SOURCE40} %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
 %{SOURCE41} supported-gpus/supported-gpus.json | xargs appstream-util add-provide %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml modalias
-mkdir -p %{buildroot}%{_datadir}/pixmaps/
-cp %{SOURCE42} %{buildroot}%{_datadir}/pixmaps/
 
 %check
 appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
@@ -336,7 +333,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_metainfodir}/com.nvidia.driver.metainfo.xml
 %{_datadir}/dbus-1/system.d/nvidia-dbus.conf
 %{_datadir}/nvidia/nvidia-application-profiles*
-%{_datadir}/pixmaps/%{name}.png
 %{_systemd_util_dir}/system-preset/70-nvidia-driver.preset
 %{_systemd_util_dir}/system-sleep/nvidia
 %{_unitdir}/nvidia-hibernate.service
@@ -455,6 +451,11 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Sat Nov 09 2024 Simone Caronni <negativo17@gmail.com> - 3:565.57.01-3
+- Switch to remote icon for Appstream metadata. "appstremcli validate", instead
+  of "appstream-util validate", prints out that local is not a valid icon type,
+  even if the documentation says so.
+
 * Sun Oct 27 2024 Simone Caronni <negativo17@gmail.com> - 3:565.57.01-2
 - Add workaround for system sleep on systemd 256+.
 
