@@ -33,7 +33,12 @@ Source99:       nvidia-generate-tarballs.sh
 
 %ifarch x86_64 aarch64
 BuildRequires:  libappstream-glib
+%if 0%{?rhel} == 8
+# xml.etree.ElementTree has indent only from 3.9+:
+BuildRequires:  python(abi) >= 3.9
+%else
 BuildRequires:  python3
+%endif
 BuildRequires:  systemd-rpm-macros
 %endif
 
