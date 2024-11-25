@@ -10,7 +10,7 @@
 
 Name:           nvidia-driver
 Version:        565.57.01
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -300,6 +300,7 @@ cp %{SOURCE42} %{buildroot}%{_datadir}/pixmaps/
 
 %check
 # Using appstreamcli: appstreamcli validate --strict
+# Icon type local is not supported by appstreamcli for drivers
 appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.metainfo.xml
 
 %endif
@@ -461,6 +462,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Mon Nov 25 2024 Simone Caronni <negativo17@gmail.com> - 3:565.57.01-5
+- Switch back to local icon.
+
 * Fri Nov 15 2024 Simone Caronni <negativo17@gmail.com> - 3:565.57.01-4
 - Do not manipulate appstream metadata using libappstream-glib.
 

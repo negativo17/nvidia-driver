@@ -5,7 +5,7 @@
     <id>nvidia-settings.desktop</id>
   </suggests>
   <name>NVIDIA Graphics Driver</name>
-  <icon type="remote">https://negativo17.org/appstream/com.nvidia.driver.png</icon>
+  <icon type="local">/usr/share/pixmaps/com.nvidia.driver.png</icon>
   <summary>NVIDIA Accelerated Graphics Driver</summary>
   <developer id="com.nvidia">
     <name>NVIDIA Corporation</name>
