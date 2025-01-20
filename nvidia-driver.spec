@@ -10,7 +10,7 @@
 
 Name:           nvidia-driver
 Version:        565.77
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -136,8 +136,8 @@ Summary:        CUDA integration for %{name}
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-persistenced = %{?epoch:%{epoch}:}%{version}
+Requires:       (ocl-icd or OpenCL-ICD-Loader)
 Requires:       opencl-filesystem
-Requires:       ocl-icd
 
 Conflicts:      xorg-x11-drv-nvidia-cuda
 Conflicts:      xorg-x11-drv-nvidia-470xx-cuda
@@ -462,6 +462,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Mon Jan 20 2025 Simone Caronni <negativo17@gmail.com> - 3:565.77-2
+- Allow using OpenCL-ICD-Loader in place of ocl-icd.
+
 * Thu Dec 05 2024 Simone Caronni <negativo17@gmail.com> - 3:565.77-1
 - Update to 565.77.
 
