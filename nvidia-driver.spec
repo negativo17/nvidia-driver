@@ -9,8 +9,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        565.77
-Release:        2%{?dist}
+Version:        570.86.15
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -298,6 +298,9 @@ install -p -m 0644 -D %{SOURCE40} %{buildroot}%{_metainfodir}/com.nvidia.driver.
 mkdir -p %{buildroot}%{_datadir}/pixmaps/
 cp %{SOURCE42} %{buildroot}%{_datadir}/pixmaps/
 
+# nvsandboxutils configuration
+install -p -m 0644 -D sandboxutils-filelist.json %{buildroot}%{_datadir}/nvidia/files.d/sandboxutils-filelist.json
+
 %check
 # Using appstreamcli: appstreamcli validate --strict
 # Icon type local is not supported by appstreamcli for drivers
@@ -312,18 +315,21 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %systemd_post nvidia-powerd.service
 %systemd_post nvidia-resume.service
 %systemd_post nvidia-suspend.service
+%systemd_post nvidia-suspend-then-hibernate.service
 
 %preun
 %systemd_preun nvidia-hibernate.service
 %systemd_preun nvidia-powerd.service
 %systemd_preun nvidia-resume.service
 %systemd_preun nvidia-suspend.service
+%systemd_preun nvidia-suspend-then-hibernate.service
 
 %postun
 %systemd_postun nvidia-hibernate.service
 %systemd_postun nvidia-powerd.service
 %systemd_postun nvidia-resume.service
 %systemd_postun nvidia-suspend.service
+%systemd_postun nvidia-suspend-then-hibernate.service
 
 %endif
 
@@ -350,6 +356,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_unitdir}/nvidia-powerd.service
 %{_unitdir}/nvidia-resume.service
 %{_unitdir}/nvidia-suspend.service
+%{_unitdir}/nvidia-suspend-then-hibernate.service
 %if 0%{?fedora} >= 41
 %{_unitdir}/systemd-suspend.service.d/10-nvidia.conf
 %{_unitdir}/systemd-homed.service.d/10-nvidia.conf
@@ -370,6 +377,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_bindir}/nvidia-cuda-mps-server
 %{_bindir}/nvidia-debugdump
 %{_bindir}/nvidia-smi
+%{_datadir}/nvidia/files.d/sandboxutils-filelist.json
 %{_mandir}/man1/nvidia-cuda-mps-control.1.*
 %{_mandir}/man1/nvidia-smi.*
 %{_prefix}/lib/nvidia/alternate-install-present
@@ -418,7 +426,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-vksc-core.so.%{version}
 %dir %{_libdir}/nvidia
 %dir %{_libdir}/nvidia/wine
-%{_libdir}/nvidia/wine/*.dll
+%{_libdir}/nvidia/wine/_nvngx.dll
+%{_libdir}/nvidia/wine/nvngx.dll
+%{_libdir}/nvidia/wine/nvngx_dlssg.dll
 %endif
 
 %files cuda-libs
@@ -462,6 +472,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Mon Jan 27 2025 Simone Caronni <negativo17@gmail.com> - 3:570.86.15-1
+- Update to 570.86.15.
+
 * Mon Jan 20 2025 Simone Caronni <negativo17@gmail.com> - 3:565.77-2
 - Allow using OpenCL-ICD-Loader in place of ocl-icd.
 
