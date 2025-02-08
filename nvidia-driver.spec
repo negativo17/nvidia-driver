@@ -10,7 +10,7 @@
 
 Name:           nvidia-driver
 Version:        570.86.16
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -145,6 +145,7 @@ Conflicts:      xorg-x11-drv-nvidia-470xx-cuda
 %description cuda
 This package provides the CUDA integration components for %{name}.
 
+%if 0%{?fedora} || 0%{?rhel} < 10
 %package -n xorg-x11-nvidia
 Summary:        X.org X11 NVIDIA driver and extensions
 Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}
@@ -156,6 +157,7 @@ Conflicts:      xorg-x11-drv-nvidia-470xx
 
 %description -n xorg-x11-nvidia
 The NVIDIA X.org X11 driver and associated components.
+%endif
 
 %endif
  
@@ -248,10 +250,12 @@ install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,bug-re
 mkdir -p %{buildroot}%{_mandir}/man1/
 install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1/
 
+%if 0%{?fedora} || 0%{?rhel} < 10
 # X stuff
 install -p -m 0644 -D %{SOURCE10} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 install -p -m 0755 -D nvidia_drv.so %{buildroot}%{_libdir}/xorg/modules/drivers/nvidia_drv.so
 install -p -m 0755 -D libglxserver_nvidia.so.%{version} %{buildroot}%{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
+%endif
 
 # NVIDIA specific configuration files
 mkdir -p %{buildroot}%{_datadir}/nvidia/
@@ -362,10 +366,12 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_unitdir}/systemd-homed.service.d/10-nvidia.conf
 %endif
 
+%if 0%{?fedora} || 0%{?rhel} < 10
 %files -n xorg-x11-nvidia
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 %{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
+%endif
 
 %files -n libnvidia-cfg
 %{_libdir}/libnvidia-cfg.so.1
@@ -472,6 +478,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Sat Feb 08 2025 Simone Caronni <negativo17@gmail.com> - 3:570.86.16-2
+- Do not build X components for el10+.
+
 * Fri Jan 31 2025 Simone Caronni <negativo17@gmail.com> - 3:570.86.16-1
 - Update to 570.86.16.
 
