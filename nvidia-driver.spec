@@ -9,8 +9,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        570.86.16
-Release:        2%{?dist}
+Version:        570.124.04
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -478,6 +478,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Fri Feb 28 2025 Simone Caronni <negativo17@gmail.com> - 3:570.124.04-1
+- Update to 570.124.04.
+
 * Sat Feb 08 2025 Simone Caronni <negativo17@gmail.com> - 3:570.86.16-2
 - Do not build X components for el10+.
 
