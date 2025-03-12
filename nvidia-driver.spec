@@ -10,7 +10,7 @@
 
 Name:           nvidia-driver
 Version:        570.124.04
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -305,6 +305,14 @@ cp %{SOURCE42} %{buildroot}%{_datadir}/pixmaps/
 # nvsandboxutils configuration
 install -p -m 0644 -D sandboxutils-filelist.json %{buildroot}%{_datadir}/nvidia/files.d/sandboxutils-filelist.json
 
+# dnf needs-restarting plugin
+# dnf4 only for the moment: https://github.com/rpm-software-management/dnf5/issues/1815
+%if 0%{?fedora} < 42 || 0%{?rhel}
+mkdir -p %{buildroot}%{_sysconfdir}/dnf/plugins/needs-restarting.d
+echo %{name} > %{buildroot}%{_sysconfdir}/dnf/plugins/needs-restarting.d/%{name}.conf
+echo %{name}-cuda > %{buildroot}%{_sysconfdir}/dnf/plugins/needs-restarting.d/%{name}-cuda.conf
+%endif
+
 %check
 # Using appstreamcli: appstreamcli validate --strict
 # Icon type local is not supported by appstreamcli for drivers
@@ -365,6 +373,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_unitdir}/systemd-suspend.service.d/10-nvidia.conf
 %{_unitdir}/systemd-homed.service.d/10-nvidia.conf
 %endif
+%if 0%{?fedora} < 42 || 0%{?rhel}
+%{_sysconfdir}/dnf/plugins/needs-restarting.d/%{name}.conf
+%endif
 
 %if 0%{?fedora} || 0%{?rhel} < 10
 %files -n xorg-x11-nvidia
@@ -388,6 +399,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_mandir}/man1/nvidia-smi.*
 %{_prefix}/lib/nvidia/alternate-install-present
 %{_systemd_util_dir}/system-preset/70-nvidia-driver-cuda.preset
+%if 0%{?fedora} < 42 || 0%{?rhel}
+%{_sysconfdir}/dnf/plugins/needs-restarting.d/%{name}-cuda.conf
+%endif
 
 %endif
 
@@ -478,6 +492,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Mar 12 2025 Simone Caronni <negativo17@gmail.com> - 3:570.124.04-2
+- Add DNF4 needs-restarting plugin support.
+
 * Fri Feb 28 2025 Simone Caronni <negativo17@gmail.com> - 3:570.124.04-1
 - Update to 570.124.04.
 
