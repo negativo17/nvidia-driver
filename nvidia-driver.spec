@@ -1,5 +1,5 @@
 %global debug_package %{nil}
-%global __strip /bin/true
+%global __brp_strip %{nil}
 %global __brp_ldconfig %{nil}
 %define _build_id_links none
 
