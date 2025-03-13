@@ -10,7 +10,7 @@
 
 Name:           nvidia-driver
 Version:        570.124.04
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -276,19 +276,6 @@ install -p -m 0755 systemd/nvidia-sleep.sh %{buildroot}%{_bindir}/
 install -p -m 0755 -D systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/system-sleep/nvidia
 install -p -m 0644 -D nvidia-dbus.conf %{buildroot}%{_datadir}/dbus-1/system.d/nvidia-dbus.conf
 
-%if 0%{?fedora} >= 41
-mkdir -p %{buildroot}%{_unitdir}/systemd-suspend.service.d/
-cat > %{buildroot}%{_unitdir}/systemd-suspend.service.d/10-nvidia.conf << EOF
-[Service]
-Environment="SYSTEMD_SLEEP_FREEZE_USER_SESSIONS=false"
-EOF
-mkdir -p %{buildroot}%{_unitdir}/systemd-homed.service.d/
-cat > %{buildroot}%{_unitdir}/systemd-homed.service.d/10-nvidia.conf << EOF
-[Service]
-Environment="SYSTEMD_HOME_LOCK_FREEZE_SESSION=false"
-EOF
-%endif
-
 # Ignore powerd binary exiting if hardware is not present
 # We should check for information in the DMI table
 sed -i -e 's/ExecStart=/ExecStart=-/g' %{buildroot}%{_unitdir}/nvidia-powerd.service
@@ -369,10 +356,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_unitdir}/nvidia-resume.service
 %{_unitdir}/nvidia-suspend.service
 %{_unitdir}/nvidia-suspend-then-hibernate.service
-%if 0%{?fedora} >= 41
-%{_unitdir}/systemd-suspend.service.d/10-nvidia.conf
-%{_unitdir}/systemd-homed.service.d/10-nvidia.conf
-%endif
 %if 0%{?fedora} < 42 || 0%{?rhel}
 %{_sysconfdir}/dnf/plugins/needs-restarting.d/%{name}.conf
 %endif
@@ -492,6 +475,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Thu Mar 13 2025 Simone Caronni <negativo17@gmail.com> - 3:570.124.04-3
+- Remove workaround for system sleep on systemd 256+.
+
 * Wed Mar 12 2025 Simone Caronni <negativo17@gmail.com> - 3:570.124.04-2
 - Add DNF4 needs-restarting plugin support.
 
