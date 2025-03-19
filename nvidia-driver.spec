@@ -9,8 +9,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        570.124.04
-Release:        3%{?dist}
+Version:        570.133.07
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -475,6 +475,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Mar 19 2025 Simone Caronni <negativo17@gmail.com> - 3:570.133.07-1
+- Update to 570.133.07.
+
 * Thu Mar 13 2025 Simone Caronni <negativo17@gmail.com> - 3:570.124.04-3
 - Remove workaround for system sleep on systemd 256+.
 
