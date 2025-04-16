@@ -9,7 +9,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        570.153.02
+Version:        575.51.02
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -68,8 +68,10 @@ Requires:       libglvnd-egl%{?_isa} >= 1.0
 Requires:       libglvnd-gles%{?_isa} >= 1.0
 Requires:       libglvnd-glx%{?_isa} >= 1.0
 Requires:       libglvnd-opengl%{?_isa} >= 1.0
-Requires:       libnvidia-ml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       vulkan-loader
+#  dlopened:
+Requires:       libnvidia-gpucomp%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       libnvidia-ml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 Conflicts:      nvidia-x11-drv-libs
 Conflicts:      nvidia-x11-drv-470xx-libs
@@ -83,11 +85,13 @@ This package provides the shared libraries for %{name}.
 Summary:        Libraries for %{name}-cuda
 Provides:       %{name}-devel = %{?epoch:%{epoch}:}%{version}-%{release}
 Obsoletes:      %{name}-devel < %{?epoch:%{epoch}:}%{version}-%{release}
-Requires:       libnvidia-ml = %{?epoch:%{epoch}:}%{version}-%{release}
 
+# dlopened:
 %ifarch x86_64 aarch64
 Requires:       libnvidia-cfg = %{?epoch:%{epoch}:}%{version}-%{release}
 %endif
+Requires:       libnvidia-gpucomp%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       libnvidia-ml = %{?epoch:%{epoch}:}%{version}-%{release}
 
 Conflicts:      xorg-x11-drv-nvidia-cuda-libs
 Conflicts:      xorg-x11-drv-nvidia-470xx-cuda-libs
@@ -99,7 +103,7 @@ This package provides the CUDA libraries for %{name}-cuda.
 Summary:        NVIDIA OpenGL-based Framebuffer Capture libraries
 Provides:       nvidia-driver-NvFBCOpenGL = %{?epoch:%{epoch}:}%{version}-%{release}
 Obsoletes:      nvidia-driver-NvFBCOpenGL < %{?epoch:%{epoch}:}%{version}-%{release}
-# Loads libnvidia-encode.so at runtime
+# dlopened (libnvidia-encode.so):
 Requires:       %{name}-cuda-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description -n libnvidia-fbc
@@ -107,6 +111,13 @@ This library provides a high performance, low latency interface to capture and
 optionally encode the composited framebuffer of an X screen. NvFBC are private
 APIs that are only available to NVIDIA approved partners for use in remote
 graphics scenarios.
+
+%package -n libnvidia-gpucomp
+Summary:        NVIDIA library for shader compilation (nvgpucomp)
+
+%description -n libnvidia-gpucomp
+This package contains the private libnvidia-gpucomp runtime library which is used by
+other driver components.
 
 %package -n libnvidia-ml
 Summary:        NVIDIA Management Library (NVML)
@@ -425,6 +436,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %endif
 %ifarch x86_64
 %{_datadir}/vulkansc/icd.d/nvidia_icd.%{_target_cpu}.json
+%{_libdir}/libnvidia-present.so.%{version}
 %{_libdir}/libnvidia-vksc-core.so.1
 %{_libdir}/libnvidia-vksc-core.so.%{version}
 %dir %{_libdir}/nvidia
@@ -455,6 +467,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %ifarch x86_64 aarch64
 %{_libdir}/libcudadebugger.so.1
 %{_libdir}/libcudadebugger.so.%{version}
+%{_libdir}/libnvidia-nvvm70.so.4
+%{_libdir}/libnvidia-sandboxutils.so.1
+%{_libdir}/libnvidia-sandboxutils.so.%{version}
 %endif
 %ifarch x86_64
 %if 0%{?rhel} == 8
@@ -462,19 +477,24 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %else
 %{_libdir}/libnvidia-pkcs11-openssl3.so.%{version}
 %endif
-%{_libdir}/libnvidia-sandboxutils.so.1
-%{_libdir}/libnvidia-sandboxutils.so.%{version}
 %endif
 
 %files -n libnvidia-fbc
 %{_libdir}/libnvidia-fbc.so.1
 %{_libdir}/libnvidia-fbc.so.%{version}
 
+%files -n libnvidia-gpucomp
+%{_libdir}/libnvidia-gpucomp.so.%{version}
+
 %files -n libnvidia-ml
 %{_libdir}/libnvidia-ml.so.1
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Tue May 20 2025 Simone Caronni <negativo17@gmail.com> - 3:575.51.02-1
+- Update to 575.51.02.
+- libnvidia-gpucomp is now required by both desktop and CUDA only components.
+
 * Tue May 20 2025 Simone Caronni <negativo17@gmail.com> - 3:570.153.02-1
 - Update to 570.153.02.
 
