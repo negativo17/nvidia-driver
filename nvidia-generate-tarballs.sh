@@ -2,7 +2,7 @@
 set -e
 
 set_vars() {
-   export VERSION=${VERSION:-570.153.02}
+   export VERSION=${VERSION:-575.51.02}
    export DL_SITE=${DL_SITE:-http://download.nvidia.com/XFree86}
    export TEMP_UNPACK=${ARCH}
    export PLATFORM=Linux-${ARCH}
@@ -46,7 +46,6 @@ cleanup_folder() {
         rm -fr \
           32/libGLESv1_CM.so.* 32/libGLESv2.so.* 32/libGLdispatch.so.* 32/libOpenGL.so.* 32/libGLX.so.* 32/libGL.so.1* 32/libEGL.so.1* \
           32/libOpenCL.so.1* \
-          32/libGL.so.${VERSION} 32/libEGL.so.${VERSION} \
           32/libnvidia-egl-wayland.so.* 32/libnvidia-egl-gbm.so.* 32/libnvidia-egl-xcb.so.* 32/libnvidia-egl-xlib.so.*
 
         cp -f *.json* 32/
