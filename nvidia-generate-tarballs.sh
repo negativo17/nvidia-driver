@@ -3,7 +3,6 @@ set -e
 
 set_vars() {
    export VERSION=${VERSION:-575.51.02}
-   export DL_SITE=${DL_SITE:-http://download.nvidia.com/XFree86}
    export TEMP_UNPACK=${ARCH}
    export PLATFORM=Linux-${ARCH}
    export RUN_FILE=NVIDIA-${PLATFORM}-${VERSION}.run
@@ -11,7 +10,14 @@ set_vars() {
 
 run_file_get() {
     printf "Downloading installer ${RUN_FILE}... "
-    [[ -f $RUN_FILE ]] || wget -c -q ${DL_SITE}/${PLATFORM}/${VERSION}/$RUN_FILE
+    if [[ ! -f $RUN_FILE ]]; then
+        # Attempt Desktop release first, otherwise get CUDA release:
+        if [[ `wget -S --spider http://download.nvidia.com/XFree86/${PLATFORM}/${VERSION}/$RUN_FILE  2>&1 | grep 'HTTP/1.1 200 OK'` ]]; then
+            wget -c -q http://download.nvidia.com/XFree86/${PLATFORM}/${VERSION}/$RUN_FILE
+        else
+            wget -c -q https://us.download.nvidia.com/tesla/${VERSION}/$RUN_FILE
+        fi
+    fi
     printf "OK\n"
 }
 
