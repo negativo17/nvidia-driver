@@ -9,7 +9,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        575.51.02
+Version:        575.57.08
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -491,6 +491,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Thu May 29 2025 Simone Caronni <negativo17@gmail.com> - 3:575.57.08-1
+- Update to 575.57.08.
+
 * Tue May 20 2025 Simone Caronni <negativo17@gmail.com> - 3:575.51.02-1
 - Update to 575.51.02.
 - libnvidia-gpucomp is now required by both desktop and CUDA only components.
