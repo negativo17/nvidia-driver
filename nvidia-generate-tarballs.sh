@@ -2,7 +2,7 @@
 set -e
 
 set_vars() {
-   export VERSION=${VERSION:-580.65.06}
+   export VERSION=${VERSION:-580.76.05}
    export TEMP_UNPACK=${ARCH}
    export PLATFORM=Linux-${ARCH}
    export RUN_FILE=NVIDIA-${PLATFORM}-${VERSION}.run
@@ -11,9 +11,11 @@ set_vars() {
 run_file_get() {
     printf "Downloading installer ${RUN_FILE}... "
     if [[ ! -f $RUN_FILE ]]; then
-        # Attempt Desktop release first, otherwise get CUDA release:
-        if wget -S --spider http://us.download.nvidia.com/XFree86/${PLATFORM}/${VERSION}/$RUN_FILE | grep -q 'HTTP response 200'; then
-            wget -c -q http://us.download.nvidia.com/XFree86/${PLATFORM}/${VERSION}/$RUN_FILE
+        # This is getting ridiculous:
+        if wget -S --spider https://us.download.nvidia.com/XFree86/${PLATFORM}/${VERSION}/$RUN_FILE | grep -q 'HTTP response 200'; then
+            wget -c -q https://us.download.nvidia.com/XFree86/${PLATFORM}/${VERSION}/$RUN_FILE
+        elif wget -S --spider https://us.download.nvidia.com/XFree86/${ARCH}/${VERSION}/$RUN_FILE | grep -q 'HTTP response 200'; then
+            wget -c -q https://us.download.nvidia.com/XFree86/${ARCH}/${VERSION}/$RUN_FILE
         else
             wget -c -q https://us.download.nvidia.com/tesla/${VERSION}/$RUN_FILE
         fi
