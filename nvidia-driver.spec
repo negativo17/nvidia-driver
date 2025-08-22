@@ -10,7 +10,7 @@
 
 Name:           nvidia-driver
 Version:        580.76.05
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -59,10 +59,11 @@ version %{version}.
 
 %package libs
 Summary:        Libraries for %{name}
-Requires:       egl-gbm%{?_isa} >= 2:1.1.2
-Requires:       egl-wayland%{?_isa} >= 1.1.13.1
-Requires:       egl-x11%{?_isa}
-Requires:       libvdpau%{?_isa} >= 0.5
+Requires:       egl-gbm%{?_isa} >= 2:1.1.2.1
+Requires:       (egl-wayland%{?_isa} >= 1.1.20 or egl-wayland2%{?_isa} >= 1.0.0~20250806gitd4deb7c-3)
+Suggests:       egl-wayland%{?_isa} >= 1.1.20
+Requires:       egl-x11%{?_isa} >= 1.0.3
+Requires:       libvdpau%{?_isa} >= 1.5
 Requires:       libglvnd%{?_isa} >= 1.0
 Requires:       libglvnd-egl%{?_isa} >= 1.0
 Requires:       libglvnd-gles%{?_isa} >= 1.0
@@ -491,6 +492,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Fri Aug 22 2025 Simone Caronni <negativo17@gmail.com> - 3:580.76.05-2
+- Update EGl requirements.
+
 * Thu Aug 14 2025 Simone Caronni <negativo17@gmail.com> - 3:580.76.05-1
 - Update to 580.76.05.
 
