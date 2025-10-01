@@ -494,6 +494,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 * Wed Oct 01 2025 Simone Caronni <negativo17@gmail.com> - 3:580.95.05-1
 - Update to 580.95.05.
 - Move nvidia-bug-report.sh to nvidia-kmod-common.
+- Update tarball script.
 
 * Thu Sep 11 2025 Simone Caronni <negativo17@gmail.com> - 3:580.82.09-1
 - Update to 580.82.09.
