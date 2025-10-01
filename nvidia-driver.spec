@@ -420,7 +420,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-glcore.so.%{version}
 %{_libdir}/libnvidia-glsi.so.%{version}
 %{_libdir}/libnvidia-glvkspirv.so.%{version}
-%{_libdir}/libnvidia-gpucomp.so.%{version}
 %{_libdir}/libnvidia-tls.so.%{version}
 %{_libdir}/vdpau/libvdpau_nvidia.so.1
 %{_libdir}/vdpau/libvdpau_nvidia.so.%{version}
@@ -495,6 +494,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 - Update to 580.95.05.
 - Move nvidia-bug-report.sh to nvidia-kmod-common.
 - Update tarball script.
+- Fix duplicate library in nvidia-driver-libs and libnvidia-gpucomp.
 
 * Thu Sep 11 2025 Simone Caronni <negativo17@gmail.com> - 3:580.82.09-1
 - Update to 580.82.09.
