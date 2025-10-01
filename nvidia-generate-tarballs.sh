@@ -72,7 +72,7 @@ create_tarball() {
 
     mkdir ${KMOD} ${KMOD_COMMON} ${USR_64}
     mv ${TEMP_UNPACK}/kernel* ${KMOD}/
-    mv ${TEMP_UNPACK}/firmware ${KMOD_COMMON}/
+    mv ${TEMP_UNPACK}/firmware ${TEMP_UNPACK}/nvidia-bug-report.sh ${KMOD_COMMON}/
 
     if [ "$ARCH" == x86_64 ]; then
 
