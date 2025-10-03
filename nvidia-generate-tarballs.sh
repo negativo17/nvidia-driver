@@ -2,6 +2,7 @@
 set -e
 
 set_vars() {
+   echo "Building for ${ARCH} using version ${VERSION}"
    export VERSION=${VERSION:-580.95.05}
    export TEMP_UNPACK=${ARCH}
    export PLATFORM=Linux-${ARCH}
@@ -102,16 +103,12 @@ create_tarball() {
     done
 }
 
-ARCH=aarch64
-set_vars
-run_file_get
-run_file_extract
-cleanup_folder
-create_tarball
+ARCHES=${ARCHES:-"x86_64 aarch64"}
 
-ARCH=x86_64
-set_vars
-run_file_get
-run_file_extract
-cleanup_folder
-create_tarball
+for ARCH in $ARCHES; do
+    set_vars
+    run_file_get
+    run_file_extract
+    cleanup_folder
+    create_tarball
+done
