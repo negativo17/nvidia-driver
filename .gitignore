@@ -1,2 +1,5 @@
 *.tar.xz
 *.run
+nvidia-driver-*/
+nvidia-kmod-*/
+nvidia-kmod-common-*/
