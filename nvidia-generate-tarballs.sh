@@ -31,8 +31,7 @@ run_file_extract() {
 
 cleanup_folder() {
     printf "Cleaning up binaries... "
-
-    cd ${TEMP_UNPACK}
+    pushd ${TEMP_UNPACK}
 
     # Stuff not needed for packages:
     #   - Compiled from source
@@ -62,8 +61,7 @@ cleanup_folder() {
         cp -f *.json* 32/
     fi
 
-    cd ..
-
+    popd
     printf "OK\n"
 }
 
