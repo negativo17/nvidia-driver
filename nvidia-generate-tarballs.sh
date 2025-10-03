@@ -71,13 +71,14 @@ create_tarball() {
     KMOD=nvidia-kmod-${VERSION}-${ARCH}
     KMOD_COMMON=nvidia-kmod-common-${VERSION}
     USR_64=nvidia-driver-${VERSION}-${ARCH}
+    USR_32=nvidia-driver-${VERSION}-i386
 
+    rm -rf ${KMOD} ${KMOD_COMMON} ${USR_64} ${USR_32}
     mkdir ${KMOD} ${KMOD_COMMON} ${USR_64}
     mv ${TEMP_UNPACK}/kernel* ${KMOD}/
     mv ${TEMP_UNPACK}/firmware ${TEMP_UNPACK}/nvidia-bug-report.sh ${KMOD_COMMON}/
 
     if [ "$ARCH" == x86_64 ]; then
-        USR_32=nvidia-driver-${VERSION}-i386
         mkdir ${USR_32} 
         mv ${TEMP_UNPACK}/32/* ${USR_32}/
         rm -fr ${TEMP_UNPACK}/32
