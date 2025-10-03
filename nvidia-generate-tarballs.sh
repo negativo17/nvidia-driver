@@ -30,7 +30,6 @@ run_file_extract() {
 }
 
 cleanup_folder() {
-
     printf "Cleaning up binaries... "
 
     cd ${TEMP_UNPACK}
@@ -69,7 +68,6 @@ cleanup_folder() {
 }
 
 create_tarball() {
-
     KMOD=nvidia-kmod-${VERSION}-${ARCH}
     KMOD_COMMON=nvidia-kmod-common-${VERSION}
     USR_64=nvidia-driver-${VERSION}-${ARCH}
@@ -79,27 +77,19 @@ create_tarball() {
     mv ${TEMP_UNPACK}/firmware ${TEMP_UNPACK}/nvidia-bug-report.sh ${KMOD_COMMON}/
 
     if [ "$ARCH" == x86_64 ]; then
-
         USR_32=nvidia-driver-${VERSION}-i386
-
         mkdir ${USR_32} 
         mv ${TEMP_UNPACK}/32/* ${USR_32}/
         rm -fr ${TEMP_UNPACK}/32
-
     fi
 
     mv ${TEMP_UNPACK}/* ${USR_64}/
-
     rm -fr ${TEMP_UNPACK}
 
     for tarball in ${KMOD} ${KMOD_COMMON} ${USR_64} ${USR_32}; do
-
         printf "Creating tarball $tarball... "
-
         XZ_OPT='-T0' tar --remove-files -cJf $tarball.tar.xz $tarball
-
         printf "OK\n"
-
     done
 }
 
