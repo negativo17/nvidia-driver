@@ -82,6 +82,8 @@ create_tarball() {
         mkdir ${USR_32} 
         mv ${TEMP_UNPACK}/32/* ${USR_32}/
         rm -fr ${TEMP_UNPACK}/32
+    else
+        USR_32=
     fi
 
     mv ${TEMP_UNPACK}/* ${USR_64}/
