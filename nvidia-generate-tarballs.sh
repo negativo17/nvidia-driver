@@ -1,7 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 set_vars() {
+   echo "Building for ${ARCH} using version ${VERSION}"
    export VERSION=${VERSION:-580.95.05}
    export TEMP_UNPACK=${ARCH}
    export PLATFORM=Linux-${ARCH}
@@ -29,7 +30,6 @@ run_file_extract() {
 }
 
 cleanup_folder() {
-
     printf "Cleaning up binaries... "
 
     cd ${TEMP_UNPACK}
@@ -68,50 +68,38 @@ cleanup_folder() {
 }
 
 create_tarball() {
-
     KMOD=nvidia-kmod-${VERSION}-${ARCH}
     KMOD_COMMON=nvidia-kmod-common-${VERSION}
     USR_64=nvidia-driver-${VERSION}-${ARCH}
+    USR_32=nvidia-driver-${VERSION}-i386
 
+    rm -rf ${KMOD} ${KMOD_COMMON} ${USR_64} ${USR_32}
     mkdir ${KMOD} ${KMOD_COMMON} ${USR_64}
     mv ${TEMP_UNPACK}/kernel* ${KMOD}/
     mv ${TEMP_UNPACK}/firmware ${TEMP_UNPACK}/nvidia-bug-report.sh ${KMOD_COMMON}/
 
     if [ "$ARCH" == x86_64 ]; then
-
-        USR_32=nvidia-driver-${VERSION}-i386
-
         mkdir ${USR_32} 
         mv ${TEMP_UNPACK}/32/* ${USR_32}/
         rm -fr ${TEMP_UNPACK}/32
-
     fi
 
     mv ${TEMP_UNPACK}/* ${USR_64}/
-
     rm -fr ${TEMP_UNPACK}
 
     for tarball in ${KMOD} ${KMOD_COMMON} ${USR_64} ${USR_32}; do
-
         printf "Creating tarball $tarball... "
-
         XZ_OPT='-T0' tar --remove-files -cJf $tarball.tar.xz $tarball
-
         printf "OK\n"
-
     done
 }
 
-ARCH=aarch64
-set_vars
-run_file_get
-run_file_extract
-cleanup_folder
-create_tarball
+ARCHES=${ARCHES:-"x86_64 aarch64"}
 
-ARCH=x86_64
-set_vars
-run_file_get
-run_file_extract
-cleanup_folder
-create_tarball
+for ARCH in $ARCHES; do
+    set_vars
+    run_file_get
+    run_file_extract
+    cleanup_folder
+    create_tarball
+done
