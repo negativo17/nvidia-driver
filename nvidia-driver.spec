@@ -17,9 +17,15 @@ License:        NVIDIA License
 URL:            http://www.nvidia.com/object/unix.html
 ExclusiveArch:  %{ix86} x86_64 aarch64
 
+%ifarch %{ix86}
 Source0:        %{name}-%{version}-i386.tar.xz
+%endif
+%ifarch x86_64
 Source1:        %{name}-%{version}-x86_64.tar.xz
+%endif
+%ifarch aarch64
 Source2:        %{name}-%{version}-aarch64.tar.xz
+%endif
 Source8:        70-nvidia-driver.preset
 Source9:        70-nvidia-driver-cuda.preset
 Source10:       10-nvidia.conf
