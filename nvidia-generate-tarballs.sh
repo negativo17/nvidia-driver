@@ -3,7 +3,7 @@ set -e
 
 set_vars() {
    echo "Building for ${ARCH} using version ${VERSION}"
-   export VERSION=${VERSION:-580.95.05}
+   export VERSION=${VERSION:-580.105.08}
    export TEMP_UNPACK=${ARCH}
    export PLATFORM=Linux-${ARCH}
    export RUN_FILE=NVIDIA-${PLATFORM}-${VERSION}.run
