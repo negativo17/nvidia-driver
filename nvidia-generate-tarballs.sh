@@ -13,12 +13,12 @@ run_file_get() {
     printf "Downloading installer ${RUN_FILE}... "
     if [[ ! -f $RUN_FILE ]]; then
         # This is getting ridiculous:
-        if wget -S --spider https://us.download.nvidia.com/XFree86/${PLATFORM}/${VERSION}/$RUN_FILE; then
-            wget -c -q https://us.download.nvidia.com/XFree86/${PLATFORM}/${VERSION}/$RUN_FILE
-        elif wget -S --spider https://us.download.nvidia.com/XFree86/${ARCH}/${VERSION}/$RUN_FILE; then
-            wget -c -q https://us.download.nvidia.com/XFree86/${ARCH}/${VERSION}/$RUN_FILE
+        if wget -q -S --spider https://us.download.nvidia.com/XFree86/${PLATFORM}/${VERSION}/$RUN_FILE; then
+            wget -q https://us.download.nvidia.com/XFree86/${PLATFORM}/${VERSION}/$RUN_FILE
+        elif wget -q -S --spider https://us.download.nvidia.com/XFree86/${ARCH}/${VERSION}/$RUN_FILE; then
+            wget -q https://us.download.nvidia.com/XFree86/${ARCH}/${VERSION}/$RUN_FILE
         else
-            wget -c -q https://us.download.nvidia.com/tesla/${VERSION}/$RUN_FILE
+            wget -q https://us.download.nvidia.com/tesla/${VERSION}/$RUN_FILE
         fi
     fi
     printf "OK\n"
