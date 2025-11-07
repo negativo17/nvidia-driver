@@ -9,7 +9,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        580.95.05
+Version:        580.105.08
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -490,6 +490,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Fri Nov 07 2025 Simone Caronni <negativo17@gmail.com> - 3:580.105.08-1
+- Update to 580.105.08.
+
 * Wed Oct 01 2025 Simone Caronni <negativo17@gmail.com> - 3:580.95.05-1
 - Update to 580.95.05.
 - Move nvidia-bug-report.sh to nvidia-kmod-common.
