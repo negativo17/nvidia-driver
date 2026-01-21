@@ -10,7 +10,7 @@
 
 Name:           nvidia-driver
 Version:        590.48.01
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -22,7 +22,6 @@ Source1:        %{name}-%{version}-x86_64.tar.xz
 Source2:        %{name}-%{version}-aarch64.tar.xz
 Source8:        70-nvidia-driver.preset
 Source9:        70-nvidia-driver-cuda.preset
-Source10:       10-nvidia.conf
 Source13:       alternate-install-present
 
 Source40:       com.nvidia.driver.metainfo.xml
@@ -264,7 +263,7 @@ install -p -m 0644 nvidia-{smi,cuda-mps-control}*.gz %{buildroot}%{_mandir}/man1
 
 %if 0%{?fedora} || 0%{?rhel} < 10
 # X stuff
-install -p -m 0644 -D %{SOURCE10} %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
+install -p -m 0644 -D nvidia-drm-outputclass.conf %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/10-nvidia.conf
 install -p -m 0755 -D nvidia_drv.so %{buildroot}%{_libdir}/xorg/modules/drivers/nvidia_drv.so
 install -p -m 0755 -D libglxserver_nvidia.so.%{version} %{buildroot}%{_libdir}/xorg/modules/extensions/libglxserver_nvidia.so
 %endif
@@ -492,6 +491,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Wed Jan 21 2026 Simone Caronni <negativo17@gmail.com> - 3:590.48.01-2
+- Use bundled X.org snippet.
+
 * Thu Dec 18 2025 Simone Caronni <negativo17@gmail.com> - 3:590.48.01-1
 - Update to 590.48.01.
 
