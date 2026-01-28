@@ -58,10 +58,9 @@ version %{version}.
 
 %package libs
 Summary:        Libraries for %{name}
-Requires:       egl-gbm%{?_isa} >= 2:1.1.2.1
-Requires:       (egl-wayland%{?_isa} >= 1.1.20 or egl-wayland2%{?_isa} >= 1.0.0~20250806gitd4deb7c-3)
-Suggests:       egl-wayland%{?_isa} >= 1.1.20
-Requires:       egl-x11%{?_isa} >= 1.0.3
+Requires:       egl-gbm%{?_isa} >= 2:1.1.3
+Requires:       egl-wayland2%{?_isa} >= 1.0.0
+Requires:       egl-x11%{?_isa} >= 1.0.4
 Requires:       libvdpau%{?_isa} >= 1.5
 Requires:       libglvnd%{?_isa} >= 1.0
 Requires:       libglvnd-egl%{?_isa} >= 1.0
@@ -285,10 +284,9 @@ install -p -m 0644 nvoptix.bin %{buildroot}%{_datadir}/nvidia/
 # Systemd units and script for suspending/resuming
 mkdir -p %{buildroot}%{_systemd_util_dir}/system-preset/
 install -p -m 0644 %{SOURCE8} %{SOURCE9} %{buildroot}%{_systemd_util_dir}/system-preset/
-mkdir -p %{buildroot}%{_unitdir}/
-install -p -m 0644 systemd/system/*.service %{buildroot}%{_unitdir}/
 install -p -m 0755 systemd/nvidia-sleep.sh %{buildroot}%{_bindir}/
-install -p -m 0755 -D systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/system-sleep/nvidia
+mkdir -p %{buildroot}%{_unitdir}/
+cp -a systemd/system* %{buildroot}%{_systemd_util_dir}/
 install -p -m 0644 -D nvidia-dbus.conf %{buildroot}%{_datadir}/dbus-1/system.d/nvidia-dbus.conf
 
 # Ignore powerd binary exiting if hardware is not present
@@ -365,11 +363,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_datadir}/pixmaps/com.nvidia.driver.png
 %{_systemd_util_dir}/system-preset/70-nvidia-driver.preset
 %{_systemd_util_dir}/system-sleep/nvidia
-%{_unitdir}/nvidia-hibernate.service
-%{_unitdir}/nvidia-powerd.service
-%{_unitdir}/nvidia-resume.service
-%{_unitdir}/nvidia-suspend.service
-%{_unitdir}/nvidia-suspend-then-hibernate.service
+%{_unitdir}/*
 %if 0%{?fedora} < 42 || 0%{?rhel}
 %{_sysconfdir}/dnf/plugins/needs-restarting.d/%{name}.conf
 %endif
