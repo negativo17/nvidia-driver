@@ -52,7 +52,7 @@ cleanup_folder() {
         libEGL.so.${VERSION} \
         nvidia-installer* .manifest make* mk* libglvnd_install_checker \
         15_nvidia_gbm.json 10_nvidia_wayland.json 20_nvidia_xcb.json 20_nvidia_xlib.json \
-        99_nvidia_wayland2.json \
+        09_nvidia_wayland2.json \
         kernel kernel-open
 
     if [ "${ARCH}" == x86_64 ]; then
