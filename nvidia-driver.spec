@@ -9,8 +9,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        590.48.01
-Release:        3%{?dist}
+Version:        595.45.04
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -494,6 +494,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Thu Mar 05 2026 Simone Caronni <negativo17@gmail.com> - 3:595.45.04-1
+- Update to 595.45.04.
+
 * Sat Jan 24 2026 Simone Caronni <negativo17@gmail.com> - 3:590.48.01-3
 - Avoid Vulkan loader warning message.
 
