@@ -10,7 +10,7 @@
 
 Name:           nvidia-driver
 Version:        595.45.04
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -74,7 +74,7 @@ Conflicts:      nvidia-x11-drv-libs
 Conflicts:      xorg-x11-drv-nvidia-libs
 
 # Already provides VK_EXT_swapchain_colorspace and VK_EXT_hdr_metadata
-Obsoletes:      VK_hdr_layer
+Obsoletes:      VK_hdr_layer < 1
 
 %description libs
 This package provides the shared libraries for %{name}.
@@ -280,9 +280,7 @@ install -p -m 0644 nvoptix.bin %{buildroot}%{_datadir}/nvidia/
 # Systemd units and script for suspending/resuming
 mkdir -p %{buildroot}%{_systemd_util_dir}/system-preset/
 install -p -m 0644 %{SOURCE8} %{SOURCE9} %{buildroot}%{_systemd_util_dir}/system-preset/
-install -p -m 0755 systemd/nvidia-sleep.sh %{buildroot}%{_bindir}/
-mkdir -p %{buildroot}%{_unitdir}/
-cp -a systemd/system* %{buildroot}%{_systemd_util_dir}/
+install -p -m 0644 -D systemd/system/nvidia-powerd.service %{buildroot}%{_unitdir}/nvidia-powerd.service
 install -p -m 0644 -D nvidia-dbus.conf %{buildroot}%{_datadir}/dbus-1/system.d/nvidia-dbus.conf
 
 # Ignore powerd binary exiting if hardware is not present
@@ -319,25 +317,13 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %ifarch x86_64 aarch64
 
 %post
-%systemd_post nvidia-hibernate.service
 %systemd_post nvidia-powerd.service
-%systemd_post nvidia-resume.service
-%systemd_post nvidia-suspend.service
-%systemd_post nvidia-suspend-then-hibernate.service
 
 %preun
-%systemd_preun nvidia-hibernate.service
 %systemd_preun nvidia-powerd.service
-%systemd_preun nvidia-resume.service
-%systemd_preun nvidia-suspend.service
-%systemd_preun nvidia-suspend-then-hibernate.service
 
 %postun
-%systemd_postun nvidia-hibernate.service
 %systemd_postun nvidia-powerd.service
-%systemd_postun nvidia-resume.service
-%systemd_postun nvidia-suspend.service
-%systemd_postun nvidia-suspend-then-hibernate.service
 
 %endif
 
@@ -352,14 +338,12 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_bindir}/nvidia-pcc
 %endif
 %{_bindir}/nvidia-powerd
-%{_bindir}/nvidia-sleep.sh
 %{_metainfodir}/com.nvidia.driver.metainfo.xml
 %{_datadir}/dbus-1/system.d/nvidia-dbus.conf
 %{_datadir}/nvidia/nvidia-application-profiles*
 %{_datadir}/pixmaps/com.nvidia.driver.png
 %{_systemd_util_dir}/system-preset/70-nvidia-driver.preset
-%{_systemd_util_dir}/system-sleep/nvidia
-%{_unitdir}/*
+%{_unitdir}/nvidia-powerd.service
 %if 0%{?fedora} < 42 || 0%{?rhel}
 %{_sysconfdir}/dnf/plugins/needs-restarting.d/%{name}.conf
 %endif
@@ -428,7 +412,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %endif
 %ifarch x86_64
 %{_datadir}/vulkansc/icd.d/nvidia_icd.%{_target_cpu}.json
-%{_libdir}/libnvidia-present.so.%{version}
 %{_libdir}/libnvidia-vksc-core.so.1
 %{_libdir}/libnvidia-vksc-core.so.%{version}
 %dir %{_libdir}/nvidia
@@ -484,6 +467,10 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Mon Mar 09 2026 Simone Caronni <negativo17@gmail.com> - 3:595.45.04-2
+- Use kernel suspend notifiers.
+- rpmlint fixes.
+
 * Thu Mar 05 2026 Simone Caronni <negativo17@gmail.com> - 3:595.45.04-1
 - Update to 595.45.04.
 
