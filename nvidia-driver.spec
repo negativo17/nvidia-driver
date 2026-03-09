@@ -10,7 +10,7 @@
 
 Name:           nvidia-driver
 Version:        595.45.04
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -280,7 +280,8 @@ install -p -m 0644 nvoptix.bin %{buildroot}%{_datadir}/nvidia/
 # Systemd units and script for suspending/resuming
 mkdir -p %{buildroot}%{_systemd_util_dir}/system-preset/
 install -p -m 0644 %{SOURCE8} %{SOURCE9} %{buildroot}%{_systemd_util_dir}/system-preset/
-install -p -m 0644 -D systemd/system/nvidia-powerd.service %{buildroot}%{_unitdir}/nvidia-powerd.service
+mkdir -p %{buildroot}%{_unitdir}/
+cp -frv systemd/system/systemd-* systemd/system/nvidia-powerd.service %{buildroot}%{_unitdir}/
 install -p -m 0644 -D nvidia-dbus.conf %{buildroot}%{_datadir}/dbus-1/system.d/nvidia-dbus.conf
 
 # Ignore powerd binary exiting if hardware is not present
@@ -344,6 +345,14 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_datadir}/pixmaps/com.nvidia.driver.png
 %{_systemd_util_dir}/system-preset/70-nvidia-driver.preset
 %{_unitdir}/nvidia-powerd.service
+%dir %{_unitdir}/systemd-suspend.service.d
+%{_unitdir}/systemd-suspend.service.d/nvidia-suspend-nofreeze.conf
+%dir %{_unitdir}/systemd-hibernate.service.d
+%{_unitdir}/systemd-hibernate.service.d/nvidia-suspend-nofreeze.conf
+%dir %{_unitdir}/systemd-suspend-then-hibernate.service.d
+%{_unitdir}/systemd-suspend-then-hibernate.service.d/nvidia-suspend-nofreeze.conf
+%dir %{_unitdir}/systemd-hybrid-sleep.service.d
+%{_unitdir}/systemd-hybrid-sleep.service.d/nvidia-suspend-nofreeze.conf
 %if 0%{?fedora} < 42 || 0%{?rhel}
 %{_sysconfdir}/dnf/plugins/needs-restarting.d/%{name}.conf
 %endif
@@ -467,6 +476,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Mon Mar 09 2026 Simone Caronni <negativo17@gmail.com> - 3:595.45.04-3
+- Keep config snippets to disable systemd's freeze behavior.
+
 * Mon Mar 09 2026 Simone Caronni <negativo17@gmail.com> - 3:595.45.04-2
 - Use kernel suspend notifiers.
 - rpmlint fixes.
