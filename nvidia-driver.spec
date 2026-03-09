@@ -1,5 +1,5 @@
 %global debug_package %{nil}
-%global __strip /bin/true
+%global __brp_strip %{nil}
 %global __brp_ldconfig %{nil}
 %define _build_id_links none
 
@@ -10,7 +10,7 @@
 
 Name:           nvidia-driver
 Version:        595.45.04
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -45,9 +45,7 @@ Requires:       nvidia-driver-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}
 Requires:       nvidia-kmod-common = %{?epoch:%{epoch}:}%{version}
 
 Conflicts:      nvidia-x11-drv
-Conflicts:      nvidia-x11-drv-470xx
 Conflicts:      xorg-x11-drv-nvidia
-Conflicts:      xorg-x11-drv-nvidia-470xx
 
 %description
 This package provides the most recent NVIDIA display driver which allows for
@@ -58,10 +56,9 @@ version %{version}.
 
 %package libs
 Summary:        Libraries for %{name}
-Requires:       egl-gbm%{?_isa} >= 2:1.1.2.1
-Requires:       (egl-wayland%{?_isa} >= 1.1.20 or egl-wayland2%{?_isa} >= 1.0.0~20250806gitd4deb7c-3)
-Suggests:       egl-wayland%{?_isa} >= 1.1.20
-Requires:       egl-x11%{?_isa} >= 1.0.3
+Requires:       egl-gbm%{?_isa} >= 2:1.1.3
+Requires:       egl-wayland2%{?_isa} >= 1.0.0
+Requires:       egl-x11%{?_isa} >= 1.0.4
 Requires:       libvdpau%{?_isa} >= 1.5
 Requires:       libglvnd%{?_isa} >= 1.0
 Requires:       libglvnd-egl%{?_isa} >= 1.0
@@ -74,9 +71,10 @@ Requires:       libnvidia-gpucomp%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{rele
 Requires:       libnvidia-ml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 Conflicts:      nvidia-x11-drv-libs
-Conflicts:      nvidia-x11-drv-470xx-libs
 Conflicts:      xorg-x11-drv-nvidia-libs
-Conflicts:      xorg-x11-drv-nvidia-470xx-libs
+
+# Already provides VK_EXT_swapchain_colorspace and VK_EXT_hdr_metadata
+Obsoletes:      VK_hdr_layer < 1
 
 %description libs
 This package provides the shared libraries for %{name}.
@@ -94,7 +92,6 @@ Requires:       libnvidia-gpucomp%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{rele
 Requires:       libnvidia-ml = %{?epoch:%{epoch}:}%{version}-%{release}
 
 Conflicts:      xorg-x11-drv-nvidia-cuda-libs
-Conflicts:      xorg-x11-drv-nvidia-470xx-cuda-libs
 
 %description cuda-libs
 This package provides the CUDA libraries for %{name}-cuda.
@@ -151,7 +148,6 @@ Requires:       (ocl-icd or OpenCL-ICD-Loader)
 Requires:       opencl-filesystem
 
 Conflicts:      xorg-x11-drv-nvidia-cuda
-Conflicts:      xorg-x11-drv-nvidia-470xx-cuda
 
 %description cuda
 This package provides the CUDA integration components for %{name}.
@@ -164,7 +160,6 @@ Requires:       xorg-x11-server-Xorg%{?_isa}
 Supplements:    (nvidia-driver and xorg-x11-server-Xorg)
 
 Conflicts:      xorg-x11-drv-nvidia
-Conflicts:      xorg-x11-drv-nvidia-470xx
 
 %description -n xorg-x11-nvidia
 The NVIDIA X.org X11 driver and associated components.
@@ -285,10 +280,7 @@ install -p -m 0644 nvoptix.bin %{buildroot}%{_datadir}/nvidia/
 # Systemd units and script for suspending/resuming
 mkdir -p %{buildroot}%{_systemd_util_dir}/system-preset/
 install -p -m 0644 %{SOURCE8} %{SOURCE9} %{buildroot}%{_systemd_util_dir}/system-preset/
-mkdir -p %{buildroot}%{_unitdir}/
-install -p -m 0644 systemd/system/*.service %{buildroot}%{_unitdir}/
-install -p -m 0755 systemd/nvidia-sleep.sh %{buildroot}%{_bindir}/
-install -p -m 0755 -D systemd/system-sleep/nvidia %{buildroot}%{_systemd_util_dir}/system-sleep/nvidia
+install -p -m 0644 -D systemd/system/nvidia-powerd.service %{buildroot}%{_unitdir}/nvidia-powerd.service
 install -p -m 0644 -D nvidia-dbus.conf %{buildroot}%{_datadir}/dbus-1/system.d/nvidia-dbus.conf
 
 # Ignore powerd binary exiting if hardware is not present
@@ -325,25 +317,13 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %ifarch x86_64 aarch64
 
 %post
-%systemd_post nvidia-hibernate.service
 %systemd_post nvidia-powerd.service
-%systemd_post nvidia-resume.service
-%systemd_post nvidia-suspend.service
-%systemd_post nvidia-suspend-then-hibernate.service
 
 %preun
-%systemd_preun nvidia-hibernate.service
 %systemd_preun nvidia-powerd.service
-%systemd_preun nvidia-resume.service
-%systemd_preun nvidia-suspend.service
-%systemd_preun nvidia-suspend-then-hibernate.service
 
 %postun
-%systemd_postun nvidia-hibernate.service
 %systemd_postun nvidia-powerd.service
-%systemd_postun nvidia-resume.service
-%systemd_postun nvidia-suspend.service
-%systemd_postun nvidia-suspend-then-hibernate.service
 
 %endif
 
@@ -358,18 +338,12 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_bindir}/nvidia-pcc
 %endif
 %{_bindir}/nvidia-powerd
-%{_bindir}/nvidia-sleep.sh
 %{_metainfodir}/com.nvidia.driver.metainfo.xml
 %{_datadir}/dbus-1/system.d/nvidia-dbus.conf
 %{_datadir}/nvidia/nvidia-application-profiles*
 %{_datadir}/pixmaps/com.nvidia.driver.png
 %{_systemd_util_dir}/system-preset/70-nvidia-driver.preset
-%{_systemd_util_dir}/system-sleep/nvidia
-%{_unitdir}/nvidia-hibernate.service
 %{_unitdir}/nvidia-powerd.service
-%{_unitdir}/nvidia-resume.service
-%{_unitdir}/nvidia-suspend.service
-%{_unitdir}/nvidia-suspend-then-hibernate.service
 %if 0%{?fedora} < 42 || 0%{?rhel}
 %{_sysconfdir}/dnf/plugins/needs-restarting.d/%{name}.conf
 %endif
@@ -438,7 +412,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %endif
 %ifarch x86_64
 %{_datadir}/vulkansc/icd.d/nvidia_icd.%{_target_cpu}.json
-%{_libdir}/libnvidia-present.so.%{version}
 %{_libdir}/libnvidia-vksc-core.so.1
 %{_libdir}/libnvidia-vksc-core.so.%{version}
 %dir %{_libdir}/nvidia
@@ -494,6 +467,10 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-ml.so.%{version}
 
 %changelog
+* Mon Mar 09 2026 Simone Caronni <negativo17@gmail.com> - 3:595.45.04-2
+- Use kernel suspend notifiers.
+- rpmlint fixes.
+
 * Thu Mar 05 2026 Simone Caronni <negativo17@gmail.com> - 3:595.45.04-1
 - Update to 595.45.04.
 
