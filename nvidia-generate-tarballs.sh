@@ -2,7 +2,7 @@
 set -e
 
 set_vars() {
-   export VERSION=${VERSION:-595.58.03}
+   export VERSION=${VERSION:-595.71.05}
    export TEMP_UNPACK=${ARCH}
    export PLATFORM=Linux-${ARCH}
    export RUN_FILE=NVIDIA-${PLATFORM}-${VERSION}.run
