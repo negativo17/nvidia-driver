@@ -2,7 +2,7 @@
 set -e
 
 set_vars() {
-   export VERSION=${VERSION:-595.71.05}
+   export VERSION=${VERSION:-610.43.02}
    export TEMP_UNPACK=${ARCH}
    export PLATFORM=Linux-${ARCH}
    export RUN_FILE=NVIDIA-${PLATFORM}-${VERSION}.run
@@ -79,7 +79,7 @@ create_tarball() {
 
     rm -rf ${KMOD_COMMON} ${USR_64} ${USR_32}
     mkdir ${KMOD_COMMON} ${USR_64}
-    mv ${TEMP_UNPACK}/firmware ${TEMP_UNPACK}/nvidia-bug-report.sh ${KMOD_COMMON}/
+    mv ${TEMP_UNPACK}/firmware ${KMOD_COMMON}/
 
     if [ "$ARCH" == x86_64 ]; then
         mkdir ${USR_32} 
