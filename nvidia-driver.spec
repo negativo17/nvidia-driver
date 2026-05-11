@@ -9,7 +9,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        595.71.05
+Version:        610.43.02
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -21,7 +21,6 @@ Source0:        %{name}-%{version}-i386.tar.xz
 Source1:        %{name}-%{version}-x86_64.tar.xz
 Source2:        %{name}-%{version}-aarch64.tar.xz
 Source8:        70-nvidia-driver.preset
-Source9:        70-nvidia-driver-cuda.preset
 Source13:       alternate-install-present
 
 Source40:       com.nvidia.driver.metainfo.xml
@@ -66,9 +65,8 @@ Requires:       libglvnd-gles%{?_isa} >= 1.0
 Requires:       libglvnd-glx%{?_isa} >= 1.0
 Requires:       libglvnd-opengl%{?_isa} >= 1.0
 Requires:       vulkan-loader
-#  dlopened:
-Requires:       libnvidia-gpucomp%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires:       libnvidia-ml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+# dlopened: libnvidia-gpucomp, libnvidia-ml
+Requires:       %{name}-common%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 Conflicts:      nvidia-x11-drv-libs
 Conflicts:      xorg-x11-drv-nvidia-libs
@@ -81,15 +79,8 @@ This package provides the shared libraries for %{name}.
 
 %package cuda-libs
 Summary:        Libraries for %{name}-cuda
-Provides:       %{name}-devel = %{?epoch:%{epoch}:}%{version}-%{release}
-Obsoletes:      %{name}-devel < %{?epoch:%{epoch}:}%{version}-%{release}
-
-# dlopened:
-%ifarch x86_64 aarch64
-Requires:       libnvidia-cfg = %{?epoch:%{epoch}:}%{version}-%{release}
-%endif
-Requires:       libnvidia-gpucomp%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires:       libnvidia-ml = %{?epoch:%{epoch}:}%{version}-%{release}
+# dlopened: libnvidia-cfg, libnvidia-gpucomp, libnvidia-ml
+Requires:       %{name}-common%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 Conflicts:      xorg-x11-drv-nvidia-cuda-libs
 
@@ -109,35 +100,20 @@ optionally encode the composited framebuffer of an X screen. NvFBC are private
 APIs that are only available to NVIDIA approved partners for use in remote
 graphics scenarios.
 
-%package -n libnvidia-gpucomp
-Summary:        NVIDIA library for shader compilation (nvgpucomp)
+%package common
+Summary:        Common files and tools for NVIDIA driver
+Obsoletes:      libnvidia-cfg < %{?epoch:%{epoch}:}%{version}-%{release}
+Obsoletes:      libnvidia-gpucomp < %{?epoch:%{epoch}:}%{version}-%{release}
+Obsoletes:      libnvidia-ml < %{?epoch:%{epoch}:}%{version}-%{release}
+Provides:       libnvidia-cfg = %{?epoch:%{epoch}:}%{version}-%{release}
+Provides:       libnvidia-gpucomp = %{?epoch:%{epoch}:}%{version}-%{release}
+Provides:       libnvidia-ml = %{?epoch:%{epoch}:}%{version}-%{release}
 
-%description -n libnvidia-gpucomp
-This package contains the private libnvidia-gpucomp runtime library which is used by
-other driver components.
-
-%package -n libnvidia-ml
-Summary:        NVIDIA Management Library (NVML)
-Provides:       cuda-nvml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-Provides:       nvidia-driver-NVML = %{?epoch:%{epoch}:}%{version}-%{release}
-Obsoletes:      nvidia-driver-NVML < %{?epoch:%{epoch}:}%{version}-%{release}
-
-%description -n libnvidia-ml
-A C-based API for monitoring and managing various states of the NVIDIA GPU
-devices. It provides a direct access to the queries and commands exposed via
-nvidia-smi. The run-time version of NVML ships with the NVIDIA display driver,
-and the SDK provides the appropriate header, stub libraries and sample
-applications. Each new version of NVML is backwards compatible and is intended
-to be a platform for building 3rd party applications.
+%description common
+This package contains various libraries and tools which are used by other driver
+components in both desktop and compute only scenarios.
 
 %ifarch x86_64 aarch64
-
-%package -n libnvidia-cfg
-Summary:        NVIDIA Config public interface (nvcfg)
-
-%description -n libnvidia-cfg
-This package contains the private libnvidia-cfg runtime library which is used by
-other driver components.
 
 %package cuda
 Summary:        CUDA integration for %{name}
@@ -257,7 +233,7 @@ install -p -m 0755 -D nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/nvidi
 
 # Binaries
 mkdir -p %{buildroot}%{_bindir}
-install -p -m 0755 nvidia-{debugdump,smi,cuda-mps-control,cuda-mps-server,ngx-updater,powerd} %{buildroot}%{_bindir}
+install -p -m 0755 nvidia-{bug-report.sh,debugdump,smi,cuda-mps-control,cuda-mps-server,ngx-updater,powerd} %{buildroot}%{_bindir}
 
 # Man pages
 mkdir -p %{buildroot}%{_mandir}/man1/
@@ -281,11 +257,11 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 install -p -m 0644 nvoptix.bin %{buildroot}%{_datadir}/nvidia/
 
 # Systemd units and script for suspending/resuming
-mkdir -p %{buildroot}%{_systemd_util_dir}/system-preset/
-install -p -m 0644 %{SOURCE8} %{SOURCE9} %{buildroot}%{_systemd_util_dir}/system-preset/
+install -p -m 0644 -DD %{SOURCE8} %{buildroot}%{_systemd_util_dir}/system-preset/70-nvidia-driver.preset
 mkdir -p %{buildroot}%{_unitdir}/
 cp -frv systemd/system/systemd-* systemd/system/nvidia-powerd.service %{buildroot}%{_unitdir}/
 install -p -m 0644 -D nvidia-dbus.conf %{buildroot}%{_datadir}/dbus-1/system.d/nvidia-dbus.conf
+install -p -m 0644 -D dlsnetparams.csv %{buildroot}%{_datadir}/nvidia/nvidia-powerd/dlsnetparams.csv
 
 # Ignore powerd binary exiting if hardware is not present
 # We should check for information in the DMI table
@@ -320,13 +296,13 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 
 %ifarch x86_64 aarch64
 
-%post
+%post common
 %systemd_post nvidia-powerd.service
 
-%preun
+%preun common
 %systemd_preun nvidia-powerd.service
 
-%postun
+%postun common
 %systemd_postun nvidia-powerd.service
 
 %endif
@@ -341,13 +317,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %ifarch x86_64
 %{_bindir}/nvidia-pcc
 %endif
-%{_bindir}/nvidia-powerd
 %{_metainfodir}/com.nvidia.driver.metainfo.xml
-%{_datadir}/dbus-1/system.d/nvidia-dbus.conf
 %{_datadir}/nvidia/nvidia-application-profiles*
 %{_datadir}/pixmaps/com.nvidia.driver.png
-%{_systemd_util_dir}/system-preset/70-nvidia-driver.preset
-%{_unitdir}/nvidia-powerd.service
 %dir %{_unitdir}/systemd-suspend.service.d
 %{_unitdir}/systemd-suspend.service.d/nvidia-suspend-nofreeze.conf
 %dir %{_unitdir}/systemd-hibernate.service.d
@@ -367,10 +339,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
 %endif
 
-%files -n libnvidia-cfg
-%{_libdir}/libnvidia-cfg.so.1
-%{_libdir}/libnvidia-cfg.so.%{version}
-
 %files cuda
 %{_sysconfdir}/OpenCL/vendors/*
 %{_bindir}/nvidia-cuda-mps-control
@@ -381,12 +349,26 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_mandir}/man1/nvidia-cuda-mps-control.1.*
 %{_mandir}/man1/nvidia-smi.*
 %{_prefix}/lib/nvidia/alternate-install-present
-%{_systemd_util_dir}/system-preset/70-nvidia-driver-cuda.preset
 %if 0%{?fedora} < 42 || 0%{?rhel}
 %{_sysconfdir}/dnf/plugins/needs-restarting.d/%{name}-cuda.conf
 %endif
 
 %endif
+
+%files common
+%ifarch x86_64 aarch64
+%{_systemd_util_dir}/system-preset/70-nvidia-driver.preset
+%{_unitdir}/nvidia-powerd.service
+%{_bindir}/nvidia-bug-report.sh
+%{_bindir}/nvidia-powerd
+%{_datadir}/dbus-1/system.d/nvidia-dbus.conf
+%{_datadir}/nvidia/nvidia-powerd
+%{_libdir}/libnvidia-cfg.so.1
+%{_libdir}/libnvidia-cfg.so.%{version}
+%endif
+%{_libdir}/libnvidia-gpucomp.so.%{version}
+%{_libdir}/libnvidia-ml.so.1
+%{_libdir}/libnvidia-ml.so.%{version}
 
 %files libs
 %{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
@@ -438,6 +420,10 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libcuda.so
 %{_libdir}/libcuda.so.1
 %{_libdir}/libcuda.so.%{version}
+%ifarch aarch64
+%{_libdir}/libnvcuextend.so.1
+%{_libdir}/libnvcuextend.so.%{version}
+%endif
 %{_libdir}/libnvcuvid.so
 %{_libdir}/libnvcuvid.so.1
 %{_libdir}/libnvcuvid.so.%{version}
@@ -472,14 +458,12 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-fbc.so.1
 %{_libdir}/libnvidia-fbc.so.%{version}
 
-%files -n libnvidia-gpucomp
-%{_libdir}/libnvidia-gpucomp.so.%{version}
-
-%files -n libnvidia-ml
-%{_libdir}/libnvidia-ml.so.1
-%{_libdir}/libnvidia-ml.so.%{version}
-
 %changelog
+* Tue May 26 2026 Simone Caronni <negativo17@gmail.com> - 3:610.43.02-1
+- Update to 610.43.02.
+- Create common package for NN weight support in nvidia-powerd for compute workload.
+- Move standalone libnvidia-cfg/gpucomp/ml in common package.
+
 * Tue Apr 28 2026 Simone Caronni <negativo17@gmail.com> - 3:595.71.05-1
 - Update to 595.71.05.
 
