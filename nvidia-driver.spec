@@ -10,7 +10,7 @@
 
 Name:           nvidia-driver
 Version:        610.43.02
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -105,6 +105,7 @@ Summary:        Common files and tools for NVIDIA driver
 Obsoletes:      libnvidia-cfg < %{?epoch:%{epoch}:}%{version}-%{release}
 Obsoletes:      libnvidia-gpucomp < %{?epoch:%{epoch}:}%{version}-%{release}
 Obsoletes:      libnvidia-ml < %{?epoch:%{epoch}:}%{version}-%{release}
+Provides:       cuda-nvml%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Provides:       libnvidia-cfg = %{?epoch:%{epoch}:}%{version}-%{release}
 Provides:       libnvidia-gpucomp = %{?epoch:%{epoch}:}%{version}-%{release}
 Provides:       libnvidia-ml = %{?epoch:%{epoch}:}%{version}-%{release}
@@ -459,6 +460,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-fbc.so.%{version}
 
 %changelog
+* Tue Jun 02 2026 Simone Caronni <negativo17@gmail.com> - 3:610.43.02-2
+- Restore cuda-nvml provider.
+
 * Tue May 26 2026 Simone Caronni <negativo17@gmail.com> - 3:610.43.02-1
 - Update to 610.43.02.
 - Create common package for NN weight support in nvidia-powerd for compute workload.
