@@ -10,7 +10,7 @@
 
 Name:           nvidia-driver
 Version:        610.43.02
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -20,6 +20,7 @@ ExclusiveArch:  %{ix86} x86_64 aarch64
 Source0:        %{name}-%{version}-i386.tar.xz
 Source1:        %{name}-%{version}-x86_64.tar.xz
 Source2:        %{name}-%{version}-aarch64.tar.xz
+Source7:        nvidia-powerd.service
 Source8:        70-nvidia-driver.preset
 Source13:       alternate-install-present
 
@@ -257,16 +258,12 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 # OptiX
 install -p -m 0644 nvoptix.bin %{buildroot}%{_datadir}/nvidia/
 
-# Systemd units and script for suspending/resuming
-install -p -m 0644 -DD %{SOURCE8} %{buildroot}%{_systemd_util_dir}/system-preset/70-nvidia-driver.preset
-mkdir -p %{buildroot}%{_unitdir}/
-cp -frv systemd/system/systemd-* systemd/system/nvidia-powerd.service %{buildroot}%{_unitdir}/
+# Systemd units and script for power management
+install -p -m 0644 -D %{SOURCE7} %{buildroot}%{_unitdir}/nvidia-powerd.service
+cp -frv systemd/system/systemd-* %{buildroot}%{_unitdir}/
 install -p -m 0644 -D nvidia-dbus.conf %{buildroot}%{_datadir}/dbus-1/system.d/nvidia-dbus.conf
 install -p -m 0644 -D dlsnetparams.csv %{buildroot}%{_datadir}/nvidia/nvidia-powerd/dlsnetparams.csv
-
-# Ignore powerd binary exiting if hardware is not present
-# We should check for information in the DMI table
-sed -i -e 's/ExecStart=/ExecStart=-/g' %{buildroot}%{_unitdir}/nvidia-powerd.service
+install -p -m 0644 -D %{SOURCE8} %{buildroot}%{_systemd_util_dir}/system-preset/70-nvidia-driver.preset
 
 # Vulkan layer
 install -p -m 0644 -D nvidia_layers.json %{buildroot}%{_datadir}/vulkan/implicit_layer.d/nvidia_layers.json
@@ -460,6 +457,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-fbc.so.%{version}
 
 %changelog
+* Mon Jun 22 2026 Simone Caronni <negativo17@gmail.com> - 3:610.43.02-3
+- Do not try to run nvidia-powerd when no GPUs are present (thanks Antheas).
+
 * Tue Jun 02 2026 Simone Caronni <negativo17@gmail.com> - 3:610.43.02-2
 - Restore cuda-nvml provider.
 

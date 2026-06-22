@@ -52,7 +52,8 @@ cleanup_folder() {
         libEGL.so.${VERSION} \
         nvidia-installer* .manifest make* mk* libglvnd_install_checker \
         *_nvidia_gbm.json *_nvidia_wayland.json *_nvidia_xcb.json *_nvidia_xlib.json *_nvidia_wayland2.json \
-        kernel kernel-open
+        kernel kernel-open \
+        systemd/system-sleep systemd/system/*.service systemd/nvidia-sleep.sh
 
     if [ "${ARCH}" == x86_64 ]; then
         rm -r \
