@@ -9,8 +9,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        610.43.02
-Release:        3%{?dist}
+Version:        610.43.03
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -457,6 +457,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-fbc.so.%{version}
 
 %changelog
+* Wed Jul 08 2026 Simone Caronni <negativo17@gmail.com> - 3:610.43.03-1
+- Update to 610.43.03.
+
 * Mon Jun 22 2026 Simone Caronni <negativo17@gmail.com> - 3:610.43.02-3
 - Do not try to run nvidia-powerd when no GPUs are present (thanks Antheas).
 
