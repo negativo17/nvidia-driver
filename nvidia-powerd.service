@@ -2,7 +2,6 @@
 Description=nvidia-powerd service
 StartLimitIntervalSec=infinity
 StartLimitBurst=5
-ConditionPathExistsGlob=/dev/nvidia*
 
 [Service]
 Type=simple

@@ -10,7 +10,7 @@
 
 Name:           nvidia-driver
 Version:        615.71.09
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -21,7 +21,7 @@ Source0:        %{name}-%{version}-i386.tar.xz
 Source1:        %{name}-%{version}-x86_64.tar.xz
 Source2:        %{name}-%{version}-aarch64.tar.xz
 Source7:        nvidia-powerd.service
-Source8:        70-nvidia-driver.preset
+Source8:        60-nvidia-powerd.rules
 Source13:       alternate-install-present
 
 Source40:       com.nvidia.driver.metainfo.xml
@@ -270,12 +270,11 @@ install -p -m 0644 nvidia-application-profiles-%{version}-rc \
 # OptiX
 install -p -m 0644 nvoptix.bin %{buildroot}%{_datadir}/nvidia/
 
-# Systemd units and script for power management
+# Power management via DL, so also for servers
 install -p -m 0644 -D %{SOURCE7} %{buildroot}%{_unitdir}/nvidia-powerd.service
-cp -frv systemd/system/systemd-* %{buildroot}%{_unitdir}/
 install -p -m 0644 -D nvidia-dbus.conf %{buildroot}%{_datadir}/dbus-1/system.d/nvidia-dbus.conf
 install -p -m 0644 -D dlsnetparams.csv %{buildroot}%{_datadir}/nvidia/nvidia-powerd/dlsnetparams.csv
-install -p -m 0644 -D %{SOURCE8} %{buildroot}%{_systemd_util_dir}/system-preset/70-nvidia-driver.preset
+install -p -m 0644 -D %{SOURCE8} %{buildroot}%{_udevrulesdir}/60-nvidia-powerd.rules
 
 # Vulkan layer
 install -p -m 0644 -D nvidia_layers.json %{buildroot}%{_datadir}/vulkan/implicit_layer.d/nvidia_layers.json
@@ -332,14 +331,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_metainfodir}/com.nvidia.driver.metainfo.xml
 %{_datadir}/nvidia/nvidia-application-profiles*
 %{_datadir}/pixmaps/com.nvidia.driver.png
-%dir %{_unitdir}/systemd-suspend.service.d
-%{_unitdir}/systemd-suspend.service.d/nvidia-suspend-nofreeze.conf
-%dir %{_unitdir}/systemd-hibernate.service.d
-%{_unitdir}/systemd-hibernate.service.d/nvidia-suspend-nofreeze.conf
-%dir %{_unitdir}/systemd-suspend-then-hibernate.service.d
-%{_unitdir}/systemd-suspend-then-hibernate.service.d/nvidia-suspend-nofreeze.conf
-%dir %{_unitdir}/systemd-hybrid-sleep.service.d
-%{_unitdir}/systemd-hybrid-sleep.service.d/nvidia-suspend-nofreeze.conf
 %if 0%{?rhel} < 11
 %config %{_sysconfdir}/dnf/plugins/needs-restarting.d/%{name}.conf
 %else
@@ -373,7 +364,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 
 %files common
 %ifarch x86_64 aarch64
-%{_systemd_util_dir}/system-preset/70-nvidia-driver.preset
+%{_udevrulesdir}/60-nvidia-powerd.rules
 %{_unitdir}/nvidia-powerd.service
 %{_bindir}/nvidia-bug-report.sh
 %{_bindir}/nvidia-networking-bug-report.py
@@ -491,6 +482,11 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %endif
 
 %changelog
+* Tue Sep 22 2026 Simone Caronni <negativo17@gmail.com> - 3:615.71.09-3
+- Allow installing the packages in images that might not end up on NVIDIA systems (https://anatase.org/).
+- Drop presets (also FM and IMEX were in the wrong preset).
+- Drop all systemd overrides (not needed with open modules and kernel suspend notifiers).
+
 * Mon Sep 21 2026 Simone Caronni <negativo17@gmail.com> - 3:615.71.09-2
 - Enable reboot suggestion for DNF 5:
   https://github.com/rpm-software-management/dnf5/pull/2929
