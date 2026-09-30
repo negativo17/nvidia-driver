@@ -10,7 +10,7 @@
 
 Name:           nvidia-driver
 Version:        615.71.09
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -288,14 +288,14 @@ cp %{SOURCE42} %{buildroot}%{_datadir}/pixmaps/
 # nvsandboxutils configuration
 install -p -m 0644 -D sandboxutils-filelist.json %{buildroot}%{_datadir}/nvidia/files.d/sandboxutils-filelist.json
 
-%if 0%{?rhel} < 11
+%if 0%{?rhel} && 0%{?rhel} < 11
 mkdir -p %{buildroot}%{_sysconfdir}/dnf/plugins/needs-restarting.d
 echo %{name} > %{buildroot}%{_sysconfdir}/dnf/plugins/needs-restarting.d/%{name}.conf
 echo %{name}-cuda > %{buildroot}%{_sysconfdir}/dnf/plugins/needs-restarting.d/%{name}-cuda.conf
 %else
 mkdir -p %{buildroot}%{_datadir}/dnf5/suggest-reboot.d/
-echo %{name} %{buildroot}%{_datadir}/dnf5/suggest-reboot.d/%{name}.conf
-echo %{name}-cuda %{buildroot}%{_datadir}/dnf5/suggest-reboot.d/%{name}-cuda.conf
+echo %{name} > %{buildroot}%{_datadir}/dnf5/suggest-reboot.d/%{name}.conf
+echo %{name}-cuda > %{buildroot}%{_datadir}/dnf5/suggest-reboot.d/%{name}-cuda.conf
 %endif
 
 %check
@@ -331,7 +331,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_metainfodir}/com.nvidia.driver.metainfo.xml
 %{_datadir}/nvidia/nvidia-application-profiles*
 %{_datadir}/pixmaps/com.nvidia.driver.png
-%if 0%{?rhel} < 11
+%if 0%{?rhel} && 0%{?rhel} < 11
 %config %{_sysconfdir}/dnf/plugins/needs-restarting.d/%{name}.conf
 %else
 %{_datadir}/dnf5/suggest-reboot.d/%{name}.conf
@@ -354,7 +354,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_mandir}/man1/nvidia-cuda-mps-control.1.*
 %{_mandir}/man1/nvidia-smi.*
 %{_prefix}/lib/nvidia/alternate-install-present
-%if 0%{?rhel} < 11
+%if 0%{?rhel} && 0%{?rhel} < 11
 %config %{_sysconfdir}/dnf/plugins/needs-restarting.d/%{name}-cuda.conf
 %else
 %{_datadir}/dnf5/suggest-reboot.d/%{name}-cuda.conf
@@ -482,6 +482,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %endif
 
 %changelog
+* Wed Sep 30 2026 Simone Caronni <negativo17@gmail.com> - 3:615.71.09-4
+- Fix DNF 5 reboot suggestion on Fedora.
+
 * Tue Sep 22 2026 Simone Caronni <negativo17@gmail.com> - 3:615.71.09-3
 - Allow installing the packages in images that might not end up on NVIDIA systems (https://anatase.org/).
 - Drop presets (also FM and IMEX were in the wrong preset).
