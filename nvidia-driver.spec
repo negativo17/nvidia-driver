@@ -9,8 +9,8 @@
 %endif
 
 Name:           nvidia-driver
-Version:        615.71.09
-Release:        5%{?dist}
+Version:        615.78.08
+Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
 License:        NVIDIA License
@@ -482,6 +482,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %endif
 
 %changelog
+* Wed Oct 07 2026 Simone Caronni <negativo17@gmail.com> - 3:615.78.08-1
+- Update to 615.78.08.
+
 * Fri Oct 02 2026 Simone Caronni <negativo17@gmail.com> - 3:615.71.09-5
 - Add developer_name to AppStream metadata for repository catalogs.
 
