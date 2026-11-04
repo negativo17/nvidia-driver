@@ -9,7 +9,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        615.78.08
+Version:        620.70.06
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -207,7 +207,7 @@ install -p -m 0644 -D 10_nvidia.json %{buildroot}%{_datadir}/glvnd/egl_vendor.d/
 install -p -m 0644 -D nvidia_icd.json %{buildroot}%{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
 sed -i -e 's|libGLX_nvidia|%{_libdir}/libGLX_nvidia|g' %{buildroot}%{_datadir}/vulkan/icd.d/nvidia_icd.%{_target_cpu}.json
 
-%ifarch x86_64
+%ifarch x86_64 aarch64
 # Vulkan SC loader and compiler
 install -p -m 0644 -D nvidia_icd_vksc.json %{buildroot}%{_datadir}/vulkansc/icd.d/nvidia_icd.%{_target_cpu}.json
 sed -i -e 's|libnvidia-vksc-core|%{_libdir}/libnvidia-vksc-core|g' %{buildroot}%{_datadir}/vulkansc/icd.d/nvidia_icd.%{_target_cpu}.json
@@ -215,8 +215,9 @@ install -p -m 0755 -D nvidia-pcc %{buildroot}%{_bindir}/nvidia-pcc
 %endif
 
 # Unique libraries
-mkdir -p %{buildroot}%{_libdir}/vdpau/
+mkdir -p %{buildroot}%{_libdir}/
 cp -a lib*GL*_nvidia.so* libcuda*.so* libnv*.so* %{buildroot}%{_libdir}/
+mkdir -p %{buildroot}%{_libdir}/vdpau/
 cp -a libvdpau_nvidia.so* %{buildroot}%{_libdir}/vdpau/
 
 %if 0%{?fedora} || 0%{?rhel} >= 9
@@ -228,8 +229,9 @@ ln -sf ../libnvidia-allocator.so.%{version} %{buildroot}%{_libdir}/gbm/nvidia-dr
 %ifarch x86_64
 
 # NGX Proton/Wine library
-mkdir -p %{buildroot}%{_libdir}/nvidia/wine/
-cp -a *.dll %{buildroot}%{_libdir}/nvidia/wine/
+mkdir -p %{buildroot}%{_libdir}/nvidia/wine/ngx-builtins/
+cp -a *.dll *.exe %{buildroot}%{_libdir}/nvidia/wine/
+cp -a  ngx-builtins/*.dll %{buildroot}%{_libdir}/nvidia/wine/ngx-builtins/
 
 %endif
 
@@ -325,9 +327,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %doc NVIDIA_Changelog README.txt html supported-gpus/supported-gpus.json
 %dir %{_sysconfdir}/nvidia
 %{_bindir}/nvidia-ngx-updater
-%ifarch x86_64
 %{_bindir}/nvidia-pcc
-%endif
 %{_metainfodir}/com.nvidia.driver.metainfo.xml
 %{_datadir}/nvidia/nvidia-application-profiles*
 %{_datadir}/pixmaps/com.nvidia.driver.png
@@ -408,23 +408,27 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %ifarch x86_64 aarch64
 %{_datadir}/nvidia/nvoptix.bin
 %{_datadir}/vulkan/implicit_layer.d/nvidia_layers.json
+%{_datadir}/vulkansc/icd.d/nvidia_icd.%{_target_cpu}.json
 %{_libdir}/libnvidia-api.so.1
 %{_libdir}/libnvidia-ngx.so.1
 %{_libdir}/libnvidia-ngx.so.%{version}
+%{_libdir}/libnvidia-ngx-builtin-dlssd.so.*
 %{_libdir}/libnvidia-present.so.%{version}
 %{_libdir}/libnvidia-rtcore.so.%{version}
+%{_libdir}/libnvidia-vksc-core.so.1
+%{_libdir}/libnvidia-vksc-core.so.%{version}
 %{_libdir}/libnvoptix.so.1
 %{_libdir}/libnvoptix.so.%{version}
 %endif
 %ifarch x86_64
-%{_datadir}/vulkansc/icd.d/nvidia_icd.%{_target_cpu}.json
-%{_libdir}/libnvidia-vksc-core.so.1
-%{_libdir}/libnvidia-vksc-core.so.%{version}
 %dir %{_libdir}/nvidia
 %dir %{_libdir}/nvidia/wine
+%dir %{_libdir}/nvidia/wine/ngx-builtins
+%{_libdir}/nvidia/wine/ngx-builtins/nvngx_dlssd.dll
 %{_libdir}/nvidia/wine/_nvngx.dll
 %{_libdir}/nvidia/wine/nvngx.dll
 %{_libdir}/nvidia/wine/nvngx_dlssg.dll
+%{_libdir}/nvidia/wine/nvngx_update.exe
 %endif
 
 %files cuda-libs
@@ -449,6 +453,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-opticalflow.so.%{version}
 %{_libdir}/libnvidia-ptxjitcompiler.so.1
 %{_libdir}/libnvidia-ptxjitcompiler.so.%{version}
+%{_libdir}/libnvidia-tileiras.so.1
 %{_libdir}/libnvidia-tileiras.so.%{version}
 %ifarch x86_64 aarch64
 %{_libdir}/libcudadebugger.so.1
@@ -482,6 +487,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %endif
 
 %changelog
+* Wed Nov 04 2026 Simone Caronni <negativo17@gmail.com> - 3:620.70.06-1
+- Update to 620.70.06.
+
 * Wed Oct 07 2026 Simone Caronni <negativo17@gmail.com> - 3:615.78.08-1
 - Update to 615.78.08.
 
